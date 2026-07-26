@@ -1,0 +1,107 @@
+export interface Product {
+  id: number | string;
+  created_at?: string;
+  nome: string;
+  descricao: string;
+  preco: number;
+  image_url: string;
+  categoria: string;
+  estoque: number;
+  // Campos extras de exibição e personalização
+  rating?: number;
+  reviews_count?: number;
+  is_best_seller?: boolean;
+  is_gluten_free?: boolean;
+  ingredients?: string[];
+  variacoes?: {
+    tamanhos?: { nome: string; precoAdicional: number }[];
+    sabores?: string[];
+    coberturas?: string[];
+  };
+}
+
+export interface CustomCakeBuilder {
+  tamanho: 'P (10 fatias)' | 'M (20 fatias)' | 'G (30 fatias)' | '2 Andares (45 fatias)';
+  massa: 'Pão de Ló Baunilha' | 'Chocolate Cacau 100%' | 'Red Velvet' | 'Nozes com Especiarias';
+  recheio1: 'Brigadeiro Belga' | 'Ninho Cremoso' | 'Pistache Bronte' | 'Doce de Leite com Avelã' | 'Cream Cheese com Frutas Vermelhas';
+  recheio2?: 'Sem 2º recheio' | 'Ganache Meio Amargo' | 'Mousse de Maracujá' | 'Geleia Caseira de Morango';
+  cobertura: 'Chantininho Aveludado' | 'Buttercream Suíço' | 'Dressed Cake Chocolate' | 'Espatulado Rústico';
+  mensagemBolo: string;
+  observacoes: string;
+  precoCalculado: number;
+}
+
+export interface CartItem {
+  id: string;
+  product?: Product;
+  customCake?: CustomCakeBuilder;
+  quantity: number;
+  customNote?: string;
+  unitPrice: number;
+}
+
+export interface UserProfile {
+  id: string;
+  created_at?: string;
+  telefone: string;
+  role: 'admin' | 'cliente' | 'confeiteiro' | 'atendente';
+  Status: 'ativo' | 'suspenso' | 'inativo';
+  nome: string;
+  sobrenome: string;
+  email: string;
+  pontosFidelidade?: number;
+}
+
+export interface OrderItem {
+  id?: number;
+  pedido_id?: number;
+  produto_id?: number | string;
+  nomeProduto: string;
+  quantidade: number;
+  preco_unitario: number;
+  detalhesCustomizados?: string;
+}
+
+export interface Order {
+  id: number | string;
+  created_at: string;
+  cliente_id: string;
+  cliente_nome: string;
+  cliente_telefone: string;
+  total: number;
+  status: 'pendente_pix' | 'em_preparo' | 'pronto_retirada' | 'saiu_entrega' | 'entregue' | 'cancelado';
+  metodo_pagamento: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro_retirada';
+  tipo_entrega: 'entrega' | 'retirada';
+  data_agendada?: string;
+  horario_agendado?: string;
+  endereco_entreg: string;
+  itens: OrderItem[];
+  impressoCozinha?: boolean;
+}
+
+export interface LoyaltyAccount {
+  clienteId: string;
+  pontosAcumulados: number;
+  nivel: 'Bronze' | 'Prata' | 'Ouro' | 'Diamante';
+  historicoResgates: { data: string; descricao: string; pontosUsados: number }[];
+}
+
+export interface NotificationItem {
+  id: number | string;
+  created_at: string;
+  titulo: string;
+  mensagem: string;
+  lida: boolean;
+  cliente_id?: string | null;
+}
+
+export interface AuditLog {
+  id: number | string;
+  created_at: string;
+  acao: string;
+  detalhes: string;
+  admin_id: string;
+  admin_nome?: string;
+}
+
+export type ThemeMode = 'light' | 'dark' | 'light-high-contrast' | 'dark-high-contrast';
