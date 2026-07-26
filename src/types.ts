@@ -29,6 +29,7 @@ export interface CustomCakeBuilder {
   mensagemBolo: string;
   observacoes: string;
   precoCalculado: number;
+  fotoReferenciaUrl?: string;
 }
 
 export interface CartItem {

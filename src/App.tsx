@@ -7,14 +7,15 @@ import { CartDrawer } from './components/CartDrawer';
 import { LoyaltyView } from './components/LoyaltyView';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AuthModal } from './components/AuthModal';
+import { CustomerProfileView } from './components/CustomerProfileView';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS } from './data/doceriaData';
 import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile } from './types';
 import { getCurrentSupabaseUser, signOutSupabase } from './lib/supabase';
-import { Search, Sparkles, Heart, ChevronRight, Cake, Gift, ArrowRight, ShieldAlert, LogIn } from 'lucide-react';
+import { Search, Sparkles, Heart, ChevronRight, Cake, Gift, ArrowRight, ShieldAlert, LogIn, User } from 'lucide-react';
 
 export function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
-  const [activeTab, setActiveTab] = useState<'shop' | 'custom-cake' | 'loyalty' | 'admin'>('shop');
+  const [activeTab, setActiveTab] = useState<'shop' | 'custom-cake' | 'loyalty' | 'admin' | 'profile'>('shop');
 
   // Auth User State
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
@@ -355,6 +356,35 @@ export function App() {
               setIsCartOpen(true);
             }}
           />
+        )}
+
+        {/* CUSTOMER PORTAL / PROFILE VIEW */}
+        {activeTab === 'profile' && (
+          currentUser ? (
+            <CustomerProfileView
+              currentUser={currentUser}
+              onUpdateUser={(updated) => setCurrentUser(updated)}
+              orders={orders}
+              onNavigateToShop={() => setActiveTab('shop')}
+            />
+          ) : (
+            <div className="py-20 text-center max-w-md mx-auto space-y-4">
+              <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto">
+                <User className="w-8 h-8" />
+              </div>
+              <h2 className="text-xl font-black">Portal do Cliente Cloudnine</h2>
+              <p className="text-xs text-[var(--color-outline)]">
+                Faça login ou crie sua conta para acessar seu histórico de pedidos, saldo de pontos do clube de fidelidade e personalizar seu perfil.
+              </p>
+              <button
+                onClick={() => handleOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos do clube de fidelidade.')}
+                className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Entrar ou Criar Conta</span>
+              </button>
+            </div>
+          )
         )}
 
         {/* ADMIN DASHBOARD VIEW (Protected) */}

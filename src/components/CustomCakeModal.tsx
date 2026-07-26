@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Cake, Check, ChevronRight, Gift, MessageSquare } from 'lucide-react';
+import { X, Sparkles, Cake, Check, ChevronRight, Gift, MessageSquare, Image as ImageIcon } from 'lucide-react';
 import { CustomCakeBuilder } from '../types';
+import { CloudinaryUploader } from './CloudinaryUploader';
 
 interface CustomCakeModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
   const [cobertura, setCobertura] = useState<CustomCakeBuilder['cobertura']>('Chantininho Aveludado');
   const [mensagemBolo, setMensagemBolo] = useState('');
   const [observacoes, setObservacoes] = useState('');
+  const [fotoReferenciaUrl, setFotoReferenciaUrl] = useState<string>('');
 
   if (!isOpen) return null;
 
@@ -49,6 +51,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
       cobertura,
       mensagemBolo,
       observacoes,
+      fotoReferenciaUrl,
       precoCalculado: finalPrice
     });
     onClose();
@@ -226,6 +229,13 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
               />
             </div>
           </div>
+
+          {/* Step 6: Foto de Referência / Modelo do Bolo (Cloudinary) */}
+          <CloudinaryUploader
+            onImageUploaded={(url) => setFotoReferenciaUrl(url)}
+            currentImageUrl={fotoReferenciaUrl}
+            label="Anexar Foto de Inspiração ou Referência do Bolo (Opcional)"
+          />
 
         </div>
 

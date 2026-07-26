@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Trash2, Calendar, Clock, QrCode, CreditCard, ShoppingBag, CheckCircle, ChevronRight, Copy, Check, Send, Truck, Store } from 'lucide-react';
 import { CartItem, Order } from '../types';
+import { AddressLookupForm } from './AddressLookupForm';
+import { AddressResult } from '../lib/addressService';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -255,14 +257,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </div>
 
             {tipoEntrega === 'entrega' && (
-              <div className="space-y-1">
-                <label className="font-bold text-[var(--color-on-surface)] block">Endereço de Entrega</label>
-                <input
-                  type="text"
-                  value={endereco}
-                  onChange={(e) => setEndereco(e.target.value)}
-                  placeholder="Rua, Número, Bairro, Cidade"
-                  className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 focus:outline-none"
+              <div className="space-y-2 pt-1">
+                <label className="font-extrabold text-[var(--color-on-surface)] block text-xs">Endereço de Entrega (Busca por CEP & GPS)</label>
+                <AddressLookupForm
+                  initialCep="01500-000"
+                  initialLogradouro="Av. Paulista"
+                  initialNumero="1500"
+                  initialBairro="Bela Vista"
+                  initialCidade="São Paulo"
+                  initialUf="SP"
+                  initialComplemento="Apt 82"
+                  compact={true}
+                  onAddressChange={(addr: AddressResult) => {
+                    const formatted = addr.formattedAddress || `${addr.logradouro}, ${addr.numero || ''} - ${addr.bairro}, ${addr.cidade} - ${addr.uf} (CEP: ${addr.cep})`;
+                    setEndereco(formatted);
+                  }}
                 />
               </div>
             )}

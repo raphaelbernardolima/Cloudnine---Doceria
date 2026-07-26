@@ -3,8 +3,8 @@ import { ShoppingBag, Cake, Sparkles, Sun, Moon, Contrast, Award, Settings2, Use
 import { ThemeMode, UserProfile } from '../types';
 
 interface HeaderProps {
-  activeTab: 'shop' | 'custom-cake' | 'loyalty' | 'admin';
-  setActiveTab: (tab: 'shop' | 'custom-cake' | 'loyalty' | 'admin') => void;
+  activeTab: 'shop' | 'custom-cake' | 'loyalty' | 'admin' | 'profile';
+  setActiveTab: (tab: 'shop' | 'custom-cake' | 'loyalty' | 'admin' | 'profile') => void;
   cartCount: number;
   onOpenCart: () => void;
   onOpenCustomCakeModal: () => void;
@@ -25,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   setThemeMode,
   currentUser,
   onOpenAuthModal,
+  onOpenCustomerProfile,
   onLogout
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -111,6 +112,22 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden lg:inline">Cloudnine Club</span>
             <span className="lg:hidden">Club</span>
           </button>
+
+          <button
+            id="nav-tab-profile"
+            onClick={() => {
+              if (currentUser) setActiveTab('profile');
+              else onOpenAuthModal();
+            }}
+            className={`flex items-center space-x-1.5 px-3 lg:px-4 py-1.5 rounded-full text-xs font-bold transition-all min-h-[36px] ${
+              activeTab === 'profile'
+                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] hover:text-[var(--color-on-surface)]'
+            }`}
+          >
+            <User className="w-3.5 h-3.5 text-amber-400" />
+            <span>Meu Perfil</span>
+          </button>
         </nav>
 
         {/* Right Action Controls */}
@@ -120,11 +137,22 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="hidden md:flex items-center">
             {currentUser ? (
               <div className="flex items-center space-x-1.5 bg-[var(--color-surface-container-high)] pl-2.5 pr-1 py-1 rounded-xl border border-[var(--color-outline-variant)]/30 text-xs font-bold">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-[var(--color-on-surface)] max-w-[80px] lg:max-w-[120px] truncate">{currentUser.nome}</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] uppercase font-extrabold hidden lg:inline">
-                  {currentUser.role}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('profile')}
+                  className="flex items-center space-x-1.5 hover:text-[var(--color-primary)] transition-colors"
+                  title="Abrir Meu Perfil / Portal do Cliente"
+                >
+                  {currentUser.avatar_url ? (
+                    <img src={currentUser.avatar_url} alt="Avatar" className="w-5 h-5 rounded-full object-cover border border-[var(--color-primary)]" />
+                  ) : (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  )}
+                  <span className="text-[var(--color-on-surface)] max-w-[80px] lg:max-w-[120px] truncate">{currentUser.nome}</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] uppercase font-extrabold hidden lg:inline">
+                    {currentUser.role}
+                  </span>
+                </button>
                 <button
                   onClick={onLogout}
                   title="Sair da Conta"
@@ -212,18 +240,29 @@ export const Header: React.FC<HeaderProps> = ({
             {/* User Account / Auth Bar */}
             {currentUser ? (
               <div className="p-3.5 rounded-2xl bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/30 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-full bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] flex items-center justify-center font-extrabold text-sm shadow-xs">
-                    {currentUser.nome.charAt(0).toUpperCase()}
+                <button
+                  type="button"
+                  onClick={() => handleNavClick(() => setActiveTab('profile'))}
+                  className="flex items-center space-x-3 text-left hover:opacity-80 transition-opacity"
+                >
+                  <div className="w-9 h-9 rounded-full bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] flex items-center justify-center font-extrabold text-sm shadow-xs overflow-hidden shrink-0">
+                    {currentUser.avatar_url ? (
+                      <img src={currentUser.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      currentUser.nome.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div>
-                    <p className="font-extrabold text-xs text-[var(--color-on-surface)]">{currentUser.nome} {currentUser.sobrenome}</p>
+                    <p className="font-extrabold text-xs text-[var(--color-on-surface)] flex items-center gap-1">
+                      <span>{currentUser.nome} {currentUser.sobrenome}</span>
+                      <span className="text-[9px] text-[var(--color-primary)] font-bold">(Ver Perfil)</span>
+                    </p>
                     <p className="text-[10px] text-[var(--color-outline)] font-semibold uppercase">{currentUser.role} • {currentUser.email}</p>
                   </div>
-                </div>
+                </button>
                 <button
                   onClick={() => handleNavClick(onLogout)}
-                  className="px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-300 font-bold text-xs flex items-center space-x-1 hover:bg-rose-500/20 transition-colors"
+                  className="px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-300 font-bold text-xs flex items-center space-x-1 hover:bg-rose-500/20 transition-colors shrink-0"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sair</span>
@@ -255,6 +294,24 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="flex items-center space-x-3">
                   <ShoppingBag className="w-4 h-4" />
                   <span>Cardápio de Doces</span>
+                </div>
+                <ChevronRight className="w-4 h-4 opacity-70" />
+              </button>
+
+              <button
+                onClick={() => handleNavClick(() => {
+                  if (currentUser) setActiveTab('profile');
+                  else onOpenAuthModal();
+                })}
+                className={`w-full px-4 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-between transition-all min-h-[48px] ${
+                  activeTab === 'profile'
+                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                    : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <User className="w-4 h-4 text-amber-500" />
+                  <span>Meu Perfil / Portal do Cliente</span>
                 </div>
                 <ChevronRight className="w-4 h-4 opacity-70" />
               </button>

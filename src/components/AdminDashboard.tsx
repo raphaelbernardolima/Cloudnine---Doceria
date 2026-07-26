@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { 
   Package, ShoppingBag, Users, FileText, Printer, Sparkles, 
   Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle, 
-  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck
+  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud
 } from 'lucide-react';
 import { Product, Order, UserProfile, AuditLog } from '../types';
 import { GoogleGenAI } from '@google/genai';
+import { CloudinaryUploader } from './CloudinaryUploader';
+import { getCloudinaryConfig } from '../lib/cloudinary';
 
 interface AdminDashboardProps {
   products: Product[];
@@ -841,6 +843,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 />
               </div>
             </div>
+
+            {/* Image Uploader */}
+            <CloudinaryUploader 
+              onImageUploaded={(url) => setImageUrl(url)}
+              currentImageUrl={imageUrl}
+              label="Foto do Doce (Upload Direto / Galeria)"
+            />
 
             <div className="flex gap-2 pt-2">
               <button
