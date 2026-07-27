@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
-import { ProductCard } from './components/ProductCard';
+import { ProductCard, ProductSkeleton } from './components/ProductCard';
 import { ProductModal } from './components/ProductModal';
 import { CustomCakeModal } from './components/CustomCakeModal';
 import { CartDrawer } from './components/CartDrawer';
@@ -23,10 +23,21 @@ export function App() {
   const [authRequiredNotice, setAuthRequiredNotice] = useState<string | undefined>(undefined);
 
   // Datasets
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   const [staff] = useState(INITIAL_STAFF);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
+
+  // Simulate Supabase Fetch for Products
+  useEffect(() => {
+    setIsLoadingProducts(true);
+    const timer = setTimeout(() => {
+      setProducts(INITIAL_PRODUCTS);
+      setIsLoadingProducts(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Cart & UI State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -48,6 +59,24 @@ export function App() {
       }
     }
     loadUser();
+  }, []);
+
+  // Handle Mercado Pago Callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+    
+    if (paymentStatus === 'success') {
+      alert('🎉 Pagamento aprovado com sucesso! Seu pedido já está sendo preparado.');
+      // Limpa os parâmetros da URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'failure') {
+      alert('⚠️ Houve um problema com o pagamento. Por favor, tente novamente ou escolha outra forma de pagamento.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'pending') {
+      alert('⏳ Seu pagamento está em análise. Avisaremos assim que for aprovado.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   // Synchronize theme attribute on body
@@ -328,17 +357,23 @@ export function App() {
 
             {/* Product Catalog Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={(p) => handleAddToCart(p, 1)}
-                  onOpenQuickView={(p) => setSelectedQuickProduct(p)}
-                />
-              ))}
+              {isLoadingProducts ? (
+                Array.from({ length: 6 }).map((_, idx) => (
+                  <ProductSkeleton key={idx} />
+                ))
+              ) : (
+                filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={(p) => handleAddToCart(p, 1)}
+                    onOpenQuickView={(p) => setSelectedQuickProduct(p)}
+                  />
+                ))
+              )}
             </div>
 
-            {filteredProducts.length === 0 && (
+            {!isLoadingProducts && filteredProducts.length === 0 && (
               <div className="py-16 text-center space-y-2 text-[var(--color-outline)]">
                 <p className="font-bold text-sm text-[var(--color-on-surface)]">Nenhum doce encontrado nesta categoria</p>
                 <p className="text-xs">Tente buscar por outro termo ou escolha outra categoria do cardápio.</p>

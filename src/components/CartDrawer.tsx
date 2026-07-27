@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, Calendar, Clock, QrCode, CreditCard, ShoppingBag, CheckCircle, ChevronRight, Copy, Check, Send, Truck, Store } from 'lucide-react';
+import { X, Trash2, Calendar, Clock, QrCode, CreditCard, ShoppingBag, CheckCircle, ChevronRight, Copy, Check, Send, Truck, Store, Loader2 } from 'lucide-react';
 import { CartItem, Order } from '../types';
 import { AddressLookupForm } from './AddressLookupForm';
 import { AddressResult } from '../lib/addressService';
@@ -62,7 +62,50 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     setTimeout(() => setCopiedPix(false), 3000);
   };
 
-  const handleFinishCheckout = () => {
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const handleFinishCheckout = async () => {
+    if (metodoPagamento === 'pix' || metodoPagamento === 'cartao_credito' || metodoPagamento === 'cartao_debito') {
+      try {
+        setIsProcessingPayment(true);
+        // Call backend API to create Mercado Pago preference
+        const response = await fetch('/api/create-preference', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: items.map(item => ({
+              title: item.product?.nome || 'Doce Especial Cloudnine',
+              quantity: item.quantity,
+              unit_price: item.unitPrice,
+            })),
+            payer: {
+              name: nomeCliente,
+              email: "cliente@email.com", // In a real app, collect the email
+            },
+            external_reference: `ORDER-${Math.floor(1000 + Math.random() * 9000)}`
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Falha ao processar pagamento via Mercado Pago');
+        }
+
+        const data = await response.json();
+        
+        // Redirect to Mercado Pago checkout
+        if (data.init_point) {
+          window.location.href = data.init_point;
+          return;
+        }
+      } catch (error) {
+        console.error('Payment Error:', error);
+        alert('Erro ao iniciar o pagamento via Mercado Pago. O pedido será salvo para pagamento presencial/posterior.');
+      } finally {
+        setIsProcessingPayment(false);
+      }
+    }
+
+    // Default flow for cash/fallback
     const newOrder: Partial<Order> = {
       id: Math.floor(1000 + Math.random() * 9000),
       created_at: new Date().toISOString(),
@@ -439,10 +482,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </button>
                 <button
                   onClick={handleFinishCheckout}
-                  className="flex-1 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 shadow-md"
+                  disabled={isProcessingPayment}
+                  className="flex-1 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <span>Confirmar e Finalizar Pedido</span>
-                  <CheckCircle className="w-4 h-4" />
+                  {isProcessingPayment ? (
+                    <>
+                      <span>Processando Pagamento...</span>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Confirmar e Finalizar Pedido</span>
+                      <CheckCircle className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </div>
             )}
