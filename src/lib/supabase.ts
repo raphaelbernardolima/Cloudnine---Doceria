@@ -38,13 +38,17 @@ export async function signInWithSupabase(email: string, password: string): Promi
     if (!data.user) return { user: null, error: 'Usuário não encontrado' };
 
     // Buscar perfil na tabela public.Perfis ou metadata
-    const { data: profile } = await client
+    const { data: profile, error: profileError } = await client
       .from('Perfis')
       .select('*')
       .eq('id', data.user.id)
       .maybeSingle();
 
-    const role = profile?.role || data.user.user_metadata?.role || 'cliente';
+    console.log('Login Supabase user ID:', data.user.id);
+    console.log('Login Perfis query result:', profile, 'Error:', profileError);
+
+    let role = profile?.role || data.user.user_metadata?.role || 'cliente';
+    
     const nome = profile?.nome || data.user.user_metadata?.nome || email.split('@')[0];
     const sobrenome = profile?.sobrenome || data.user.user_metadata?.sobrenome || '';
 
@@ -76,7 +80,7 @@ export async function signUpWithSupabase(
   sobrenome: string
 ): Promise<{ user: UserProfile | null; error: string | null }> {
   const client = getSupabaseClient();
-  const role: UserProfile['role'] = 'cliente';
+  let role: UserProfile['role'] = 'cliente';
 
   if (!client) {
     return { user: null, error: 'Serviço de autenticação temporariamente indisponível.' };
@@ -149,19 +153,25 @@ export async function getCurrentSupabaseUser(): Promise<UserProfile | null> {
     if (!session || !session.user) return null;
 
     const user = session.user;
-    const { data: profile } = await client
+    const { data: profile, error: profileError } = await client
       .from('Perfis')
       .select('*')
       .eq('id', user.id)
       .maybeSingle();
 
+    console.log('Supabase session user ID:', user.id);
+    console.log('Perfis query result:', profile, 'Error:', profileError);
+
+    const userEmail = user.email || '';
+    let userRole = profile?.role || user.user_metadata?.role || 'cliente';
+
     return {
       id: user.id,
-      email: user.email || '',
-      nome: profile?.nome || user.user_metadata?.nome || user.email?.split('@')[0] || 'Usuário',
+      email: userEmail,
+      nome: profile?.nome || user.user_metadata?.nome || userEmail.split('@')[0] || 'Usuário',
       sobrenome: profile?.sobrenome || user.user_metadata?.sobrenome || '',
       telefone: profile?.telefone || '(11) 99999-0000',
-      role: profile?.role || user.user_metadata?.role || 'cliente',
+      role: userRole,
       Status: 'ativo',
       pontosFidelidade: profile?.pontosFidelidade || 100
     };
@@ -173,6 +183,41 @@ export async function getCurrentSupabaseUser(): Promise<UserProfile | null> {
 /**
  * Testa a conexão com o Supabase
  */
+export async function updateUserProfileInDB(userId: string, updates: Partial<UserProfile>): Promise<{ error: string | null }> {
+  const client = getSupabaseClient();
+  if (!client) return { error: 'Serviço de banco de dados indisponível.' };
+
+  try {
+    // Apenas atualizar os campos permitidos
+    const updateData = {
+      nome: updates.nome,
+      sobrenome: updates.sobrenome,
+      telefone: updates.telefone,
+    };
+
+    const { error } = await client
+      .from('Perfis')
+      .update(updateData)
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Erro ao atualizar perfil no Supabase:', error);
+      return { error: error.message };
+    }
+
+    // Opcional: Atualizar os metadados do auth (se a role ou nome mudar)
+    await client.auth.updateUser({
+      data: updateData
+    });
+
+    return { error: null };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido';
+    console.error('Falha ao atualizar perfil no Supabase:', errorMsg);
+    return { error: errorMsg };
+  }
+}
+
 export async function testSupabaseConnection(urlInput?: string, keyInput?: string): Promise<{ success: boolean; message: string }> {
   const url = urlInput || import.meta.env.VITE_SUPABASE_URL;
   const anonKey = keyInput || import.meta.env.VITE_SUPABASE_ANON_KEY;

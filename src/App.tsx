@@ -10,7 +10,7 @@ import { AuthModal } from './components/AuthModal';
 import { CustomerProfileView } from './components/CustomerProfileView';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS } from './data/doceriaData';
 import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile } from './types';
-import { getCurrentSupabaseUser, signOutSupabase } from './lib/supabase';
+import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB } from './lib/supabase';
 import { Search, Sparkles, Heart, ChevronRight, Cake, Gift, ArrowRight, ShieldAlert, LogIn, User } from 'lucide-react';
 
 export function App() {
@@ -21,6 +21,13 @@ export function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authRequiredNotice, setAuthRequiredNotice] = useState<string | undefined>(undefined);
+  
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   // Datasets
   const [products, setProducts] = useState<Product[]>([]);
@@ -108,6 +115,16 @@ export function App() {
     }
   };
 
+  const handleUpdateUser = async (updated: UserProfile) => {
+    setCurrentUser(updated);
+    if (updated.id) {
+      const { error } = await updateUserProfileInDB(updated.id, updated);
+      if (error) {
+        console.error('Failed to update profile:', error);
+      }
+    }
+  };
+
   // Handle Tab Change with Security Check
   const handleTabChange = (tab: 'shop' | 'custom-cake' | 'loyalty' | 'admin') => {
     if (tab === 'admin') {
@@ -173,12 +190,17 @@ export function App() {
     if (code.toUpperCase() === 'CLOUDNINE10') {
       const subtotal = cartItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
       setAppliedDiscount(subtotal * 0.10);
-      alert('Cupom CLOUDNINE10 de 10% de desconto aplicado com sucesso!');
+      showToast('Cupom CLOUDNINE10 de 10% de desconto aplicado com sucesso!');
     } else if (code.toUpperCase() === 'DOCE10') {
       setAppliedDiscount(10.00);
-      alert('Cupom DOCE10 de R$ 10,00 OFF aplicado!');
+      showToast('Cupom DOCE10 de R$ 10,00 OFF aplicado!');
+    } else if (code.toUpperCase() === 'CAIXAGIFT20') {
+      setAppliedDiscount(20.00);
+      showToast('Desconto de R$ 20,00 aplicado com sucesso!');
+    } else if (code.toUpperCase() === 'BRIGADEIROSGRATIS') {
+      showToast('Recompensa de Brigadeiros resgatada! Adicionaremos ao seu pedido.');
     } else {
-      alert('Cupom inválido ou expirado.');
+      showToast('Cupom inválido ou expirado.');
     }
   };
 
@@ -388,7 +410,9 @@ export function App() {
           <LoyaltyView
             onApplyRewardCoupon={(code) => {
               handleApplyCoupon(code);
-              setIsCartOpen(true);
+              if (cartItems.length > 0) {
+                setIsCartOpen(true);
+              }
             }}
           />
         )}
@@ -398,9 +422,10 @@ export function App() {
           currentUser ? (
             <CustomerProfileView
               currentUser={currentUser}
-              onUpdateUser={(updated) => setCurrentUser(updated)}
+              onUpdateUser={handleUpdateUser}
               orders={orders}
               onNavigateToShop={() => setActiveTab('shop')}
+              onNavigateToAdmin={() => setActiveTab('admin')}
             />
           ) : (
             <div className="py-20 text-center max-w-md mx-auto space-y-4">
@@ -511,6 +536,13 @@ export function App() {
         onApplyCoupon={handleApplyCoupon}
       />
 
+      {/* Global Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] bg-[var(--color-on-surface)] text-[var(--color-surface)] px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 text-sm font-bold">
+          <Sparkles className="w-4 h-4 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

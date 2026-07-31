@@ -99,7 +99,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         }
       } catch (error) {
         console.error('Payment Error:', error);
-        alert('Erro ao iniciar o pagamento via Mercado Pago. O pedido será salvo para pagamento presencial/posterior.');
+        // Silently continue to fallback order creation
       } finally {
         setIsProcessingPayment(false);
       }

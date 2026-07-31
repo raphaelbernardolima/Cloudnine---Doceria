@@ -64,8 +64,18 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center space-x-2.5 cursor-pointer group shrink-0"
           onClick={() => handleNavClick(() => setActiveTab('shop'))}
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
-            <Cake className="w-5 h-5" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--color-primary-container)] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0 overflow-hidden border-2 border-[var(--color-primary)]/20">
+            <img 
+              src="/logo.png" 
+              alt="Cloudnine Logo" 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback to the Cake icon if logo.png is not found
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.classList.add('fallback-icon-active');
+              }}
+            />
+            <style>{`.fallback-icon-active::after { content: '🎂'; font-size: 1.25rem; }`}</style>
           </div>
           <div>
             <span className="text-base sm:text-lg lg:text-xl font-extrabold tracking-tight text-[var(--color-on-surface)] flex items-center gap-1">
@@ -136,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* User Account Button (Tablet/Desktop) */}
           <div className="hidden md:flex items-center">
             {currentUser ? (
-              <div className="flex items-center space-x-1.5 bg-[var(--color-surface-container-high)] pl-2.5 pr-1 py-1 rounded-xl border border-[var(--color-outline-variant)]/30 text-xs font-bold">
+              <div className="flex items-center space-x-1.5 bg-[var(--color-surface-container-high)] pl-1 pr-1 py-1 rounded-xl border border-[var(--color-outline-variant)]/30 text-xs font-bold">
                 <button
                   type="button"
                   onClick={() => setActiveTab('profile')}
@@ -173,28 +183,12 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* Admin Toggle Button */}
-          <button
-            id="header-admin-btn"
-            onClick={handleAdminClick}
-            title="Acessar Gestão da Doceria"
-            className={`hidden sm:flex items-center space-x-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all border min-h-[38px] ${
-              activeTab === 'admin'
-                ? 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)] border-transparent shadow-xs'
-                : 'bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)] border-[var(--color-outline-variant)]/30 hover:bg-[var(--color-surface-container-highest)] hover:text-[var(--color-on-surface)]'
-            }`}
-          >
-            <Settings2 className="w-3.5 h-3.5" />
-            <span className="hidden lg:inline">{activeTab === 'admin' ? 'Sair da Gestão' : 'Gestão Cloudnine'}</span>
-            <span className="lg:hidden">{activeTab === 'admin' ? 'Sair' : 'Gestão'}</span>
-          </button>
-
           {/* Theme Mode Button */}
           <button
             id="header-theme-toggle"
             onClick={toggleTheme}
             title={`Alternar Tema (${themeMode})`}
-            className="p-2 sm:p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container-highest)] transition-colors flex items-center justify-center border border-[var(--color-outline-variant)]/30 text-xs min-w-[38px] min-h-[38px]"
+            className="p-2 sm:p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container-highest)] transition-colors flex items-center justify-center border border-[var(--color-outline-variant)]/30 text-xs min-w-[46px] min-h-[46px]"
           >
             {themeMode === 'light' && <Sun className="w-4 h-4 text-amber-600" />}
             {themeMode === 'dark' && <Moon className="w-4 h-4 text-rose-300" />}
@@ -207,7 +201,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="header-cart-btn"
             onClick={onOpenCart}
-            className="relative flex items-center space-x-1.5 px-3 sm:px-4 py-2 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:opacity-95 transition-all shadow-xs font-bold text-xs min-h-[38px]"
+            className="relative flex items-center justify-center space-x-1.5 px-3 sm:px-4 py-2 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:opacity-95 transition-all shadow-xs font-bold text-xs min-h-[46px] min-w-[46px]"
           >
             <ShoppingBag className="w-4 h-4" />
             <span className="hidden sm:inline">Sacola</span>
@@ -224,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Menu de Navegação"
             aria-expanded={isMobileMenuOpen}
-            className="md:hidden p-2 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] border border-[var(--color-outline-variant)]/30 hover:bg-[var(--color-surface-container-highest)] transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+            className="md:hidden p-2 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] border border-[var(--color-outline-variant)]/30 hover:bg-[var(--color-surface-container-highest)] transition-all min-w-[46px] min-h-[46px] flex items-center justify-center"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5 text-rose-500" /> : <Menu className="w-5 h-5" />}
           </button>

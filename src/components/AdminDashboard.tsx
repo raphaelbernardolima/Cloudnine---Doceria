@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Package, ShoppingBag, Users, FileText, Printer, Sparkles, 
   Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle, 
-  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud
+  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud, LayoutDashboard, CreditCard, Settings
 } from 'lucide-react';
 import { Product, Order, UserProfile, AuditLog } from '../types';
 import { GoogleGenAI } from '@google/genai';
@@ -30,8 +30,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onDeleteProduct,
   onUpdateOrderStatus
 }) => {
-  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'kitchen' | 'ai' | 'database'>('orders');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'products' | 'kitchen' | 'staff' | 'payments' | 'settings' | 'ai' | 'database'>('dashboard');
   
+  // Notification Toast State
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const previousOrderCount = React.useRef(orders.length);
+
+  React.useEffect(() => {
+    if (orders.length > previousOrderCount.current) {
+      const newOrder = orders[orders.length - 1] || orders[0];
+      setToastMessage(`🎉 Novo pedido #${newOrder?.id || ''} recebido de ${newOrder?.cliente_nome || 'Cliente'}!`);
+      
+      // Play a simple notification sound (optional, but requested simple observer)
+      // Hide toast after 5 seconds
+      setTimeout(() => setToastMessage(null), 5000);
+    }
+    previousOrderCount.current = orders.length;
+  }, [orders]);
+
   // Kitchen thermal receipt modal & settings
   const [printingOrder, setPrintingOrder] = useState<Order | null>(null);
   const [receiptType, setReceiptType] = useState<'cozinha' | 'cliente'>('cozinha');
@@ -870,6 +886,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       )}
 
+      {/* NEW ORDER NOTIFICATION TOAST */}
+      {toastMessage && (
+        <div className="fixed bottom-4 right-4 z-[9999] bg-[var(--color-primary)] text-[var(--color-on-primary)] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <ShoppingBag className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="font-bold text-sm">Atenção Equipe!</p>
+            <p className="text-xs opacity-90">{toastMessage}</p>
+          </div>
+          <button onClick={() => setToastMessage(null)} className="ml-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+            X
+          </button>
+        </div>
+      )}
     </div>
   );
 };

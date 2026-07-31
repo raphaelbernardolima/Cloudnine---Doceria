@@ -95,7 +95,6 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onApplyRewardCoupon })
                   disabled={!canRedeem}
                   onClick={() => {
                     onApplyRewardCoupon(reward.code, reward.pointsCost);
-                    alert(`Recompensa resgatada! Código do cupom: ${reward.code}`);
                   }}
                   className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center space-x-2 transition-all ${
                     canRedeem

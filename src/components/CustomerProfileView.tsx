@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   User, MapPin, Heart, ShoppingBag, Award, Camera, 
   Save, CheckCircle, Clock, ChevronRight, Phone, Mail, Shield, AlertCircle,
-  Copy, RefreshCw, Bell, Sparkles, Star, Gift, Truck, FileText
+  Copy, RefreshCw, Bell, Sparkles, Star, Gift, Truck, FileText, Settings2
 } from 'lucide-react';
 import { UserProfile, Order } from '../types';
 import { CloudinaryUploader } from './CloudinaryUploader';
@@ -13,13 +13,15 @@ interface CustomerProfileViewProps {
   onUpdateUser: (updated: UserProfile) => void;
   orders: Order[];
   onNavigateToShop: () => void;
+  onNavigateToAdmin?: () => void;
 }
 
 export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
   currentUser,
   onUpdateUser,
   orders,
-  onNavigateToShop
+  onNavigateToShop,
+  onNavigateToAdmin
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'profile' | 'orders' | 'addresses' | 'loyalty' | 'preferences' | 'security'>('profile');
   const [isLoading, setIsLoading] = useState(true);
@@ -244,6 +246,21 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
               </div>
               <ChevronRight className="w-4 h-4 opacity-70" />
             </button>
+            
+            {(currentUser.role === 'admin' || currentUser.role === 'confeiteiro' || currentUser.role === 'atendente') && (
+              <div className="pt-4 mt-2 border-t border-[var(--color-outline-variant)]/20">
+                <button
+                  onClick={onNavigateToAdmin}
+                  className="w-full p-3 rounded-2xl text-xs font-black flex items-center justify-between transition-all bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:hover:bg-rose-950/50 border border-rose-200 dark:border-rose-900/50 shadow-sm"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Settings2 className="w-4 h-4" />
+                    <span>Acessar Painel de Gestão</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 opacity-70" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
