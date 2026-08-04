@@ -49,9 +49,9 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onApplyRewardCoupon })
 
         {/* Counter Card */}
         <div className="z-10 bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)] p-5 rounded-2xl border border-[var(--color-outline-variant)]/30 text-center min-w-[180px] shadow-lg">
-          <span className="text-[10px] uppercase font-bold text-[var(--color-outline)] block">Saldo de Pontos</span>
+          <span className="text-sm uppercase font-bold text-[var(--color-outline)] block">Saldo de Pontos</span>
           <span className="text-3xl font-black text-[var(--color-primary)] block my-1">{points} pts</span>
-          <span className="text-[10px] text-emerald-600 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">
+          <span className="text-sm text-emerald-600 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">
             +50 pts para o Nível Diamante
           </span>
         </div>
@@ -78,7 +78,7 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onApplyRewardCoupon })
                       {reward.pointsCost} pontos
                     </span>
                     {canRedeem && (
-                      <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                      <span className="text-sm font-bold text-emerald-600 flex items-center gap-1">
                         <CheckCircleIcon /> Pronto p/ resgatar
                       </span>
                     )}

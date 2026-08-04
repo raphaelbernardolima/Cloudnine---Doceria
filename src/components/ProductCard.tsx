@@ -28,13 +28,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
           {product.is_best_seller && (
-            <span className="px-2.5 py-1 rounded-full bg-amber-500 text-white font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-xs">
+            <span className="px-2.5 py-1 rounded-full bg-amber-500 text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-1 shadow-xs">
               <Flame className="w-3 h-3 fill-current" />
               Bestseller
             </span>
           )}
           {product.is_gluten_free && (
-            <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white font-extrabold text-[10px] uppercase tracking-wider shadow-xs">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white font-extrabold text-sm uppercase tracking-wider shadow-xs">
               Sem Glúten
             </span>
           )}
@@ -54,7 +54,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-primary)] bg-[var(--color-primary-container)] px-2 py-0.5 rounded-md">
+            <span className="text-sm font-bold uppercase tracking-wider text-[var(--color-primary)] bg-[var(--color-primary-container)] px-2 py-0.5 rounded-md">
               {product.categoria}
             </span>
 
@@ -62,7 +62,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <div className="flex items-center space-x-1 text-amber-500 font-extrabold text-xs">
                 <Star className="w-3.5 h-3.5 fill-current" />
                 <span>{product.rating.toFixed(1)}</span>
-                <span className="text-[10px] text-[var(--color-outline)] font-normal">
+                <span className="text-sm text-[var(--color-outline)] font-normal">
                   ({product.reviews_count || 12})
                 </span>
               </div>
@@ -81,7 +81,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Footer Price & Add CTA */}
         <div className="pt-2 border-t border-[var(--color-outline-variant)]/20 flex items-center justify-between">
           <div>
-            <span className="text-[9px] uppercase font-bold text-[var(--color-outline)] block">Preço</span>
+            <span className="text-xs uppercase font-bold text-[var(--color-outline)] block">Preço</span>
             <span className="text-base font-extrabold text-[var(--color-on-surface)]">
               R$ {product.preco.toFixed(2).replace('.', ',')}
             </span>

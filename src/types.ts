@@ -11,6 +11,7 @@ export interface Product {
   rating?: number;
   reviews_count?: number;
   is_best_seller?: boolean;
+  receita?: RecipeItem[];
   is_gluten_free?: boolean;
   ingredients?: string[];
   variacoes?: {
@@ -45,12 +46,13 @@ export interface UserProfile {
   id: string;
   created_at?: string;
   telefone: string;
-  role: 'admin' | 'cliente' | 'confeiteiro' | 'atendente';
+  role: 'ADMIN' | 'CAIXA' | 'COZINHA' | 'LIMPEZA' | 'ATENDIMENTO' | 'USUARIO_PADRAO' | 'admin' | 'cliente' | 'confeiteiro' | 'atendente';
   Status: 'ativo' | 'suspenso' | 'inativo';
   nome: string;
   sobrenome: string;
   email: string;
   pontosFidelidade?: number;
+  avatar_url?: string;
 }
 
 export interface OrderItem {
@@ -73,6 +75,7 @@ export interface Order {
   status: 'pendente_pix' | 'em_preparo' | 'pronto_retirada' | 'saiu_entrega' | 'entregue' | 'cancelado';
   metodo_pagamento: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro_retirada';
   tipo_entrega: 'entrega' | 'retirada';
+  entregador_id?: string;
   data_agendada?: string;
   horario_agendado?: string;
   endereco_entreg: string;
@@ -106,3 +109,41 @@ export interface AuditLog {
 }
 
 export type ThemeMode = 'light' | 'dark' | 'light-high-contrast' | 'dark-high-contrast';
+
+export interface Ingredient {
+  id: string;
+  nome: string;
+  unidadeMedida: 'g' | 'ml' | 'un';
+  custoPorUnidade: number;
+  estoqueAtual: number;
+  estoqueMinimo: number;
+}
+
+export interface RecipeItem {
+  insumoId: string;
+  quantidade: number;
+}
+
+export interface Driver {
+  id: string;
+  nome: string;
+  telefone: string;
+  taxaPorEntrega: number;
+  totalGanhos: number;
+  pedidosEntregues: number;
+  status: 'disponivel' | 'em_entrega' | 'indisponivel';
+}
+
+export interface Coupon {
+  id: string;
+  codigo: string;
+  tipoDesconto: 'porcentagem' | 'fixo' | 'frete_gratis';
+  valor: number;
+  ativo: boolean;
+  minimoCompra: number;
+}
+
+export interface LoyaltySettings {
+  pontosPorReal: number;
+  valorResgatePorPonto: number;
+}

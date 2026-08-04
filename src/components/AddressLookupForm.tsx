@@ -291,7 +291,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
             <span>Dados do Endereço</span>
           </h4>
           {geoCoords && (
-            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20">
+            <span className="text-sm font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20">
               <MapPin className="w-3 h-3" /> GPS ({geoCoords.lat.toFixed(4)}, {geoCoords.lng.toFixed(4)})
             </span>
           )}
@@ -304,7 +304,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
           <div className="sm:col-span-4 space-y-1.5">
             <label className="font-extrabold text-xs text-[var(--color-on-surface)] flex items-center justify-between">
               <span>CEP <span className="text-rose-500">*</span></span>
-              <span className="text-[10px] text-[var(--color-primary)] font-bold">Busca Automática</span>
+              <span className="text-sm text-[var(--color-primary)] font-bold">Busca Automática</span>
             </label>
             <div className="relative">
               <input
@@ -321,7 +321,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
                 <Search className="w-5 h-5 text-[var(--color-outline)] absolute right-3 top-3" />
               )}
             </div>
-            <span className="text-[11px] text-[var(--color-outline)] block">
+            <span className="text-sm text-[var(--color-outline)] block">
               Digite os 8 números do CEP.
             </span>
           </div>

@@ -137,7 +137,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <h2 className="text-base font-black tracking-tight flex items-center gap-1.5">
                 Área do Cliente Cloudnine
               </h2>
-              <p className="text-[11px] opacity-85">Acesse sua conta para acompanhar pedidos e pontos</p>
+              <p className="text-sm opacity-85">Acesse sua conta para acompanhar pedidos e pontos</p>
             </div>
           </div>
 

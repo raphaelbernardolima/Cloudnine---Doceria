@@ -43,7 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
       setActiveTab('shop');
       return;
     }
-    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'confeiteiro' || currentUser.role === 'atendente')) {
+    const staffRoles = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'];
+    if (currentUser && staffRoles.includes(currentUser.role)) {
       setActiveTab('admin');
     } else {
       onOpenAuthModal();
@@ -81,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="text-base sm:text-lg lg:text-xl font-extrabold tracking-tight text-[var(--color-on-surface)] flex items-center gap-1">
               Cloudnine
             </span>
-            <p className="text-[10px] text-[var(--color-outline)] hidden sm:block leading-none">Confeitaria Artesanal</p>
+            <p className="text-sm text-[var(--color-outline)] hidden sm:block leading-none">Confeitaria Artesanal</p>
           </div>
         </div>
 
@@ -158,10 +159,12 @@ export const Header: React.FC<HeaderProps> = ({
                   ) : (
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   )}
-                  <span className="text-[var(--color-on-surface)] max-w-[80px] lg:max-w-[120px] truncate">{currentUser.nome}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] uppercase font-extrabold hidden lg:inline">
-                    {currentUser.role}
-                  </span>
+                  <span className="text-[var(--color-on-surface)] max-w-[80px] lg:max-w-[120px] truncate">{currentUser.nome?.replace(/["']/g, '') || 'Usuário'}</span>
+                  {currentUser.role !== 'cliente' && currentUser.role !== 'USUARIO_PADRAO' && (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] uppercase font-extrabold hidden lg:inline">
+                      {currentUser.role}
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={onLogout}
@@ -206,7 +209,7 @@ export const Header: React.FC<HeaderProps> = ({
             <ShoppingBag className="w-4 h-4" />
             <span className="hidden sm:inline">Sacola</span>
             {cartCount > 0 && (
-              <span className="ml-0.5 bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] font-extrabold rounded-full w-5 h-5 text-[10px] flex items-center justify-center">
+              <span className="ml-0.5 bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] font-extrabold rounded-full w-5 h-5 text-sm flex items-center justify-center">
                 {cartCount}
               </span>
             )}
@@ -248,10 +251,12 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                   <div>
                     <p className="font-extrabold text-xs text-[var(--color-on-surface)] flex items-center gap-1">
-                      <span>{currentUser.nome} {currentUser.sobrenome}</span>
-                      <span className="text-[9px] text-[var(--color-primary)] font-bold">(Ver Perfil)</span>
+                      <span>{(currentUser.nome?.replace(/["']/g, '') || 'Usuário')} {(currentUser.sobrenome?.replace(/["']/g, '') || '')}</span>
+                      <span className="text-xs text-[var(--color-primary)] font-bold">(Ver Perfil)</span>
                     </p>
-                    <p className="text-[10px] text-[var(--color-outline)] font-semibold uppercase">{currentUser.role} • {currentUser.email}</p>
+                    <p className="text-sm text-[var(--color-outline)] font-semibold uppercase">
+                      {currentUser.role !== 'cliente' && currentUser.role !== 'USUARIO_PADRAO' ? `${currentUser.role} • ` : ''}{currentUser.email}
+                    </p>
                   </div>
                 </button>
                 <button
@@ -353,7 +358,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Quick Actions Footer inside Drawer */}
-            <div className="pt-2.5 border-t border-[var(--color-outline-variant)]/20 flex items-center justify-between text-[11px] text-[var(--color-outline)] font-bold">
+            <div className="pt-2.5 border-t border-[var(--color-outline-variant)]/20 flex items-center justify-between text-sm text-[var(--color-outline)] font-bold">
               <span>Tema: {themeMode.toUpperCase()}</span>
               <button
                 onClick={toggleTheme}

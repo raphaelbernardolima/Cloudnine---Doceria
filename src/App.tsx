@@ -8,10 +8,12 @@ import { LoyaltyView } from './components/LoyaltyView';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AuthModal } from './components/AuthModal';
 import { CustomerProfileView } from './components/CustomerProfileView';
-import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS } from './data/doceriaData';
-import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile } from './types';
-import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB } from './lib/supabase';
+import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS, INITIAL_INGREDIENTS, INITIAL_DRIVERS, INITIAL_COUPONS, INITIAL_LOYALTY_SETTINGS } from './data/doceriaData';
+import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings } from './types';
+import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB, getSupabaseClient } from './lib/supabase';
 import { Search, Sparkles, Heart, ChevronRight, Cake, Gift, ArrowRight, ShieldAlert, LogIn, User } from 'lucide-react';
+
+export const STAFF_ROLES = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'];
 
 export function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
@@ -32,21 +34,55 @@ export function App() {
   // Datasets
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
-  const [staff] = useState(INITIAL_STAFF);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [staff, setStaff] = useState<UserProfile[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loyaltySettings, setLoyaltySettings] = useState<LoyaltySettings>(INITIAL_LOYALTY_SETTINGS);
 
-  // Simulate Supabase Fetch for Products
+  
+  // Fetch real data from Supabase
   useEffect(() => {
-    setIsLoadingProducts(true);
-    const timer = setTimeout(() => {
-      setProducts(INITIAL_PRODUCTS);
-      setIsLoadingProducts(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchSupabaseData = async () => {
+      setIsLoadingProducts(true);
+      const client = getSupabaseClient();
+      if (!client) {
+        // Fallback to initial if no supabase configured
+        setProducts(INITIAL_PRODUCTS);
+        setIsLoadingProducts(false);
+        return;
+      }
 
-  // Cart & UI State
+      try {
+        // Fetch products
+        const { data: prodData, error: prodErr } = await client.from('produtos').select('*');
+        if (!prodErr && prodData && prodData.length > 0) {
+          setProducts(prodData);
+        } else {
+          setProducts([]);
+        }
+
+        // Fetch orders
+        const { data: ordData, error: ordErr } = await client.from('pedidos').select('*, itens_pedidos(*)');
+        if (!ordErr && ordData && ordData.length > 0) {
+          // Transform db format to app format if needed, but assuming compatible for now
+          setOrders(ordData as any);
+        } else {
+          setOrders([]);
+        }
+
+      } catch (err) {
+        console.error("Error fetching from Supabase", err);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+    
+    fetchSupabaseData();
+  }, []);
+// Cart & UI State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCustomCakeOpen, setIsCustomCakeOpen] = useState(false);
@@ -132,8 +168,8 @@ export function App() {
         handleOpenAuthModal('Para acessar a Área de Gestão, faça login com sua conta autorizada.');
         return;
       }
-      if (currentUser.role !== 'admin' && currentUser.role !== 'confeiteiro' && currentUser.role !== 'atendente') {
-        handleOpenAuthModal('Acesso Negado: Sua conta atual não possui permissão de Administrador ou Cozinha.');
+      if (!STAFF_ROLES.includes(currentUser.role)) {
+        handleOpenAuthModal('Acesso Negado: Sua conta atual não possui permissão de Administrador ou Equipe.');
         return;
       }
     }
@@ -204,7 +240,7 @@ export function App() {
     }
   };
 
-  const handlePlaceOrder = (newOrderData: Partial<Order>) => {
+const handlePlaceOrder = async (newOrderData: Partial<Order>) => {
     const fullOrder: Order = {
       id: newOrderData.id || Math.floor(1000 + Math.random() * 9000),
       created_at: new Date().toISOString(),
@@ -221,43 +257,103 @@ export function App() {
       itens: newOrderData.itens || []
     };
 
+    const client = getSupabaseClient();
+    if (client) {
+      const pedidoDB = {
+        cliente_id: fullOrder.cliente_id !== 'usr-guest' ? fullOrder.cliente_id : null,
+        total: fullOrder.total,
+        status: fullOrder.status,
+        endereco_entreg: fullOrder.endereco_entreg
+      };
+      
+      const { data, error } = await client.from('pedidos').insert([pedidoDB]).select();
+      if (!error && data && data.length > 0) {
+        fullOrder.id = data[0].id; // Replace ID with DB serial ID
+        
+        // Insert order items
+        if (fullOrder.itens.length > 0) {
+          const itensDB = fullOrder.itens.map(item => ({
+            pedido_id: fullOrder.id,
+            produto_id: typeof item.produto_id === 'number' ? item.produto_id : null,
+            quantidade: item.quantidade,
+            preco_unitario: item.preco_unitario
+          }));
+          await client.from('itens_pedidos').insert(itensDB);
+        }
+      } else {
+        console.error("Erro ao inserir pedido", error);
+      }
+    }
+
     setOrders(prev => [fullOrder, ...prev]);
     setCartItems([]);
     setAppliedDiscount(0);
 
     // Audit log entry
-    setAuditLogs(prev => [
-      {
-        id: Date.now(),
-        created_at: new Date().toISOString(),
-        admin_id: currentUser?.id || 'system',
-        admin_nome: currentUser?.nome || 'Cliente',
-        acao: 'NOVO_PEDIDO',
-        detalhes: `Novo pedido #${fullOrder.id} realizado por ${fullOrder.cliente_nome} no valor de R$ ${fullOrder.total.toFixed(2)}`
-      },
-      ...prev
-    ]);
+    const novoLog: AuditLog = {
+      id: Date.now(),
+      created_at: new Date().toISOString(),
+      admin_id: currentUser?.id || 'system',
+      admin_nome: currentUser?.nome || 'Cliente',
+      acao: 'NOVO_PEDIDO',
+      detalhes: `Novo pedido #${fullOrder.id} realizado por ${fullOrder.cliente_nome} no valor de R$ ${fullOrder.total.toFixed(2)}`
+    };
+    
+    if (client) {
+       await client.from('logs_auditoria').insert([{
+         acao: novoLog.acao,
+         detalhes: novoLog.detalhes,
+         admin_id: currentUser?.id || null
+       }]);
+    }
+    
+    setAuditLogs(prev => [novoLog, ...prev]);
   };
 
   // Product Admin handlers
-  const handleAddProduct = (newProd: Omit<Product, 'id'>) => {
-    const created: Product = {
-      ...newProd,
-      id: Date.now()
-    };
+const handleAddProduct = async (newProd: Omit<Product, 'id'>) => {
+    const client = getSupabaseClient();
+    if (client) {
+      const { data, error } = await client.from('produtos').insert([newProd]).select();
+      if (!error && data) {
+        setProducts(prev => [data[0], ...prev]);
+        return;
+      }
+    }
+    // Fallback if no client or error
+    const created: Product = { ...newProd, id: Date.now() };
     setProducts(prev => [created, ...prev]);
   };
 
-  const handleUpdateStock = (id: number | string, newStock: number) => {
+  const handleUpdateStock = async (id: number | string, newStock: number) => {
+    const client = getSupabaseClient();
+    if (client) {
+      await client.from('produtos').update({ estoque: newStock }).eq('id', id);
+    }
     setProducts(prev => prev.map(p => p.id === id ? { ...p, estoque: newStock } : p));
   };
 
-  const handleDeleteProduct = (id: number | string) => {
+  const handleDeleteProduct = async (id: number | string) => {
+    const client = getSupabaseClient();
+    if (client) {
+      await client.from('produtos').delete().eq('id', id);
+    }
     setProducts(prev => prev.filter(p => p.id !== id));
   };
 
-  const handleUpdateOrderStatus = (orderId: number | string, newStatus: Order['status']) => {
+  const handleUpdateOrderStatus = async (orderId: number | string, newStatus: Order['status']) => {
+    const client = getSupabaseClient();
+    if (client) {
+      await client.from('pedidos').update({ status: newStatus }).eq('id', orderId);
+    }
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+  };
+
+  const handleUpdateRole = (userId: string, newRole: UserProfile['role']) => {
+    setStaff(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    if (currentUser?.id === userId) {
+      setCurrentUser(prev => prev ? { ...prev, role: newRole } : null);
+    }
   };
 
   // Filter products by category and search
@@ -271,7 +367,7 @@ export function App() {
 
   const cartTotalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const isUserAdminOrStaff = currentUser && (currentUser.role === 'admin' || currentUser.role === 'confeiteiro' || currentUser.role === 'atendente');
+  const isUserAdminOrStaff = currentUser && STAFF_ROLES.includes(currentUser.role);
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-on-surface)] transition-colors font-sans flex flex-col">
@@ -300,7 +396,7 @@ export function App() {
             {/* Hero Brand Banner */}
             <div className="relative rounded-3xl p-8 sm:p-10 bg-gradient-to-r from-[var(--color-primary-container)] via-[var(--color-surface-container-high)] to-[var(--color-secondary-container)] border border-[var(--color-outline-variant)]/30 overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-xs">
               <div className="space-y-3 text-center md:text-left z-10 max-w-xl">
-                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] text-[11px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-black uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5 fill-current" />
                   Confeitaria Fina & Artesanal
                 </span>
@@ -455,10 +551,23 @@ export function App() {
               orders={orders}
               staff={staff}
               auditLogs={auditLogs}
+              ingredients={ingredients}
+              drivers={drivers}
+              coupons={coupons}
+              loyaltySettings={loyaltySettings}
+              onUpdateLoyalty={setLoyaltySettings}
+              onAddIngredient={(ing) => setIngredients(prev => [...prev, { ...ing, id: Math.random().toString() }])}
+              onUpdateIngredientStock={(id, stock) => setIngredients(prev => prev.map(i => i.id === id ? { ...i, estoqueAtual: stock } : i))}
+              onDeleteIngredient={(id) => setIngredients(prev => prev.filter(i => i.id !== id))}
+              onAddCoupon={(c) => setCoupons(prev => [...prev, { ...c, id: Math.random().toString() }])}
+              onToggleCoupon={(id, ativo) => setCoupons(prev => prev.map(c => c.id === id ? { ...c, ativo } : c))}
+              onAssignDriver={(orderId, driverId) => setOrders(prev => prev.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o))}
+              currentUser={currentUser!}
               onAddProduct={handleAddProduct}
               onUpdateStock={handleUpdateStock}
               onDeleteProduct={handleDeleteProduct}
               onUpdateOrderStatus={handleUpdateOrderStatus}
+              onUpdateRole={handleUpdateRole}
             />
           ) : (
             <div className="py-20 text-center max-w-md mx-auto space-y-4">
@@ -490,10 +599,10 @@ export function App() {
               <Cake className="w-4 h-4" />
             </div>
             <span className="font-bold text-sm text-[var(--color-on-surface)]">Cloudnine Doceria</span>
-            <span className="text-[10px] text-[var(--color-outline)]">© 2026 Todos os direitos reservados.</span>
+            <span className="text-sm text-[var(--color-outline)]">© 2026 Todos os direitos reservados.</span>
           </div>
 
-          <div className="flex items-center space-x-4 font-semibold text-[11px]">
+          <div className="flex items-center space-x-4 font-semibold text-sm">
             <span>Alameda Gabriel Monteiro da Silva, 450 - SP</span>
             <span>Atendimento: (11) 99999-0000</span>
           </div>

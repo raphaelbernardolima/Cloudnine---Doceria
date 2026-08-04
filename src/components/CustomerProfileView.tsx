@@ -105,8 +105,8 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
             <div className="text-center sm:text-left space-y-1.5">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{nome || currentUser.nome} {sobrenome || currentUser.sobrenome}</h1>
-                <span className="px-3 py-1 rounded-full bg-white/25 backdrop-blur-md text-white font-extrabold text-[10px] uppercase tracking-wider border border-white/30">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{(nome || currentUser.nome)?.replace(/["']/g, '') || 'Usuário'} {(sobrenome || currentUser.sobrenome)?.replace(/["']/g, '') || ''}</h1>
+                <span className="px-3 py-1 rounded-full bg-white/25 backdrop-blur-md text-white font-extrabold text-sm uppercase tracking-wider border border-white/30">
                   Membro VIP Cloudnine
                 </span>
               </div>
@@ -153,7 +153,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
         {/* Left Sidebar Navigation */}
         <div className="lg:col-span-1 space-y-2">
           <div className="p-3 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-1 shadow-xs sticky top-20">
-            <p className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-[var(--color-outline)]">
+            <p className="px-3 py-2 text-sm font-black uppercase tracking-wider text-[var(--color-outline)]">
               Portal do Cliente
             </p>
 
@@ -479,7 +479,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                     <span className="font-black text-xs px-2.5 py-1 rounded-lg bg-[var(--color-primary)] text-[var(--color-on-primary)]">
                       Endereço Principal (Casa)
                     </span>
-                    <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
+                    <span className="text-sm font-bold text-emerald-600 flex items-center gap-1">
                       <CheckCircle className="w-3.5 h-3.5" />
                       Ativo para Entregas
                     </span>
@@ -539,7 +539,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
               <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    <span className="text-sm font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
                       Cartão de Fidelidade Digital
                     </span>
                     <h4 className="text-xl font-black text-[var(--color-on-surface)]">Saldo Atual: 480 Pontos</h4>
@@ -569,7 +569,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                   <div className="p-4 rounded-2xl bg-[var(--color-surface-container-low)] border border-dashed border-[var(--color-primary)]/50 flex items-center justify-between">
                     <div>
                       <span className="font-black text-sm text-[var(--color-primary)] block">CLOUDNINE10</span>
-                      <p className="text-[11px] text-[var(--color-outline)]">10% OFF em qualquer pedido</p>
+                      <p className="text-sm text-[var(--color-outline)]">10% OFF em qualquer pedido</p>
                     </div>
                     <button
                       onClick={() => handleCopyCoupon('CLOUDNINE10')}
@@ -583,7 +583,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                   <div className="p-4 rounded-2xl bg-[var(--color-surface-container-low)] border border-dashed border-amber-500/50 flex items-center justify-between">
                     <div>
                       <span className="font-black text-sm text-amber-600 block">DOCEAGORA</span>
-                      <p className="text-[11px] text-[var(--color-outline)]">Frete Grátis acima de R$ 80,00</p>
+                      <p className="text-sm text-[var(--color-outline)]">Frete Grátis acima de R$ 80,00</p>
                     </div>
                     <button
                       onClick={() => handleCopyCoupon('DOCEAGORA')}
@@ -622,7 +622,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                   />
                   <div>
                     <span className="font-extrabold text-sm block">Intolerância a Lactose (Linha Zero Lactose)</span>
-                    <p className="text-[11px] text-[var(--color-outline)]">Destacar opções preparadas com leite vegetal e ingredientes sem derivados de leite.</p>
+                    <p className="text-sm text-[var(--color-outline)]">Destacar opções preparadas com leite vegetal e ingredientes sem derivados de leite.</p>
                   </div>
                 </label>
 
@@ -635,7 +635,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                   />
                   <div>
                     <span className="font-extrabold text-sm block">Dieta Sem Glúten</span>
-                    <p className="text-[11px] text-[var(--color-outline)]">Filtrar produtos preparados com farinhas especiais sem glúten.</p>
+                    <p className="text-sm text-[var(--color-outline)]">Filtrar produtos preparados com farinhas especiais sem glúten.</p>
                   </div>
                 </label>
 
@@ -648,7 +648,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                   />
                   <div>
                     <span className="font-extrabold text-sm block">Linha Zero Açúcar / Fit</span>
-                    <p className="text-[11px] text-[var(--color-outline)]">Priorizar doces adoçados naturalmente com eritritol, xilitol ou stevia.</p>
+                    <p className="text-sm text-[var(--color-outline)]">Priorizar doces adoçados naturalmente com eritritol, xilitol ou stevia.</p>
                   </div>
                 </label>
 
@@ -661,7 +661,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                   />
                   <div>
                     <span className="font-extrabold text-sm block">Alergia Severa a Oleaginosas (Nozes, Castanhas, Amendoim)</span>
-                    <p className="text-[11px] text-[var(--color-outline)]">Emitir alerta especial de manipulação e contaminação cruzada para a equipe de produção.</p>
+                    <p className="text-sm text-[var(--color-outline)]">Emitir alerta especial de manipulação e contaminação cruzada para a equipe de produção.</p>
                   </div>
                 </label>
               </div>

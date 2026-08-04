@@ -177,3 +177,23 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     detalhes: 'Ativou o cupom promocional "CLOUDNINE10" com 10% de desconto na primeira compra'
   }
 ];
+
+export const INITIAL_INGREDIENTS = [
+  { id: 'ing1', nome: 'Leite Condensado Moça', unidadeMedida: 'g' as const, custoPorUnidade: 0.02, estoqueAtual: 5000, estoqueMinimo: 1000 },
+  { id: 'ing2', nome: 'Chocolate Belga Callebaut 70%', unidadeMedida: 'g' as const, custoPorUnidade: 0.15, estoqueAtual: 2000, estoqueMinimo: 500 },
+];
+
+export const INITIAL_DRIVERS = [
+  { id: 'd1', nome: 'João Pedro', telefone: '(11) 99999-1111', taxaPorEntrega: 8.00, totalGanhos: 48.00, pedidosEntregues: 6, status: 'disponivel' as const },
+  { id: 'd2', nome: 'Carlos Silva', telefone: '(11) 98888-2222', taxaPorEntrega: 10.00, totalGanhos: 120.00, pedidosEntregues: 12, status: 'em_entrega' as const },
+];
+
+export const INITIAL_COUPONS = [
+  { id: 'c1', codigo: 'BEMVINDO10', tipoDesconto: 'porcentagem' as const, valor: 10, ativo: true, minimoCompra: 50 },
+  { id: 'c2', codigo: 'FRETEGRATIS', tipoDesconto: 'frete_gratis' as const, valor: 0, ativo: true, minimoCompra: 100 },
+];
+
+export const INITIAL_LOYALTY_SETTINGS = {
+  pontosPorReal: 1,
+  valorResgatePorPonto: 0.05
+};

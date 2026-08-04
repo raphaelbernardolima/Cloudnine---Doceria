@@ -60,7 +60,7 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
           <ImageIcon className="w-3.5 h-3.5 text-[var(--color-primary)]" />
           <span>{label}</span>
         </label>
-        <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold flex items-center gap-1">
+        <span className="text-sm px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold flex items-center gap-1">
           <CheckCircle className="w-3 h-3" />
           <span>Upload Direto em Alta Definição</span>
         </span>
@@ -96,7 +96,7 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
           </label>
 
           {previewUrl && (
-            <div className="flex items-center space-x-2 text-[10px] text-[var(--color-outline)]">
+            <div className="flex items-center space-x-2 text-sm text-[var(--color-outline)]">
               <span className="truncate max-w-[180px] font-mono">{previewUrl}</span>
               <button
                 type="button"
@@ -110,14 +110,14 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
           )}
 
           {statusMessage && (
-            <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
               <CheckCircle className="w-3 h-3 shrink-0" />
               <span>{statusMessage}</span>
             </p>
           )}
 
           {errorMessage && (
-            <p className="text-[10px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+            <p className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
               <AlertCircle className="w-3 h-3 shrink-0" />
               <span>{errorMessage}</span>
             </p>

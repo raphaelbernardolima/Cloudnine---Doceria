@@ -181,12 +181,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         {item.product?.nome || (item.customCake ? `Bolo ${item.customCake.tamanho}` : 'Doce Especial')}
                       </h4>
                       {item.customCake && (
-                        <p className="text-[10px] text-[var(--color-primary)] font-semibold truncate">
+                        <p className="text-sm text-[var(--color-primary)] font-semibold truncate">
                           {item.customCake.massa} • {item.customCake.recheio1}
                         </p>
                       )}
                       {item.customNote && (
-                        <p className="text-[10px] text-[var(--color-outline)] italic truncate">
+                        <p className="text-sm text-[var(--color-outline)] italic truncate">
                           Obs: {item.customNote}
                         </p>
                       )}

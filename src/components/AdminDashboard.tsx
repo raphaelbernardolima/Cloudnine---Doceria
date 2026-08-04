@@ -2,22 +2,41 @@ import React, { useState } from 'react';
 import { 
   Package, ShoppingBag, Users, FileText, Printer, Sparkles, 
   Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle, 
-  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud, LayoutDashboard, CreditCard, Settings
+  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud, LayoutDashboard, CreditCard, Settings, Calendar, Gift
 } from 'lucide-react';
-import { Product, Order, UserProfile, AuditLog } from '../types';
+import { Product, Order, UserProfile, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings } from '../types';
 import { GoogleGenAI } from '@google/genai';
 import { CloudinaryUploader } from './CloudinaryUploader';
 import { getCloudinaryConfig } from '../lib/cloudinary';
+import { AdminStaffModule } from './AdminStaffModule';
+import { AdminCalendarModule } from './AdminCalendarModule';
+import { AdminInventoryModule } from './AdminInventoryModule';
+import { AdminDeliveryModule } from './AdminDeliveryModule';
+import { AdminMarketingModule } from './AdminMarketingModule';
+import { AdminFinanceModule } from './AdminFinanceModule';
 
 interface AdminDashboardProps {
   products: Product[];
   orders: Order[];
   staff: UserProfile[];
   auditLogs: AuditLog[];
+  currentUser: UserProfile;
   onAddProduct: (product: Omit<Product, 'id'>) => void;
   onUpdateStock: (id: number | string, newStock: number) => void;
   onDeleteProduct: (id: number | string) => void;
   onUpdateOrderStatus: (orderId: number | string, newStatus: Order['status']) => void;
+  onUpdateRole: (userId: string, newRole: UserProfile['role']) => void;
+  ingredients: Ingredient[];
+  drivers: Driver[];
+  coupons: Coupon[];
+  loyaltySettings: LoyaltySettings;
+  onUpdateLoyalty: (settings: LoyaltySettings) => void;
+  onAddIngredient: (ing: Omit<Ingredient, 'id'>) => void;
+  onUpdateIngredientStock: (id: string, newStock: number) => void;
+  onDeleteIngredient: (id: string) => void;
+  onAddCoupon: (c: Omit<Coupon, 'id'>) => void;
+  onToggleCoupon: (id: string, ativo: boolean) => void;
+  onAssignDriver: (orderId: string | number, driverId: string) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -25,12 +44,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   orders,
   staff,
   auditLogs,
+  currentUser,
   onAddProduct,
   onUpdateStock,
   onDeleteProduct,
-  onUpdateOrderStatus
+  onUpdateOrderStatus,
+  onUpdateRole,
+  ingredients,
+  drivers,
+  coupons,
+  loyaltySettings,
+  onUpdateLoyalty,
+  onAddIngredient,
+  onUpdateIngredientStock,
+  onDeleteIngredient,
+  onAddCoupon,
+  onToggleCoupon,
+  onAssignDriver
 }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'products' | 'kitchen' | 'staff' | 'payments' | 'settings' | 'ai' | 'database'>('dashboard');
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+
   
   // Notification Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -122,109 +155,163 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* Top Header & Admin Tabs */}
       <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
         <div>
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--color-primary)] bg-[var(--color-primary-container)] px-2.5 py-1 rounded-md">
+          <span className="text-sm font-extrabold uppercase tracking-wider text-[var(--color-primary)] bg-[var(--color-primary-container)] px-2.5 py-1 rounded-md">
             Painel Administrativo Restrito
           </span>
           <h1 className="text-2xl font-black text-[var(--color-on-surface)] mt-1">
             Gestão Operacional Cloudnine
           </h1>
           <p className="text-xs text-[var(--color-outline)]">
-            Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.
-          </p>
+            Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.</p>
         </div>
-
-        {/* Tab Selector */}
+          {/* Tab Selector */}
         <div className="flex flex-wrap gap-1.5 bg-[var(--color-surface-container)] p-1.5 rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs font-bold">
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
-              activeTab === 'orders'
-                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-            }`}
-          >
-            <ShoppingBag className="w-4 h-4" />
-            <span>Pedidos ({orders.length})</span>
-          </button>
+          {['admin', 'ADMIN'].includes(currentUser.role) && (
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                activeTab === 'dashboard'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+              }`}
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Financeiro & Dashboard</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab('products')}
-            className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
-              activeTab === 'products'
-                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-            }`}
-          >
-            <Package className="w-4 h-4" />
-            <span>Estoque & Catálogo</span>
-          </button>
+          {['admin', 'ADMIN', 'CAIXA', 'ATENDIMENTO', 'atendente'].includes(currentUser.role) && (
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                activeTab === 'orders'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Pedidos ({orders.length})</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab('kitchen')}
-            className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
-              activeTab === 'kitchen'
-                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-            }`}
-          >
-            <Printer className="w-4 h-4" />
-            <span>Comanda Cozinha</span>
-          </button>
+          {['admin', 'ADMIN', 'COZINHA'].includes(currentUser.role) && (
+            <button
+              onClick={() => setActiveTab('calendar')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                activeTab === 'calendar'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Calendário de Encomendas</span>
+            </button>
+          )}
+          {['admin', 'ADMIN', 'COZINHA'].includes(currentUser.role) && (
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                activeTab === 'products'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+              }`}
+            >
+              <Package className="w-4 h-4" />
+              <span>Estoque & Catálogo</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab('ai')}
-            className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
-              activeTab === 'ai'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xs'
-                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Marketing IA</span>
-          </button>
+          {['admin', 'ADMIN', 'COZINHA', 'confeiteiro'].includes(currentUser.role) && (
+            <button
+              onClick={() => setActiveTab('kitchen')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                activeTab === 'kitchen'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+              }`}
+            >
+              <Printer className="w-4 h-4" />
+              <span>Comanda Cozinha</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab('database')}
-            className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
-              activeTab === 'database'
-                ? 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)] shadow-xs'
-                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-            }`}
-          >
-            <Database className="w-4 h-4" />
-            <span>Supabase RLS & Logs</span>
-          </button>
+          {['admin', 'ADMIN', 'ATENDIMENTO'].includes(currentUser.role) && (
+            <button
+              onClick={() => setActiveTab('delivery')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                activeTab === 'delivery'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+              }`}
+            >
+              <Truck className="w-4 h-4" />
+              <span>Despacho & Logística</span>
+            </button>
+          )}
+          {['admin', 'ADMIN'].includes(currentUser.role) && (
+            <button
+              onClick={() => setActiveTab('marketing')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                activeTab === 'marketing'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+              }`}
+            >
+              <Gift className="w-4 h-4" />
+              <span>Marketing & Fidelidade</span>
+            </button>
+          )}
+          {['admin', 'ADMIN'].includes(currentUser.role) && (
+            <>
+              <button
+                onClick={() => setActiveTab('staff')}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'staff'
+                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Equipe & Permissões</span>
+       </button>
+
+              <button
+                onClick={() => setActiveTab('ai')}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'ai'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xs'
+                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Marketing IA</span>
+       </button>
+
+              <button
+                onClick={() => setActiveTab('database')}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'database'
+                    ? 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)] shadow-xs'
+                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+                }`}
+              >
+                <Database className="w-4 h-4" />
+                <span>Supabase RLS & Logs</span>
+       </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Top Metrics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-1">
-          <span className="text-[10px] uppercase font-bold text-[var(--color-outline)] block">Faturamento Total</span>
-          <span className="text-xl font-black text-emerald-600">R$ {totalRevenue.toFixed(2).replace('.', ',')}</span>
-          <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
-            <ArrowUpRight className="w-3 h-3" /> +18.4% este mês
-          </span>
-        </div>
+      {/* DASHBOARD & FINANCE */}
+      {activeTab === 'dashboard' && (
+        <AdminFinanceModule orders={orders} products={products} />
+      )}
 
-        <div className="p-4 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-1">
-          <span className="text-[10px] uppercase font-bold text-[var(--color-outline)] block">Ticket Médio</span>
-          <span className="text-xl font-black text-[var(--color-primary)]">R$ {avgTicket.toFixed(2).replace('.', ',')}</span>
-          <span className="text-[10px] text-[var(--color-outline)] block">Base de {totalOrders} vendas</span>
-        </div>
-
-        <div className="p-4 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-1">
-          <span className="text-[10px] uppercase font-bold text-[var(--color-outline)] block">Pedidos em Aberto</span>
-          <span className="text-xl font-black text-amber-500">{pendingOrders} pedidos</span>
-          <span className="text-[10px] text-amber-600 font-semibold block">Aguardando preparo/despacho</span>
-        </div>
-
-        <div className="p-4 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-1">
-          <span className="text-[10px] uppercase font-bold text-[var(--color-outline)] block">Itens no Catálogo</span>
-          <span className="text-xl font-black text-[var(--color-on-surface)]">{products.length} itens</span>
-          <span className="text-[10px] text-emerald-600 font-semibold block">Estoque sincronizado</span>
-        </div>
-      </div>
+      {/* STAFF & PERMISSIONS (RBAC) */}
+      {activeTab === 'staff' && (
+        <AdminStaffModule staffList={staff} onUpdateRole={onUpdateRole} />
+      )}
 
       {/* TAB 1: ORDERS MANAGEMENT */}
       {activeTab === 'orders' && (
@@ -237,7 +324,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-[var(--color-outline-variant)]/30 text-[var(--color-outline)] uppercase font-bold text-[10px]">
+                  <tr className="border-b border-[var(--color-outline-variant)]/30 text-[var(--color-outline)] uppercase font-bold text-sm">
                     <th className="py-3 px-3"># Pedido</th>
                     <th className="py-3 px-3">Cliente</th>
                     <th className="py-3 px-3">Itens</th>
@@ -255,7 +342,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </td>
                       <td className="py-3 px-3">
                         <span className="font-bold block text-[var(--color-on-surface)]">{o.cliente_nome}</span>
-                        <span className="text-[10px] text-[var(--color-outline)]">{o.cliente_telefone}</span>
+                        <span className="text-sm text-[var(--color-outline)]">{o.cliente_telefone}</span>
                       </td>
                       <td className="py-3 px-3">
                         <span className="font-semibold block max-w-xs truncate">
@@ -264,7 +351,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </td>
                       <td className="py-3 px-3">
                         <span className="font-bold block text-[var(--color-on-surface)]">{o.tipo_entrega.toUpperCase()}</span>
-                        <span className="text-[10px] text-[var(--color-outline)]">{o.data_agendada} ({o.horario_agendado})</span>
+                        <span className="text-sm text-[var(--color-outline)]">{o.data_agendada} ({o.horario_agendado})</span>
                       </td>
                       <td className="py-3 px-3 font-extrabold text-[var(--color-on-surface)]">
                         R$ {o.total.toFixed(2).replace('.', ',')}
@@ -273,7 +360,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <select
                           value={o.status}
                           onChange={(e) => onUpdateOrderStatus(o.id, e.target.value as Order['status'])}
-                          className="p-1.5 rounded-xl bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/40 font-bold text-[10px] focus:outline-none"
+                          className="p-1.5 rounded-xl bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/40 font-bold text-sm focus:outline-none"
                         >
                           <option value="pendente_pix">⏳ Pendente Pix</option>
                           <option value="em_preparo">👨‍🍳 Em Preparo</option>
@@ -286,11 +373,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <td className="py-3 px-3 text-right">
                         <button
                           onClick={() => setPrintingOrder(o)}
-                          className="p-2 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] hover:bg-[var(--color-primary)] hover:text-white transition-all inline-flex items-center space-x-1 font-bold text-[10px]"
+                          className="p-2 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] hover:bg-[var(--color-primary)] hover:text-white transition-all inline-flex items-center space-x-1 font-bold text-sm"
                         >
                           <Printer className="w-3.5 h-3.5" />
                           <span>Comanda</span>
-                        </button>
+</button>
                       </td>
                     </tr>
                   ))}
@@ -301,70 +388,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       )}
 
+      {/* TAB: CALENDAR */}
+      {activeTab === 'calendar' && (
+        <AdminCalendarModule orders={orders} />
+      )}
+
       {/* TAB 2: PRODUCTS & STOCK */}
       {activeTab === 'products' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-base text-[var(--color-on-surface)]">
-              Catálogo de Produtos & Controle de Estoque
-            </h3>
-            <button
-              onClick={() => setShowAddProductModal(true)}
-              className="px-4 py-2.5 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center space-x-2 shadow-xs"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Novo Doce no Catálogo</span>
-            </button>
-          </div>
+        <AdminInventoryModule
+          products={products}
+          onAddProduct={() => setShowAddProductModal(true)}
+          onUpdateStock={onUpdateStock}
+          onDeleteProduct={onDeleteProduct}
+          ingredients={ingredients}
+          onAddIngredient={onAddIngredient}
+          onUpdateIngredientStock={onUpdateIngredientStock}
+          onDeleteIngredient={onDeleteIngredient}
+        />
+      )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {products.map((p) => (
-              <div 
-                key={p.id}
-                className="p-4 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 flex items-center justify-between gap-3 shadow-xs"
-              >
-                <img 
-                  src={p.image_url} 
-                  alt={p.nome} 
-                  className="w-16 h-16 rounded-2xl object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-xs text-[var(--color-on-surface)] truncate">{p.nome}</h4>
-                  <span className="text-[10px] text-[var(--color-primary)] font-bold block">
-                    R$ {p.preco.toFixed(2).replace('.', ',')}
-                  </span>
+      {/* TAB: DELIVERY */}
+      {activeTab === 'delivery' && (
+        <AdminDeliveryModule
+          orders={orders}
+          drivers={drivers}
+          onAssignDriver={onAssignDriver}
+          onUpdateOrderStatus={onUpdateOrderStatus}
+        />
+      )}
 
-                  {/* Stock Adjuster */}
-                  <div className="flex items-center space-x-2 mt-2">
-                    <span className="text-[10px] text-[var(--color-outline)] font-semibold">Estoque:</span>
-                    <button 
-                      onClick={() => onUpdateStock(p.id, Math.max(0, p.estoque - 1))}
-                      className="px-2 py-0.5 rounded-md bg-[var(--color-surface-container-high)] text-xs font-bold"
-                    >
-                      -
-                    </button>
-                    <span className="text-xs font-black">{p.estoque}</span>
-                    <button 
-                      onClick={() => onUpdateStock(p.id, p.estoque + 1)}
-                      className="px-2 py-0.5 rounded-md bg-[var(--color-surface-container-high)] text-xs font-bold"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onDeleteProduct(p.id)}
-                  className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors"
-                  title="Excluir produto"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* TAB: MARKETING */}
+      {activeTab === 'marketing' && (
+        <AdminMarketingModule
+          coupons={coupons}
+          loyaltySettings={loyaltySettings}
+          onUpdateLoyalty={onUpdateLoyalty}
+          onAddCoupon={onAddCoupon}
+          onToggleCoupon={onToggleCoupon}
+        />
       )}
 
       {/* TAB 3: KITCHEN THERMAL PRINTING & POS INTEGRATION */}
@@ -411,7 +472,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     }`}
                   >
                     80mm (Padrão Cozinha)
-                  </button>
+</button>
                   <button
                     type="button"
                     onClick={() => setPaperWidth('58mm')}
@@ -422,7 +483,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     }`}
                   >
                     58mm (Maquininha POS)
-                  </button>
+</button>
                 </div>
               </div>
 
@@ -439,7 +500,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     }`}
                   >
                     👨‍🍳 Via Cozinha
-                  </button>
+</button>
                   <button
                     type="button"
                     onClick={() => setReceiptType('cliente')}
@@ -450,7 +511,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     }`}
                   >
                     🛍️ Via Cliente / Balcão
-                  </button>
+</button>
                 </div>
               </div>
 
@@ -478,7 +539,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             {/* Test Printing Trigger */}
             <div className="pt-2 flex flex-wrap gap-2 items-center justify-between border-t border-[var(--color-outline-variant)]/20">
-              <p className="text-[11px] text-[var(--color-outline)] font-medium">
+              <p className="text-sm text-[var(--color-outline)] font-medium">
                 💡 As comandas são impressas em mono com suporte a caracteres acentuados, separador serrilhado e corte automático ESC/POS.
               </p>
 
@@ -505,7 +566,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <Printer className="w-3.5 h-3.5 text-[var(--color-primary)]" />
                 <span>Testar Impressão de Exemplo</span>
-              </button>
+       </button>
             </div>
           </div>
 
@@ -562,7 +623,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     >
                       <Printer className="w-3.5 h-3.5" />
                       <span>Comanda Cozinha</span>
-                    </button>
+</button>
                     <button
                       onClick={() => {
                         setReceiptType('cliente');
@@ -572,7 +633,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       <span>Via do Cliente</span>
-                    </button>
+</button>
                   </div>
                 </div>
               ))}
@@ -619,17 +680,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             {aiResponse && (
               <div className="p-5 rounded-3xl bg-purple-500/10 border border-purple-500/30 text-xs leading-relaxed space-y-2 mt-4">
-                <span className="font-bold text-purple-700 dark:text-purple-300 block uppercase tracking-wider text-[10px]">Resultado Gerado:</span>
+                <span className="font-bold text-purple-700 dark:text-purple-300 block uppercase tracking-wider text-sm">Resultado Gerado:</span>
                 <p className="whitespace-pre-line text-[var(--color-on-surface)] font-medium">{aiResponse}</p>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(aiResponse);
                     alert("Copy copiada para a área de transferência!");
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-bold text-[10px] mt-2 inline-block"
+                  className="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-bold text-sm mt-2 inline-block"
                 >
                   Copiar Texto
-                </button>
+</button>
               </div>
             )}
           </div>
@@ -666,7 +727,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <span className="font-bold block text-[var(--color-on-surface)]">Histórico de Auditoria do Sistema:</span>
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {auditLogs.map((log) => (
-                  <div key={log.id} className="p-2 rounded-xl bg-[var(--color-surface-container-lowest)] text-[10px]">
+                  <div key={log.id} className="p-2 rounded-xl bg-[var(--color-surface-container-lowest)] text-sm">
                     <span className="font-bold text-[var(--color-primary)]">{log.acao}</span>
                     <p className="text-[var(--color-on-surface)]">{log.detalhes}</p>
                     <span className="text-[var(--color-outline)] block">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
@@ -684,7 +745,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="bg-white text-black p-6 rounded-2xl max-w-sm w-full font-mono text-xs space-y-3 shadow-2xl printable-receipt">
             
             {/* Controls Bar inside preview modal (hidden when printing) */}
-            <div className="no-print p-2 rounded-xl bg-gray-100 flex items-center justify-between text-[11px] font-sans font-bold mb-2">
+            <div className="no-print p-2 rounded-xl bg-gray-100 flex items-center justify-between text-sm font-sans font-bold mb-2">
               <div className="flex gap-1">
                 <button
                   type="button"
@@ -692,14 +753,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   className={`px-2 py-1 rounded-lg ${receiptType === 'cozinha' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                 >
                   Cozinha
-                </button>
+</button>
                 <button
                   type="button"
                   onClick={() => setReceiptType('cliente')}
                   className={`px-2 py-1 rounded-lg ${receiptType === 'cliente' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                 >
                   Cliente
-                </button>
+</button>
               </div>
 
               <div className="flex gap-1">
@@ -709,29 +770,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   className={`px-2 py-1 rounded-lg ${paperWidth === '80mm' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                 >
                   80mm
-                </button>
+</button>
                 <button
                   type="button"
                   onClick={() => setPaperWidth('58mm')}
                   className={`px-2 py-1 rounded-lg ${paperWidth === '58mm' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                 >
                   58mm
-                </button>
+</button>
               </div>
             </div>
 
             {/* Ticket Thermal Receipt Layout */}
-            <div className={`mx-auto space-y-2 ${paperWidth === '58mm' ? 'max-w-[200px] text-[10px]' : 'max-w-[260px]'}`}>
+            <div className={`mx-auto space-y-2 ${paperWidth === '58mm' ? 'max-w-[200px] text-sm' : 'max-w-[260px]'}`}>
               <div className="text-center border-b border-dashed border-black pb-2 space-y-0.5">
                 <h2 className="font-black text-sm uppercase tracking-widest">CLOUD NINE DOCERIA</h2>
-                <p className="text-[9px]">Alameda Gabriel Monteiro da Silva, 450</p>
-                <p className="font-bold text-[10px]">
+                <p className="text-xs">Alameda Gabriel Monteiro da Silva, 450</p>
+                <p className="font-bold text-sm">
                   {receiptType === 'cozinha' ? '=== VIA DA COZINHA (PRODUÇÃO) ===' : '=== VIA DO CLIENTE (RECIBO) ==='}
                 </p>
                 <span className="font-black text-base block mt-1">PEDIDO #{printingOrder.id}</span>
               </div>
 
-              <div className="space-y-0.5 text-[10px]">
+              <div className="space-y-0.5 text-sm">
                 <p><strong>Cliente:</strong> {printingOrder.cliente_nome}</p>
                 <p><strong>Telefone:</strong> {printingOrder.cliente_telefone}</p>
                 <p><strong>Data/Hora:</strong> {printingOrder.data_agendada} ({printingOrder.horario_agendado})</p>
@@ -739,9 +800,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <div className="border-t border-b border-dashed border-black py-2 space-y-1">
-                <p className="font-bold uppercase text-[9px] text-center">--- ITENS DO PEDIDO ---</p>
+                <p className="font-bold uppercase text-xs text-center">--- ITENS DO PEDIDO ---</p>
                 {printingOrder.itens.map((i, idx) => (
-                  <div key={idx} className="flex justify-between font-bold text-[11px]">
+                  <div key={idx} className="flex justify-between font-bold text-sm">
                     <span>{i.quantidade}x {i.nomeProduto}</span>
                     <span>R$ {(i.preco_unitario * i.quantidade).toFixed(2)}</span>
                   </div>
@@ -754,9 +815,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <div className="pt-2 text-center border-t border-dashed border-black space-y-1">
-                <p className="text-[9px]">Obrigado por escolher a Cloudnine!</p>
+                <p className="text-xs">Obrigado por escolher a Cloudnine!</p>
                 <p className="text-[8px] opacity-75">Confeitaria Artesanal & Bolos de Luxo</p>
-                <div className="mt-1 text-center text-[9px] tracking-widest font-mono">||||||| |||| |||||||||||||||</div>
+                <div className="mt-1 text-center text-xs tracking-widest font-mono">||||||| |||| |||||||||||||||</div>
               </div>
             </div>
 
@@ -768,7 +829,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 className="w-1/2 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 text-black font-bold font-sans transition-colors min-h-[42px]"
               >
                 Fechar
-              </button>
+       </button>
               <button
                 type="button"
                 onClick={() => {
@@ -779,7 +840,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <Printer className="w-4 h-4" />
                 <span>Imprimir Agora</span>
-              </button>
+       </button>
             </div>
 
           </div>
@@ -874,13 +935,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 className="w-1/2 py-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] font-bold"
               >
                 Cancelar
-              </button>
+       </button>
               <button
                 type="submit"
                 className="w-1/2 py-2.5 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold"
               >
                 Salvar Produto
-              </button>
+       </button>
             </div>
           </form>
         </div>
@@ -898,7 +959,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
           <button onClick={() => setToastMessage(null)} className="ml-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
             X
-          </button>
+</button>
         </div>
       )}
     </div>

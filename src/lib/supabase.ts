@@ -60,7 +60,8 @@ export async function signInWithSupabase(email: string, password: string): Promi
       telefone: profile?.telefone || data.user.user_metadata?.telefone || '(11) 99999-0000',
       role: role as UserProfile['role'],
       Status: 'ativo',
-      pontosFidelidade: profile?.pontosFidelidade || 100
+      pontosFidelidade: profile?.pontosFidelidade || 100,
+      avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url || ''
     };
 
     return { user: userProfile, error: null };
@@ -173,7 +174,8 @@ export async function getCurrentSupabaseUser(): Promise<UserProfile | null> {
       telefone: profile?.telefone || '(11) 99999-0000',
       role: userRole,
       Status: 'ativo',
-      pontosFidelidade: profile?.pontosFidelidade || 100
+      pontosFidelidade: profile?.pontosFidelidade || 100,
+      avatar_url: profile?.avatar_url || user.user_metadata?.avatar_url || ''
     };
   } catch {
     return null;
@@ -189,7 +191,16 @@ export async function updateUserProfileInDB(userId: string, updates: Partial<Use
 
   try {
     // Apenas atualizar os campos permitidos
-    const updateData = {
+    const updateDataAuth: any = {
+      nome: updates.nome,
+      sobrenome: updates.sobrenome,
+      telefone: updates.telefone,
+    };
+    if (updates.avatar_url !== undefined) {
+      updateDataAuth.avatar_url = updates.avatar_url;
+    }
+
+    const updateDataPerfis = {
       nome: updates.nome,
       sobrenome: updates.sobrenome,
       telefone: updates.telefone,
@@ -197,17 +208,16 @@ export async function updateUserProfileInDB(userId: string, updates: Partial<Use
 
     const { error } = await client
       .from('Perfis')
-      .update(updateData)
+      .update(updateDataPerfis)
       .eq('id', userId);
 
     if (error) {
-      console.error('Erro ao atualizar perfil no Supabase:', error);
-      return { error: error.message };
+      console.warn('Erro ao atualizar perfil na tabela Perfis no Supabase:', error);
     }
 
-    // Opcional: Atualizar os metadados do auth (se a role ou nome mudar)
+    // Atualizar os metadados do auth (onde a avatar_url vai ficar salva com segurança)
     await client.auth.updateUser({
-      data: updateData
+      data: updateDataAuth
     });
 
     return { error: null };

@@ -108,7 +108,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                   }`}
                 >
                   <span className="block">{t}</span>
-                  <span className="text-[10px] opacity-80 block font-normal mt-0.5">A partir de R$ {basePrices[t].toFixed(2).replace('.', ',')}</span>
+                  <span className="text-sm opacity-80 block font-normal mt-0.5">A partir de R$ {basePrices[t].toFixed(2).replace('.', ',')}</span>
                 </button>
               ))}
             </div>
@@ -133,7 +133,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                 >
                   <span>{m}</span>
                   {(m === 'Nozes com Especiarias' || m === 'Red Velvet') && (
-                    <span className="text-[9px] block text-amber-500 font-normal">+R$ 15,00</span>
+                    <span className="text-xs block text-amber-500 font-normal">+R$ 15,00</span>
                   )}
                 </button>
               ))}
@@ -242,7 +242,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
         {/* Footer calculated total */}
         <div className="p-5 bg-[var(--color-surface-container-low)] border-t border-[var(--color-outline-variant)]/30 flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-[var(--color-outline)] font-bold uppercase block">Valor Total do Bolo Personalizado</span>
+            <span className="text-sm text-[var(--color-outline)] font-bold uppercase block">Valor Total do Bolo Personalizado</span>
             <span className="text-xl font-black text-[var(--color-primary)]">
               R$ {calculateTotalPrice().toFixed(2).replace('.', ',')}
             </span>
