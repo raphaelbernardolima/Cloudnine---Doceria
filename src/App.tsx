@@ -165,7 +165,7 @@ export function App() {
   const handleTabChange = (tab: 'shop' | 'custom-cake' | 'loyalty' | 'admin') => {
     if (tab === 'admin') {
       if (!currentUser) {
-        handleOpenAuthModal('Para acessar a Área de Gestão, faça login com sua conta autorizada.');
+        handleOpenAuthModal('Acesso Administrativo: Por favor, entre com sua conta de colaborador para acessar o painel de gestão.');
         return;
       }
       if (!STAFF_ROLES.includes(currentUser.role)) {
@@ -579,7 +579,7 @@ const handleAddProduct = async (newProd: Omit<Product, 'id'>) => {
                 Você precisa estar autenticado com uma conta de Administrador ou Equipe para acessar esta página.
               </p>
               <button
-                onClick={() => handleOpenAuthModal('Faça login com sua conta autorizada para acessar a Área de Gestão.')}
+                onClick={() => handleOpenAuthModal('Acesso Administrativo: Por favor, entre com sua conta de colaborador para acessar o painel de gestão.')}
                 className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
               >
                 <LogIn className="w-4 h-4" />

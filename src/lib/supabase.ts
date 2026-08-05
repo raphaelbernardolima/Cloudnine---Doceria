@@ -60,7 +60,7 @@ export async function signInWithSupabase(email: string, password: string): Promi
       telefone: profile?.telefone || data.user.user_metadata?.telefone || '(11) 99999-0000',
       role: role as UserProfile['role'],
       Status: 'ativo',
-      pontosFidelidade: profile?.pontosFidelidade || 100,
+      pontosFidelidade: profile?.pontos_fidelidade || 100,
       avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url || ''
     };
 
@@ -108,7 +108,7 @@ export async function signUpWithSupabase(
         sobrenome,
         role,
         Status: 'ativo',
-        pontosFidelidade: 100
+        pontos_fidelidade: 100
       });
     } catch (e) {
       console.warn('Tabela Perfis pode não existir ainda no Supabase:', e);
@@ -174,7 +174,7 @@ export async function getCurrentSupabaseUser(): Promise<UserProfile | null> {
       telefone: profile?.telefone || '(11) 99999-0000',
       role: userRole,
       Status: 'ativo',
-      pontosFidelidade: profile?.pontosFidelidade || 100,
+      pontosFidelidade: profile?.pontos_fidelidade || 100,
       avatar_url: profile?.avatar_url || user.user_metadata?.avatar_url || ''
     };
   } catch {
@@ -200,11 +200,14 @@ export async function updateUserProfileInDB(userId: string, updates: Partial<Use
       updateDataAuth.avatar_url = updates.avatar_url;
     }
 
-    const updateDataPerfis = {
+    const updateDataPerfis: any = {
       nome: updates.nome,
       sobrenome: updates.sobrenome,
       telefone: updates.telefone,
     };
+    if (updates.avatar_url !== undefined) {
+      updateDataPerfis.avatar_url = updates.avatar_url;
+    }
 
     const { error } = await client
       .from('Perfis')

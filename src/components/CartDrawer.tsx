@@ -139,7 +139,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         {/* Header */}
         <div className="p-5 bg-[var(--color-surface-container-low)] border-b border-[var(--color-outline-variant)]/30 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <ShoppingBag className="w-5 h-5 text-[var(--color-primary)]" />
+            <ShoppingBag className="w-6 h-6 text-[var(--color-primary)]" />
             <h2 className="font-extrabold text-base text-[var(--color-on-surface)]">
               {step === 'cart' && 'Sua Sacola Cloudnine'}
               {step === 'checkout' && 'Finalizar Pedido'}
@@ -150,18 +150,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             onClick={onClose}
             className="p-2 rounded-full hover:bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* STEP 1: CART ITEMS */}
         {step === 'cart' && (
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm">
             {items.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-3 my-12 text-[var(--color-outline)]">
                 <ShoppingBag className="w-12 h-12 stroke-1" />
                 <p className="font-bold text-sm text-[var(--color-on-surface)]">Sua sacola está vazia</p>
-                <p className="text-xs max-w-xs">Escolha alguns dos nossos deliciosos brigadeiros, macarons e bolos no cardápio!</p>
+                <p className="text-sm max-w-xs">Escolha alguns dos nossos deliciosos brigadeiros, macarons e bolos no cardápio!</p>
               </div>
             ) : (
               items.map((item) => (
@@ -177,7 +177,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       referrerPolicy="no-referrer"
                     />
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-xs text-[var(--color-on-surface)] truncate">
+                      <h4 className="font-bold text-sm text-[var(--color-on-surface)] truncate">
                         {item.product?.nome || (item.customCake ? `Bolo ${item.customCake.tamanho}` : 'Doce Especial')}
                       </h4>
                       {item.customCake && (
@@ -190,7 +190,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           Obs: {item.customNote}
                         </p>
                       )}
-                      <span className="font-extrabold text-xs text-[var(--color-primary)] block mt-0.5">
+                      <span className="font-extrabold text-sm text-[var(--color-primary)] block mt-0.5">
                         R$ {(item.unitPrice * item.quantity).toFixed(2).replace('.', ',')}
                       </span>
                     </div>
@@ -198,17 +198,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                   {/* Quantity & Delete */}
                   <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-1 bg-[var(--color-surface-container-high)] px-2 py-1 rounded-xl">
+                    <div className="flex items-center space-x-1 bg-[var(--color-surface-container-high)] px-3 py-2 rounded-xl">
                       <button 
                         onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                        className="text-xs font-bold px-1"
+                        className="text-sm font-bold px-1"
                       >
                         -
                       </button>
-                      <span className="text-xs font-bold px-1">{item.quantity}</span>
+                      <span className="text-sm font-bold px-1">{item.quantity}</span>
                       <button 
                         onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                        className="text-xs font-bold px-1"
+                        className="text-sm font-bold px-1"
                       >
                         +
                       </button>
@@ -218,7 +218,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       onClick={() => onRemoveItem(item.id)}
                       className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
@@ -233,11 +233,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
                   placeholder="Cupom de Desconto (ex: CLOUDNINE10)"
-                  className="flex-1 p-2.5 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 text-xs focus:outline-none"
+                  className="flex-1 p-2.5 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 text-sm focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2.5 rounded-xl bg-[var(--color-secondary)] text-[var(--color-on-secondary)] font-bold text-xs"
+                  className="px-4 py-2.5 rounded-xl bg-[var(--color-secondary)] text-[var(--color-on-secondary)] font-bold text-sm"
                 >
                   Aplicar
                 </button>
@@ -248,7 +248,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
         {/* STEP 2: CHECKOUT FORM */}
         {step === 'checkout' && (
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm">
             {/* Customer info */}
             <div className="space-y-2">
               <label className="font-bold text-[var(--color-on-surface)] block">Seus Dados de Contato</label>
@@ -281,7 +281,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       : 'bg-[var(--color-surface-container-lowest)] border-[var(--color-outline-variant)]/40'
                   }`}
                 >
-                  <Truck className="w-4 h-4" />
+                  <Truck className="w-5 h-5" />
                   <span>Entrega (R$ 12,00)</span>
                 </button>
                 <button
@@ -293,7 +293,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       : 'bg-[var(--color-surface-container-lowest)] border-[var(--color-outline-variant)]/40'
                   }`}
                 >
-                  <Store className="w-4 h-4" />
+                  <Store className="w-5 h-5" />
                   <span>Retirada Grátis</span>
                 </button>
               </div>
@@ -301,7 +301,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
             {tipoEntrega === 'entrega' && (
               <div className="space-y-2 pt-1">
-                <label className="font-extrabold text-[var(--color-on-surface)] block text-xs">Endereço de Entrega (Busca por CEP & GPS)</label>
+                <label className="font-extrabold text-[var(--color-on-surface)] block text-sm">Endereço de Entrega (Busca por CEP & GPS)</label>
                 <AddressLookupForm
                   initialCep="01500-000"
                   initialLogradouro="Av. Paulista"
@@ -358,7 +358,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       : 'bg-[var(--color-surface-container-lowest)] border-[var(--color-outline-variant)]/40'
                   }`}
                 >
-                  <QrCode className="w-4 h-4" />
+                  <QrCode className="w-5 h-5" />
                   <span>Pix (Instantâneo)</span>
                 </button>
                 <button
@@ -370,7 +370,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       : 'bg-[var(--color-surface-container-lowest)] border-[var(--color-outline-variant)]/40'
                   }`}
                 >
-                  <CreditCard className="w-4 h-4" />
+                  <CreditCard className="w-5 h-5" />
                   <span>Cartão no Balcão</span>
                 </button>
               </div>
@@ -378,7 +378,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
             {metodoPagamento === 'pix' && (
               <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-3 text-center">
-                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 block">
+                <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300 block">
                   Chave Pix E-mail da Confeitaria
                 </span>
                 <div className="p-2 bg-white rounded-xl inline-block shadow-xs">
@@ -391,9 +391,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <button
                   type="button"
                   onClick={handleCopyPix}
-                  className="w-full py-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center space-x-2"
+                  className="w-full py-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-sm flex items-center justify-center space-x-2"
                 >
-                  {copiedPix ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copiedPix ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
                   <span>{copiedPix ? 'Copia e Cola Copiado!' : 'Copiar Chave Pix'}</span>
                 </button>
               </div>
@@ -409,12 +409,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </div>
             <div className="space-y-1">
               <h3 className="text-xl font-black text-[var(--color-on-surface)]">Pedido Recebido com Sucesso!</h3>
-              <p className="text-xs text-[var(--color-on-surface-variant)] max-w-xs">
+              <p className="text-sm text-[var(--color-on-surface-variant)] max-w-xs">
                 Nossos confeiteiros já receberam sua solicitação no painel da cozinha.
               </p>
             </div>
 
-            <div className="w-full p-4 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 text-left text-xs space-y-1.5">
+            <div className="w-full p-4 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 text-left text-sm space-y-1.5">
               <p><strong>Cliente:</strong> {nomeCliente}</p>
               <p><strong>Total:</strong> R$ {totalFinal.toFixed(2).replace('.', ',')}</p>
               <p><strong>Agendado para:</strong> {dataAgendada} ({horarioAgendado})</p>
@@ -425,9 +425,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               href={`https://wa.me/5511999990000?text=${encodeURIComponent(`Olá Cloudnine! Fiz o pedido no site com o valor de R$ ${totalFinal.toFixed(2)}`)}`}
               target="_blank"
               rel="noreferrer"
-              className="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md hover:bg-emerald-700 transition-colors"
+              className="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold text-sm flex items-center justify-center space-x-2 shadow-md hover:bg-emerald-700 transition-colors"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
               <span>Enviar Comprovante via WhatsApp</span>
             </a>
           </div>
@@ -436,7 +436,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         {/* Footer Summary & Action Button */}
         {step !== 'confirmation' && (
           <div className="p-5 bg-[var(--color-surface-container-low)] border-t border-[var(--color-outline-variant)]/30 space-y-3">
-            <div className="space-y-1 text-xs">
+            <div className="space-y-1 text-sm">
               <div className="flex justify-between text-[var(--color-on-surface-variant)]">
                 <span>Subtotal</span>
                 <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
@@ -463,37 +463,37 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <button
                 disabled={items.length === 0}
                 onClick={() => setStep('checkout')}
-                className={`w-full py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition-all ${
+                className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2 shadow-md transition-all ${
                   items.length > 0
                     ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:opacity-95'
                     : 'bg-[var(--color-surface-container-high)] text-[var(--color-outline)] cursor-not-allowed'
                 }`}
               >
                 <span>Avançar para Identificação</span>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             ) : (
               <div className="flex gap-2">
                 <button
                   onClick={() => setStep('cart')}
-                  className="px-4 py-3 rounded-2xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] font-bold text-xs"
+                  className="px-4 py-3 rounded-2xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] font-bold text-sm"
                 >
                   Voltar
                 </button>
                 <button
                   onClick={handleFinishCheckout}
                   disabled={isProcessingPayment}
-                  className="flex-1 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-sm flex items-center justify-center space-x-2 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isProcessingPayment ? (
                     <>
                       <span>Processando Pagamento...</span>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     </>
                   ) : (
                     <>
                       <span>Confirmar e Finalizar Pedido</span>
-                      <CheckCircle className="w-4 h-4" />
+                      <CheckCircle className="w-5 h-5" />
                     </>
                   )}
                 </button>

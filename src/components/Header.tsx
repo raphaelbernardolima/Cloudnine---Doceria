@@ -65,18 +65,8 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center space-x-2.5 cursor-pointer group shrink-0"
           onClick={() => handleNavClick(() => setActiveTab('shop'))}
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--color-primary-container)] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0 overflow-hidden border-2 border-[var(--color-primary)]/20">
-            <img 
-              src="/logo.png" 
-              alt="Cloudnine Logo" 
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback to the Cake icon if logo.png is not found
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.parentElement?.classList.add('fallback-icon-active');
-              }}
-            />
-            <style>{`.fallback-icon-active::after { content: '🎂'; font-size: 1.25rem; }`}</style>
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-tertiary)] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
+            <Cake className="w-5 h-5 text-[var(--color-on-primary)]" />
           </div>
           <div>
             <span className="text-base sm:text-lg lg:text-xl font-extrabold tracking-tight text-[var(--color-on-surface)] flex items-center gap-1">
