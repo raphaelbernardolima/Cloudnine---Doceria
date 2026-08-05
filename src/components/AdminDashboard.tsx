@@ -305,7 +305,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* DASHBOARD & FINANCE */}
       {activeTab === 'dashboard' && (
-        <AdminFinanceModule orders={orders} products={products} />
+        <AdminFinanceModule orders={orders} products={products} ingredients={ingredients} />
       )}
 
       {/* STAFF & PERMISSIONS (RBAC) */}

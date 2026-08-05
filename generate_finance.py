@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import re
+
+content = """import React, { useState, useMemo } from 'react';
 import { 
   TrendingUp, TrendingDown, DollarSign, Download, PieChart, Activity, AlertCircle, Package, ArrowUpRight, BarChart3, Calculator, Calendar
 } from 'lucide-react';
@@ -132,7 +134,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
     }).filter(p => p.quantity > 0);
 
     // Calculate Break Even percentage (max 100%)
-    const breakEvenProgress = Math.min(Math.max((grossMargin / FIXED_COSTS) * 100, 0), 100);
+    const breakEvenProgress = Math.min((grossMargin / FIXED_COSTS) * 100, 100);
 
     return {
       rawRevenue, netRevenue, totalCMV, grossMargin, grossMarginPercent, ebitda,
@@ -191,7 +193,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value as any)}
-            className="px-4 py-2 bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/30 rounded-xl font-bold text-sm focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="px-4 py-2 bg-[var(--color-surface-container-high)] border-none rounded-xl font-bold text-sm focus:ring-2 focus:ring-[var(--color-primary)]"
           >
             <option value="today">Hoje</option>
             <option value="7days">Últimos 7 dias</option>
@@ -267,7 +269,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
             <Activity className="w-5 h-5 text-purple-500" />
             Matriz BCG (Volume vs Margem)
           </h3>
-          <div className="flex-1 min-h-[250px]">
+          <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -304,7 +306,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
             <TrendingUp className="w-5 h-5 text-emerald-500" />
             Fluxo de Receita Diário
           </h3>
-          <div className="flex-1 min-h-[250px]">
+          <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={financeData.chartDataFlow} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
@@ -374,3 +376,6 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
     </div>
   );
 };
+"""
+with open('generate_finance.py_tmp', 'w') as f:
+    f.write(content)
