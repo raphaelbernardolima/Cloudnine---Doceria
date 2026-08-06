@@ -226,36 +226,40 @@ export const Header: React.FC<HeaderProps> = ({
             
             {/* User Account / Auth Bar */}
             {currentUser ? (
-              <div className="p-3.5 rounded-2xl bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/30 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => handleNavClick(() => setActiveTab('profile'))}
-                  className="flex items-center space-x-3 text-left hover:opacity-80 transition-opacity"
-                >
-                  <div className="w-9 h-9 rounded-full bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] flex items-center justify-center font-extrabold text-sm shadow-xs overflow-hidden shrink-0">
+              <div className="flex flex-col gap-2">
+                <div className="p-3.5 rounded-2xl bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/30 flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] flex items-center justify-center font-extrabold text-sm shadow-xs overflow-hidden shrink-0">
                     {currentUser.avatar_url ? (
                       <img src={currentUser.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       currentUser.nome.charAt(0).toUpperCase()
                     )}
                   </div>
-                  <div>
-                    <p className="font-extrabold text-xs text-[var(--color-on-surface)] flex items-center gap-1">
-                      <span>{(currentUser.nome?.replace(/["']/g, '') || 'Usuário')} {(currentUser.sobrenome?.replace(/["']/g, '') || '')}</span>
-                      <span className="text-xs text-[var(--color-primary)] font-bold">(Ver Perfil)</span>
+                  <div className="overflow-hidden">
+                    <p className="font-extrabold text-sm text-[var(--color-on-surface)] truncate">
+                      {(currentUser.nome?.replace(/["']/g, '') || 'Usuário')} {(currentUser.sobrenome?.replace(/["']/g, '') || '')}
                     </p>
-                    <p className="text-sm text-[var(--color-outline)] font-semibold uppercase">
+                    <p className="text-xs text-[var(--color-outline)] font-semibold uppercase truncate">
                       {currentUser.role !== 'cliente' && currentUser.role !== 'USUARIO_PADRAO' ? `${currentUser.role} • ` : ''}{currentUser.email}
                     </p>
                   </div>
-                </button>
-                <button
-                  onClick={() => handleNavClick(onLogout)}
-                  className="px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-300 font-bold text-xs flex items-center space-x-1 hover:bg-rose-500/20 transition-colors shrink-0"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Sair</span>
-                </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleNavClick(() => setActiveTab('profile'))}
+                    className="p-2.5 rounded-xl bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/30 text-[var(--color-primary)] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[var(--color-surface-container-highest)] transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Ver Perfil</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavClick(onLogout)}
+                    className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-300 font-bold text-xs flex items-center justify-center gap-2 hover:bg-rose-500/20 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sair da Conta</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <button
