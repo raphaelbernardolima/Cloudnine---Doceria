@@ -43,11 +43,17 @@ export const Header: React.FC<HeaderProps> = ({
       setActiveTab('shop');
       return;
     }
+    
+    if (!currentUser) {
+      onOpenAuthModal();
+      return;
+    }
+
     const staffRoles = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'];
-    if (currentUser && staffRoles.includes(currentUser.role)) {
+    if (staffRoles.includes(currentUser.role)) {
       setActiveTab('admin');
     } else {
-      onOpenAuthModal();
+      alert("Acesso Negado: Apenas membros da equipe podem acessar o Painel de Gestão. Se você acabou de alterar seu cargo para 'admin' no Supabase, atualize a página (F5) ou faça logout e login novamente para que o app reconheça sua nova permissão.");
     }
   };
 
@@ -335,20 +341,22 @@ export const Header: React.FC<HeaderProps> = ({
                 <ChevronRight className="w-4 h-4 opacity-70" />
               </button>
 
-              <button
-                onClick={handleAdminClick}
-                className={`w-full px-4 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-between transition-all min-h-[48px] ${
-                  activeTab === 'admin'
-                    ? 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)] shadow-xs'
-                    : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <Settings2 className="w-4 h-4" />
-                  <span>Painel de Gestão (Admin / Equipe)</span>
-                </div>
-                <ChevronRight className="w-4 h-4 opacity-70" />
-              </button>
+              {currentUser && ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'].includes(currentUser.role) && (
+                <button
+                  onClick={handleAdminClick}
+                  className={`w-full px-4 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-between transition-all min-h-[48px] ${
+                    activeTab === 'admin'
+                      ? 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)] shadow-xs'
+                      : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Settings2 className="w-4 h-4" />
+                    <span>Painel de Gestão (Admin / Equipe)</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 opacity-70" />
+                </button>
+              )}
             </div>
 
             {/* Quick Actions Footer inside Drawer */}

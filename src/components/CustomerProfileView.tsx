@@ -41,12 +41,12 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
   const [avatarUrl, setAvatarUrl] = useState(currentUser.avatar_url || '');
 
   // Address
-  const [rua, setRua] = useState('Alameda Gabriel Monteiro da Silva, 450');
-  const [bairro, setBairro] = useState('Jardins');
-  const [cidade, setCidade] = useState('São Paulo');
-  const [cep, setCep] = useState('01442-000');
-  const [complemento, setComplemento] = useState('Apto 42');
-  const [pontoReferencia, setPontoReferencia] = useState('Próximo à Alameda Santos');
+  const [rua, setRua] = useState('');
+  const [bairro, setBairro] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [cep, setCep] = useState('');
+  const [complemento, setComplemento] = useState('');
+  const [pontoReferencia, setPontoReferencia] = useState('');
 
   // Dietary Preferences
   const [zeroLactose, setZeroLactose] = useState(false);
@@ -111,17 +111,21 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 </span>
               </div>
               
-              <p className="text-xs sm:text-sm text-white/90 font-medium flex items-center justify-center sm:justify-start gap-1.5">
-                <Mail className="w-3.5 h-3.5" />
-                <span>{currentUser.email}</span>
+              <div className="text-xs sm:text-sm text-white/90 font-medium flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 sm:gap-1.5">
+                <div className="flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>{currentUser.email}</span>
+                </div>
                 {telefone && (
                   <>
-                    <span className="opacity-50">•</span>
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>{telefone}</span>
+                    <span className="hidden sm:inline opacity-50">•</span>
+                    <div className="flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>{telefone}</span>
+                    </div>
                   </>
                 )}
-              </p>
+              </div>
 
               <div className="pt-1 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs font-bold">
                 <span className="flex items-center gap-1 bg-amber-400/20 px-3 py-1 rounded-xl text-amber-200 border border-amber-300/30">
@@ -474,15 +478,21 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
               </div>
 
               <div className="space-y-4 text-xs">
-                <div className="p-5 rounded-3xl bg-[var(--color-surface-container-low)] border-2 border-[var(--color-primary)]/40 space-y-3 relative">
+                <div className="p-5 rounded-3xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 hover:border-[var(--color-primary)]/40 space-y-3 relative transition-all">
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-xs px-2.5 py-1 rounded-lg bg-[var(--color-primary)] text-[var(--color-on-primary)]">
-                      Endereço Principal (Casa)
+                    <span className="font-black text-xs px-2.5 py-1 rounded-lg bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] border border-[var(--color-outline-variant)]/30">
+                      Endereço Principal
                     </span>
-                    <span className="text-sm font-bold text-emerald-600 flex items-center gap-1">
-                      <CheckCircle className="w-3.5 h-3.5" />
-                      Ativo para Entregas
-                    </span>
+                    {cep ? (
+                      <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        Ativo para Entregas
+                      </span>
+                    ) : (
+                      <span className="text-xs font-bold text-[var(--color-outline)] flex items-center gap-1">
+                        Pendente
+                      </span>
+                    )}
                   </div>
 
                   <div className="pt-2">

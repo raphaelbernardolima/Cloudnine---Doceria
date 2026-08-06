@@ -124,8 +124,8 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
           if (result.cep) setCep(result.cep);
           if (result.numero) setNumero(result.numero);
 
-          setSuccessMessage('🎯 Endereço capturado via GPS com alta precisão!');
-          setTimeout(() => setSuccessMessage(null), 4000);
+          setSuccessMessage('Localização encontrada! Confira se os dados estão corretos abaixo.');
+          setTimeout(() => setSuccessMessage(null), 5000);
         } catch (err: any) {
           setErrorMessage(err.message || 'Não foi possível converter o GPS em endereço.');
         } finally {
@@ -178,14 +178,14 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
             type="button"
             onClick={handleUseCurrentLocation}
             disabled={loadingGeo}
-            className="flex-1 px-4 py-3 rounded-2xl bg-gradient-to-r from-rose-500 via-amber-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-xs flex items-center justify-center space-x-2.5 transition-all min-h-[48px] disabled:opacity-60 cursor-pointer"
+            className="flex-1 px-4 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-black text-xs sm:text-sm shadow-xs flex items-center justify-center space-x-2.5 transition-all hover:opacity-90 min-h-[48px] disabled:opacity-60 cursor-pointer"
           >
             {loadingGeo ? (
               <Loader2 className="w-5 h-5 animate-spin shrink-0" />
             ) : (
-              <Navigation className="w-5 h-5 fill-white shrink-0" />
+              <Navigation className="w-5 h-5 shrink-0" />
             )}
-            <span>{loadingGeo ? 'Obtendo GPS...' : '📍 Usar minha localização atual (GPS)'}</span>
+            <span>{loadingGeo ? 'Buscando...' : 'Usar minha localização atual'}</span>
           </button>
 
           {/* Config Google Maps API Button */}
@@ -200,33 +200,6 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
           </button>
         </div>
 
-        {/* Quick Test Location Chips */}
-        <div className="pt-1 flex items-center gap-2 text-xs flex-wrap">
-          <span className="font-extrabold text-[var(--color-outline)] flex items-center gap-1.5 shrink-0">
-            <Compass className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Locais de teste:
-          </span>
-          <button
-            type="button"
-            onClick={() => handleQuickPresetLocation('Av. Paulista, SP', -23.561684, -46.655981)}
-            className="px-3 py-1.5 rounded-xl bg-[var(--color-surface-container-high)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] font-bold text-xs transition-all border border-[var(--color-outline-variant)]/20"
-          >
-            Av. Paulista (SP)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickPresetLocation('Jardins, SP', -23.568285, -46.666992)}
-            className="px-3 py-1.5 rounded-xl bg-[var(--color-surface-container-high)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] font-bold text-xs transition-all border border-[var(--color-outline-variant)]/20"
-          >
-            Jardins (SP)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickPresetLocation('Copacabana, RJ', -22.969188, -43.180468)}
-            className="px-3 py-1.5 rounded-xl bg-[var(--color-surface-container-high)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] font-bold text-xs transition-all border border-[var(--color-outline-variant)]/20"
-          >
-            Copacabana (RJ)
-          </button>
-        </div>
       </div>
 
       {/* Google Maps Config Accordion */}
@@ -341,11 +314,11 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
           </div>
         </div>
 
-        {/* Row 2: Número, Bairro, Cidade, UF */}
-        <div className="grid grid-cols-2 sm:grid-cols-12 gap-4">
+        {/* Row 2: Número, Bairro, Cidade */}
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
           
           {/* Número */}
-          <div className="col-span-1 sm:col-span-3 space-y-1.5">
+          <div className="sm:col-span-3 space-y-1.5">
             <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
               Número <span className="text-rose-500">*</span>
             </label>
@@ -359,7 +332,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
           </div>
 
           {/* Bairro */}
-          <div className="col-span-1 sm:col-span-4 space-y-1.5">
+          <div className="sm:col-span-5 space-y-1.5">
             <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
               Bairro <span className="text-rose-500">*</span>
             </label>
@@ -367,13 +340,13 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
               type="text"
               value={bairro}
               onChange={(e) => setBairro(e.target.value)}
-              placeholder="Ex: Jardins, Bela Vista"
+              placeholder="Ex: Gonzaga, Boqueirão"
               className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-extrabold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
             />
           </div>
 
           {/* Cidade */}
-          <div className="col-span-1 sm:col-span-3 space-y-1.5">
+          <div className="sm:col-span-4 space-y-1.5">
             <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
               Cidade
             </label>
@@ -381,23 +354,8 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
               type="text"
               value={cidade}
               onChange={(e) => setCidade(e.target.value)}
-              placeholder="São Paulo"
+              placeholder="Ex: Santos"
               className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-extrabold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
-            />
-          </div>
-
-          {/* UF */}
-          <div className="col-span-1 sm:col-span-2 space-y-1.5">
-            <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
-              UF
-            </label>
-            <input
-              type="text"
-              value={uf}
-              onChange={(e) => setUf(e.target.value.toUpperCase())}
-              maxLength={2}
-              placeholder="SP"
-              className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-black text-xs sm:text-sm uppercase text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
             />
           </div>
         </div>
