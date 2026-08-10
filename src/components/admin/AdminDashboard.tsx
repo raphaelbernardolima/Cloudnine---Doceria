@@ -4,10 +4,11 @@ import {
   Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle, 
   Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud, LayoutDashboard, CreditCard, Settings, Calendar, Gift
 } from 'lucide-react';
-import { Product, Order, UserProfile, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings } from '../types';
+import { Product, Order, UserProfile, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '../../types/index';
+import { AdminCustomCakeModule } from './AdminCustomCakeModule';
 import { GoogleGenAI } from '@google/genai';
-import { CloudinaryUploader } from './CloudinaryUploader';
-import { getCloudinaryConfig } from '../lib/cloudinary';
+import { CloudinaryUploader } from '../shared/CloudinaryUploader';
+import { getCloudinaryConfig } from '../../services/cloudinary';
 import { AdminStaffModule } from './AdminStaffModule';
 import { AdminCalendarModule } from './AdminCalendarModule';
 import { AdminInventoryModule } from './AdminInventoryModule';
@@ -31,6 +32,8 @@ interface AdminDashboardProps {
   coupons: Coupon[];
   loyaltySettings: LoyaltySettings;
   onUpdateLoyalty: (settings: LoyaltySettings) => void;
+  customCakeConfig: CustomCakeConfig;
+  onUpdateCustomCakeConfig: (config: CustomCakeConfig) => void;
   onAddIngredient: (ing: Omit<Ingredient, 'id'>) => void;
   onUpdateIngredientStock: (id: string, newStock: number) => void;
   onDeleteIngredient: (id: string) => void;

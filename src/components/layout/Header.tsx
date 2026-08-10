@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Cake, Sparkles, Sun, Moon, Contrast, Award, Settings2, User, LogOut, Menu, X, ChevronRight } from 'lucide-react';
-import { ThemeMode, UserProfile } from '../types';
+import { ThemeMode, UserProfile } from '../../types/index';
 
 interface HeaderProps {
   activeTab: 'shop' | 'custom-cake' | 'loyalty' | 'admin' | 'profile';

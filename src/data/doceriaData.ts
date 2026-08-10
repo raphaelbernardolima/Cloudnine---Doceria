@@ -1,4 +1,4 @@
-import { Product, Order, UserProfile, AuditLog } from '../types';
+import { Product, Order, UserProfile, AuditLog } from '../types/index';
 
 export const INITIAL_PRODUCTS: Product[] = [
   {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Package, Plus, Trash2, Edit, AlertCircle, ChefHat } from 'lucide-react';
-import { Product, Ingredient } from '../types';
+import { Product, Ingredient } from '../../types/index';
 
 interface AdminInventoryModuleProps {
   products: Product[];

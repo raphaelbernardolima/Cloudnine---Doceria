@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Gift, Ticket, Save, AlertCircle } from 'lucide-react';
-import { Coupon, LoyaltySettings } from '../types';
+import { Coupon, LoyaltySettings } from '../../types/index';
 
 interface AdminMarketingModuleProps {
   coupons: Coupon[];

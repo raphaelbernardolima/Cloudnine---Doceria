@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   TrendingUp, TrendingDown, DollarSign, Download, PieChart, Activity, AlertCircle, Package, ArrowUpRight, BarChart3, Calculator, Calendar
 } from 'lucide-react';
-import { Product, Order, Ingredient } from '../types';
+import { Product, Order, Ingredient } from '../../types/index';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   ScatterChart, Scatter, ZAxis, Cell, ReferenceLine

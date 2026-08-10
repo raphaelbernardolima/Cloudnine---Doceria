@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Shield, Key, CheckCircle, AlertCircle, LogIn, UserPlus } from 'lucide-react';
-import { signInWithSupabase, signUpWithSupabase, getSupabaseConfig } from '../lib/supabase';
-import { UserProfile } from '../types';
+import { signInWithSupabase, signUpWithSupabase, getSupabaseConfig } from '../../services/supabase';
+import { UserProfile } from '../../types/index';
 
 interface AuthModalProps {
   isOpen: boolean;

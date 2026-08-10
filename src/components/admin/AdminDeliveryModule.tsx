@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Truck, MapPin, DollarSign, CheckCircle2, ChevronDown } from 'lucide-react';
-import { Order, Driver } from '../types';
+import { Order, Driver } from '../../types/index';
 
 interface AdminDeliveryModuleProps {
   orders: Order[];

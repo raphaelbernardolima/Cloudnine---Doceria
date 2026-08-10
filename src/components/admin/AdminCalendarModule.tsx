@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar as CalendarIcon, Clock, Package, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Order } from '../types';
+import { Order } from '../../types/index';
 
 interface AdminCalendarModuleProps {
   orders: Order[];

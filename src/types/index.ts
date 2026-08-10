@@ -21,12 +21,24 @@ export interface Product {
   };
 }
 
+export interface CustomCakeOption {
+  nome: string;
+  precoAdicional: number;
+}
+
+export interface CustomCakeConfig {
+  tamanhos: CustomCakeOption[];
+  massas: CustomCakeOption[];
+  recheios: CustomCakeOption[];
+  coberturas: CustomCakeOption[];
+}
+
 export interface CustomCakeBuilder {
-  tamanho: 'P (10 fatias)' | 'M (20 fatias)' | 'G (30 fatias)' | '2 Andares (45 fatias)';
-  massa: 'Pão de Ló Baunilha' | 'Chocolate Cacau 100%' | 'Red Velvet' | 'Nozes com Especiarias';
-  recheio1: 'Brigadeiro Belga' | 'Ninho Cremoso' | 'Pistache Bronte' | 'Doce de Leite com Avelã' | 'Cream Cheese com Frutas Vermelhas';
-  recheio2?: 'Sem 2º recheio' | 'Ganache Meio Amargo' | 'Mousse de Maracujá' | 'Geleia Caseira de Morango';
-  cobertura: 'Chantininho Aveludado' | 'Buttercream Suíço' | 'Dressed Cake Chocolate' | 'Espatulado Rústico';
+  tamanho: string;
+  massa: string;
+  recheio1: string;
+  recheio2?: string;
+  cobertura: string;
   mensagemBolo: string;
   observacoes: string;
   precoCalculado: number;
@@ -53,6 +65,14 @@ export interface UserProfile {
   email: string;
   pontosFidelidade?: number;
   avatar_url?: string;
+  endereco_rua?: string;
+  endereco_numero?: string;
+  endereco_bairro?: string;
+  endereco_cidade?: string;
+  endereco_uf?: string;
+  endereco_cep?: string;
+  endereco_complemento?: string;
+  endereco_referencia?: string;
 }
 
 export interface OrderItem {

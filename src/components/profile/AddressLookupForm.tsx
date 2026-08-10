@@ -3,7 +3,7 @@ import {
   MapPin, Search, Navigation, Check, AlertCircle, Loader2, 
   Map, Sparkles, Building, Settings, Compass, Info 
 } from 'lucide-react';
-import { fetchAddressByCep, formatCep, reverseGeocodeLatLng, AddressResult } from '../lib/addressService';
+import { fetchAddressByCep, formatCep, reverseGeocodeLatLng, AddressResult } from '../../services/addressService';
 
 interface AddressLookupFormProps {
   initialCep?: string;

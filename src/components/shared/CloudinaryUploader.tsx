@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UploadCloud, CheckCircle, AlertCircle, Image as ImageIcon, Loader2, Link, Copy } from 'lucide-react';
-import { uploadToCloudinary, getCloudinaryConfig } from '../lib/cloudinary';
+import { uploadToCloudinary, getCloudinaryConfig } from '../../services/cloudinary';
 
 interface CloudinaryUploaderProps {
   onImageUploaded: (url: string) => void;

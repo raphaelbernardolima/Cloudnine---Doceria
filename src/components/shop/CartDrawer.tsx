@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X, Trash2, Calendar, Clock, QrCode, CreditCard, ShoppingBag, CheckCircle, ChevronRight, Copy, Check, Send, Truck, Store, Loader2 } from 'lucide-react';
-import { CartItem, Order } from '../types';
-import { AddressLookupForm } from './AddressLookupForm';
-import { AddressResult } from '../lib/addressService';
+import { CartItem, Order } from '../../types/index';
+import { AddressLookupForm } from '../profile/AddressLookupForm';
+import { AddressResult } from '../../services/addressService';
 
 interface CartDrawerProps {
   isOpen: boolean;

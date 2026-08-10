@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Star, ShoppingBag, Plus, Minus, Check, Flame, ShieldAlert } from 'lucide-react';
-import { Product } from '../types';
+import { Product } from '../../types/index';
 
 interface ProductModalProps {
   product: Product | null;

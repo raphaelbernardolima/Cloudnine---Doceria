@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserProfile } from '../types';
+import { UserProfile } from '../../types/index';
 import { Search, Edit, User, Shield, CheckCircle, AlertCircle, X } from 'lucide-react';
 
 interface AdminStaffModuleProps {

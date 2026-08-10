@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient, User, Session } from '@supabase/supabase-js';
-import { Product, Order, UserProfile } from '../types';
+import { Product, Order, UserProfile } from '../types/index';
 
 let supabaseClient: SupabaseClient | null = null;
 

@@ -4,8 +4,8 @@ import {
   Save, CheckCircle, Clock, ChevronRight, Phone, Mail, Shield, AlertCircle,
   Copy, RefreshCw, Bell, Sparkles, Star, Gift, Truck, FileText, Settings2
 } from 'lucide-react';
-import { UserProfile, Order } from '../types';
-import { CloudinaryUploader } from './CloudinaryUploader';
+import { UserProfile, Order } from '../../types/index';
+import { CloudinaryUploader } from '../shared/CloudinaryUploader';
 import { AddressLookupForm } from './AddressLookupForm';
 
 interface CustomerProfileViewProps {
@@ -41,12 +41,13 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
   const [avatarUrl, setAvatarUrl] = useState(currentUser.avatar_url || '');
 
   // Address
-  const [rua, setRua] = useState('');
-  const [bairro, setBairro] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [cep, setCep] = useState('');
-  const [complemento, setComplemento] = useState('');
-  const [pontoReferencia, setPontoReferencia] = useState('');
+  const [rua, setRua] = useState(currentUser.endereco_rua || '');
+  const [numero, setNumero] = useState(currentUser.endereco_numero || '');
+  const [bairro, setBairro] = useState(currentUser.endereco_bairro || '');
+  const [cidade, setCidade] = useState(currentUser.endereco_cidade || '');
+  const [cep, setCep] = useState(currentUser.endereco_cep || '');
+  const [complemento, setComplemento] = useState(currentUser.endereco_complemento || '');
+  const [pontoReferencia, setPontoReferencia] = useState(currentUser.endereco_referencia || '');
 
   // Dietary Preferences
   const [zeroLactose, setZeroLactose] = useState(false);
@@ -483,19 +484,31 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                     <span className="font-black text-xs px-2.5 py-1 rounded-lg bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] border border-[var(--color-outline-variant)]/30">
                       Endereço Principal
                     </span>
-                    {cep ? (
-                      <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        Ativo para Entregas
-                      </span>
-                    ) : (
+                    
+                    {!cep ? (
                       <span className="text-xs font-bold text-[var(--color-outline)] flex items-center gap-1">
                         Pendente
+                      </span>
+                    ) : (
+                      <span className="text-xs font-bold text-[var(--color-primary)] flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        Ativo para Entregas
                       </span>
                     )}
                   </div>
 
                   <div className="pt-2">
+                    {!cep && (
+                      <div className="py-8 mb-4 flex flex-col items-center justify-center text-center space-y-4 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-outline-variant)]/20">
+                        <div className="w-12 h-12 rounded-full bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)] flex items-center justify-center">
+                          <MapPin className="w-6 h-6 opacity-50" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-[var(--color-on-surface)]">Nenhum endereço salvo</p>
+                          <p className="text-[10px] text-[var(--color-on-surface-variant)] max-w-xs mt-1 px-4">Busque seu CEP abaixo para adicionar seu primeiro endereço de entrega e facilitar seus pedidos.</p>
+                        </div>
+                      </div>
+                    )}
                     <AddressLookupForm
                       compact={true}
                       initialCep={cep}
