@@ -61,7 +61,50 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
   // Status feedback
   const [isSaved, setIsSaved] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [copiedCoupon, setCopiedCoupon] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (
+      nome === currentUser.nome &&
+      sobrenome === currentUser.sobrenome &&
+      telefone === currentUser.telefone &&
+      avatarUrl === currentUser.avatar_url &&
+      rua === currentUser.endereco_rua &&
+      numero === currentUser.endereco_numero &&
+      bairro === currentUser.endereco_bairro &&
+      cidade === currentUser.endereco_cidade &&
+      cep === currentUser.endereco_cep &&
+      complemento === currentUser.endereco_complemento &&
+      pontoReferencia === currentUser.endereco_referencia
+    ) {
+      return;
+    }
+
+    setIsAutoSaving(true);
+    const timer = setTimeout(() => {
+      const updated: UserProfile = {
+        ...currentUser,
+        nome,
+        sobrenome,
+        telefone,
+        avatar_url: avatarUrl,
+        endereco_rua: rua,
+        endereco_numero: numero,
+        endereco_bairro: bairro,
+        endereco_cidade: cidade,
+        endereco_cep: cep,
+        endereco_complemento: complemento,
+        endereco_referencia: pontoReferencia
+      };
+      onUpdateUser(updated);
+      setIsAutoSaving(false);
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2500);
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [nome, sobrenome, telefone, avatarUrl, rua, numero, bairro, cidade, cep, complemento, pontoReferencia]);
 
   const userOrders = orders.filter(
     o => o.cliente_nome.toLowerCase().includes(currentUser.nome.toLowerCase()) || currentUser.role === 'admin'
@@ -74,7 +117,14 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
       nome,
       sobrenome,
       telefone,
-      avatar_url: avatarUrl
+      avatar_url: avatarUrl,
+      endereco_rua: rua,
+      endereco_numero: numero,
+      endereco_bairro: bairro,
+      endereco_cidade: cidade,
+      endereco_cep: cep,
+      endereco_complemento: complemento,
+      endereco_referencia: pontoReferencia
     };
     onUpdateUser(updated);
     setIsSaved(true);
@@ -363,13 +413,18 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 </div>
 
                 <div className="pt-4 border-t border-[var(--color-outline-variant)]/20 flex items-center justify-between">
-                  {isSaved ? (
+                  {isAutoSaving ? (
+                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 animate-pulse">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Salvando automaticamente...</span>
+                    </span>
+                  ) : isSaved ? (
                     <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                       <CheckCircle className="w-4 h-4" />
                       <span>Alterações salvas com sucesso!</span>
                     </span>
                   ) : (
-                    <span className="text-xs text-[var(--color-outline)]">Clique ao lado para gravar suas alterações.</span>
+                    <span className="text-xs text-[var(--color-outline)]">Dados salvos automaticamente enquanto você digita.</span>
                   )}
 
                   <button

@@ -283,6 +283,20 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Navigation List */}
             <div className="space-y-1.5 pt-1">
               <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenCart();
+                }}
+                className="w-full px-4 py-3 rounded-2xl text-xs font-extrabold bg-[var(--color-primary)] text-[var(--color-on-primary)] flex items-center justify-between transition-all shadow-sm min-h-[48px]"
+              >
+                <div className="flex items-center space-x-3">
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>Minha Sacola {cartCount > 0 ? `(${cartCount})` : ''}</span>
+                </div>
+                <ChevronRight className="w-4 h-4 opacity-70" />
+              </button>
+
+              <button
                 onClick={() => handleNavClick(() => setActiveTab('shop'))}
                 className={`w-full px-4 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-between transition-all min-h-[48px] ${
                   activeTab === 'shop'

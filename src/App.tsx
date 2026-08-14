@@ -13,6 +13,7 @@ import { CustomerProfileView } from './components/profile/CustomerProfileView';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS, INITIAL_INGREDIENTS, INITIAL_DRIVERS, INITIAL_COUPONS, INITIAL_LOYALTY_SETTINGS } from './data/doceriaData';
 import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings } from './types/index';
 import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB, getSupabaseClient } from './services/supabase';
+import { sendOrderStatusNotification, requestNotificationPermission } from './services/notificationService';
 import { Search, Sparkles, Heart, ChevronRight, Cake, Gift, ArrowRight, ShieldAlert, LogIn, User } from 'lucide-react';
 
 export const STAFF_ROLES = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'];
@@ -242,7 +243,8 @@ export function App() {
     }
   };
 
-const handlePlaceOrder = async (newOrderData: Partial<Order>) => {
+  const handlePlaceOrder = async (newOrderData: Partial<Order>) => {
+    requestNotificationPermission().catch(() => {});
     const fullOrder: Order = {
       id: newOrderData.id || Math.floor(1000 + Math.random() * 9000),
       created_at: new Date().toISOString(),
@@ -344,11 +346,16 @@ const handleAddProduct = async (newProd: Omit<Product, 'id'>) => {
   };
 
   const handleUpdateOrderStatus = async (orderId: number | string, newStatus: Order['status']) => {
+    const targetOrder = orders.find(o => o.id === orderId);
     const client = getSupabaseClient();
     if (client) {
       await client.from('pedidos').update({ status: newStatus }).eq('id', orderId);
     }
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
+    if (newStatus === 'saiu_entrega' || newStatus === 'entregue') {
+      sendOrderStatusNotification(orderId, newStatus, targetOrder?.cliente_nome);
+    }
   };
 
   const handleUpdateRole = (userId: string, newRole: UserProfile['role']) => {
@@ -411,11 +418,12 @@ const handleAddProduct = async (newProd: Omit<Product, 'id'>) => {
         {/* CUSTOMER LOYALTY VIEW */}
         {activeTab === 'loyalty' && (
           <LoyaltyView
+            currentUser={currentUser}
+            orders={orders}
+            onOpenAuthModal={(msg) => handleOpenAuthModal(msg)}
             onApplyRewardCoupon={(code) => {
               handleApplyCoupon(code);
-              if (cartItems.length > 0) {
-                setIsCartOpen(true);
-              }
+              setIsCartOpen(true);
             }}
           />
         )}

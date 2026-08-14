@@ -39,6 +39,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [dataAgendada, setDataAgendada] = useState(new Date().toISOString().split('T')[0]);
   const [horarioAgendado, setHorarioAgendado] = useState('16:00 - 17:00');
   const [metodoPagamento, setMetodoPagamento] = useState<'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro_retirada'>('pix');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   if (!isOpen) return null;
 
@@ -61,8 +62,6 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     setCopiedPix(true);
     setTimeout(() => setCopiedPix(false), 3000);
   };
-
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const handleFinishCheckout = async () => {
     if (metodoPagamento === 'pix' || metodoPagamento === 'cartao_credito' || metodoPagamento === 'cartao_debito') {
