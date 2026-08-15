@@ -23,6 +23,19 @@ export function getSupabaseClient(): SupabaseClient | null {
   return supabaseClient;
 }
 
+export async function getStoreConfig(): Promise<{ telefone?: string; nome_loja?: string } | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client.from('configuracoes_loja').select('*').limit(1).maybeSingle();
+    if (error || !data) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Realiza login via Supabase Auth com Email e Senha
  */

@@ -168,11 +168,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.</p>
         </div>
           {/* Tab Selector */}
-        <div className="flex flex-wrap gap-1.5 bg-[var(--color-surface-container)] p-1.5 rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs font-bold">
+        <div className="flex overflow-x-auto gap-1.5 bg-[var(--color-surface-container)] p-1.5 rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs font-bold max-w-full">
           {['admin', 'ADMIN'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                 activeTab === 'dashboard'
                   ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                   : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -186,7 +186,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'CAIXA', 'ATENDIMENTO', 'atendente'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('orders')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                 activeTab === 'orders'
                   ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                   : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -200,7 +200,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'COZINHA'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('calendar')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                 activeTab === 'calendar'
                   ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                   : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -213,7 +213,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'COZINHA'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('products')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                 activeTab === 'products'
                   ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                   : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -227,7 +227,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'COZINHA', 'confeiteiro'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('kitchen')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                 activeTab === 'kitchen'
                   ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                   : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -241,7 +241,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'ATENDIMENTO'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('delivery')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                 activeTab === 'delivery'
                   ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                   : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -254,7 +254,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('marketing')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                 activeTab === 'marketing'
                   ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                   : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -268,7 +268,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <>
               <button
                 onClick={() => setActiveTab('staff')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                   activeTab === 'staff'
                     ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                     : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -276,11 +276,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Equipe & Permissões</span>
-       </button>
+              </button>
 
               <button
                 onClick={() => setActiveTab('ai')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
                   activeTab === 'ai'
                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xs'
                     : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
@@ -288,19 +288,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <Sparkles className="w-4 h-4" />
                 <span>Marketing IA</span>
-       </button>
-
-              <button
-                onClick={() => setActiveTab('database')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
-                  activeTab === 'database'
-                    ? 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)] shadow-xs'
-                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-                }`}
-              >
-                <Database className="w-4 h-4" />
-                <span>Supabase RLS & Logs</span>
-       </button>
+              </button>
             </>
           )}
         </div>
@@ -322,7 +310,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="font-bold text-xl text-[var(--color-on-surface)]">
-                Kanban de Pedidos
+                Pedidos
               </h3>
               <p className="text-sm text-[var(--color-outline)]">Gestão visual e em tempo real da esteira de produção e entrega.</p>
             </div>

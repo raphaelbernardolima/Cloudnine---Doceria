@@ -1,6 +1,6 @@
 import React from 'react';
 import { Award, Gift, Star, Sparkles, Check, AlertCircle } from 'lucide-react';
-import { UserProfile, Order } from '../../types/index';
+import { UserProfile, Order } from '../../types';
 
 interface LoyaltyViewProps {
   currentUser: UserProfile | null;

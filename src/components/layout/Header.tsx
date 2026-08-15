@@ -106,19 +106,6 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Monte seu Bolo</span>
           </button>
 
-          <button
-            id="nav-tab-loyalty"
-            onClick={() => setActiveTab('loyalty')}
-            className={`flex items-center space-x-1.5 px-3 lg:px-4 py-1.5 rounded-full text-xs font-bold transition-all min-h-[36px] ${
-              activeTab === 'loyalty'
-                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] hover:text-[var(--color-on-surface)]'
-            }`}
-          >
-            <Award className="w-3.5 h-3.5" />
-            <span className="hidden lg:inline">Cloudnine Club</span>
-            <span className="lg:hidden">Club</span>
-          </button>
 
           <button
             id="nav-tab-profile"
@@ -340,20 +327,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <ChevronRight className="w-4 h-4 opacity-70" />
               </button>
 
-              <button
-                onClick={() => handleNavClick(() => setActiveTab('loyalty'))}
-                className={`w-full px-4 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-between transition-all min-h-[48px] ${
-                  activeTab === 'loyalty'
-                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                    : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <Award className="w-4 h-4" />
-                  <span>Cloudnine Club & Fidelidade</span>
-                </div>
-                <ChevronRight className="w-4 h-4 opacity-70" />
-              </button>
 
               {currentUser && ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'].includes(currentUser.role) && (
                 <button
