@@ -169,7 +169,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
   return (
     <div className={`animate-in fade-in duration-200 ${compact ? 'space-y-4' : 'space-y-5'}`}>
       
-      {/* SECTION 1: Action Bar - GPS & Quick Location */}
+      {/* SECTION 1: Action Bar - GPS */}
       <div className={compact ? 'space-y-3' : 'p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 space-y-4 shadow-2xs'}>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           
@@ -178,7 +178,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
             type="button"
             onClick={handleUseCurrentLocation}
             disabled={loadingGeo}
-            className="flex-1 px-4 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-black text-xs sm:text-sm shadow-xs flex items-center justify-center space-x-2.5 transition-all hover:opacity-90 min-h-[48px] disabled:opacity-60 cursor-pointer"
+            className="w-full px-4 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-black text-xs sm:text-sm shadow-xs flex items-center justify-center space-x-2.5 transition-all hover:opacity-90 min-h-[48px] disabled:opacity-60 cursor-pointer"
           >
             {loadingGeo ? (
               <Loader2 className="w-5 h-5 animate-spin shrink-0" />
@@ -187,52 +187,8 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
             )}
             <span>{loadingGeo ? 'Buscando...' : 'Usar minha localização atual'}</span>
           </button>
-
-          {/* Config Google Maps API Button */}
-          <button
-            type="button"
-            onClick={() => setShowGoogleConfig(!showGoogleConfig)}
-            className="px-4 py-3 rounded-2xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)] font-bold text-xs flex items-center justify-center space-x-2 border border-[var(--color-outline-variant)]/30 min-h-[48px] transition-colors cursor-pointer shrink-0"
-            title="Configurar Integração Google Maps Geocoding API"
-          >
-            <Settings className="w-4 h-4 text-sky-500 shrink-0" />
-            <span className="hidden sm:inline">Google Maps API</span>
-          </button>
         </div>
-
       </div>
-
-      {/* Google Maps Config Accordion */}
-      {showGoogleConfig && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-sky-500/10 border border-sky-500/30 space-y-3 text-xs animate-in slide-in-from-top-2 duration-200">
-          <div className="flex items-start space-x-2.5">
-            <Info className="w-5 h-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
-            <div className="space-y-1.5">
-              <h4 className="font-black text-sm text-sky-700 dark:text-sky-300">
-                Integração com Geolocalização e CEP
-              </h4>
-              <p className="text-xs text-[var(--color-on-surface-variant)] leading-relaxed">
-                • <strong>Busca por CEP (ViaCEP & BrasilAPI):</strong> Ao preencher os 8 dígitos do CEP, a API busca automaticamente rua, bairro, cidade e estado.<br />
-                • <strong>Geolocalização GPS:</strong> O botão de localização utiliza o sensor nativo de GPS do navegador para obter latitude/longitude.<br />
-                • <strong>Google Geocoding API:</strong> Cole abaixo sua chave de API do Google Cloud para geocodificação reversa oficial.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
-            <input
-              type="password"
-              value={googleApiKey}
-              onChange={(e) => setGoogleApiKey(e.target.value)}
-              placeholder="Cole sua GOOGLE_MAPS_API_KEY aqui (Opcional)"
-              className="flex-1 p-3 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 focus:outline-none text-xs font-mono"
-            />
-            <span className="text-xs text-emerald-600 font-bold bg-emerald-500/10 px-3 py-2.5 rounded-xl border border-emerald-500/20 text-center shrink-0">
-              {googleApiKey ? '✓ API Key Ativa' : 'Modo GPS Nativo Ativo'}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Notifications */}
       {loadingCep && (

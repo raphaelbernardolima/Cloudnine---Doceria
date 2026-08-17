@@ -23,7 +23,7 @@ export function getSupabaseClient(): SupabaseClient | null {
   return supabaseClient;
 }
 
-export async function getStoreConfig(): Promise<{ telefone?: string; nome_loja?: string } | null> {
+export async function getStoreConfig(): Promise<any | null> {
   const client = getSupabaseClient();
   if (!client) return null;
 
@@ -33,6 +33,49 @@ export async function getStoreConfig(): Promise<{ telefone?: string; nome_loja?:
     return data;
   } catch {
     return null;
+  }
+}
+
+export async function updateStoreConfig(config: {
+  nome_loja?: string;
+  logo_url?: string;
+  telefone?: string;
+  email?: string;
+  loja_aberta?: boolean;
+  pedido_minimo?: number;
+  raio_entrega_km?: number;
+  horarios_funcionamento?: any;
+}): Promise<{ success: boolean; error?: string }> {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { success: false, error: 'Supabase não conectado' };
+  }
+
+  try {
+    // Check if row exists
+    const { data: existing } = await client.from('configuracoes_loja').select('id').limit(1).maybeSingle();
+
+    if (existing && existing.id) {
+      const { error } = await client
+        .from('configuracoes_loja')
+        .update({
+          ...config,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('id', existing.id);
+
+      if (error) return { success: false, error: error.message };
+    } else {
+      const { error } = await client
+        .from('configuracoes_loja')
+        .insert([config]);
+
+      if (error) return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : 'Erro ao salvar configurações' };
   }
 }
 

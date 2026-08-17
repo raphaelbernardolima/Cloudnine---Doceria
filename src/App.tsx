@@ -494,6 +494,9 @@ const handleAddProduct = async (newProd: Omit<Product, 'id'>) => {
               onDeleteProduct={handleDeleteProduct}
               onUpdateOrderStatus={handleUpdateOrderStatus}
               onUpdateRole={handleUpdateRole}
+              showToast={showToast}
+              storePhone={storePhone}
+              setStorePhone={setStorePhone}
             />
           ) : (
             <div className="py-20 text-center max-w-md mx-auto space-y-4">

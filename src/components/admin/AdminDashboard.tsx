@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Package, ShoppingBag, Users, FileText, Printer, Sparkles, 
   Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle, 
-  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud, LayoutDashboard, CreditCard, Settings, Calendar, Gift
+  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud, LayoutDashboard, CreditCard, Settings, Calendar, Gift, Store
 } from 'lucide-react';
 import { Product, Order, UserProfile, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '../../types/index';
 import { AdminCustomCakeModule } from './AdminCustomCakeModule';
@@ -15,6 +15,8 @@ import { AdminInventoryModule } from './AdminInventoryModule';
 import { AdminDeliveryModule } from './AdminDeliveryModule';
 import { AdminMarketingModule } from './AdminMarketingModule';
 import { AdminFinanceModule } from './AdminFinanceModule';
+import { AdminStoreConfigModule } from './AdminStoreConfigModule';
+import { AdminPaymentConfigModule } from './AdminPaymentConfigModule';
 
 interface AdminDashboardProps {
   products: Product[];
@@ -40,6 +42,9 @@ interface AdminDashboardProps {
   onAddCoupon: (c: Omit<Coupon, 'id'>) => void;
   onToggleCoupon: (id: string, ativo: boolean) => void;
   onAssignDriver: (orderId: string | number, driverId: string) => void;
+  showToast?: (msg: string) => void;
+  storePhone?: string;
+  setStorePhone?: (phone: string) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -63,7 +68,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onDeleteIngredient,
   onAddCoupon,
   onToggleCoupon,
-  onAssignDriver
+  onAssignDriver,
+  showToast,
+  storePhone,
+  setStorePhone
 }) => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
 
@@ -167,8 +175,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <p className="text-xs text-[var(--color-outline)]">
             Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.</p>
         </div>
-          {/* Tab Selector */}
-        <div className="flex overflow-x-auto gap-1.5 bg-[var(--color-surface-container)] p-1.5 rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs font-bold max-w-full">
+          {/* Tab Selector - Wrap layout to eliminate horizontal scrolling */}
+        <div className="flex flex-wrap items-center gap-1.5 bg-[var(--color-surface-container)] p-2 rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs font-bold max-w-2xl justify-end">
           {['admin', 'ADMIN'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('dashboard')}
@@ -289,6 +297,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <Sparkles className="w-4 h-4" />
                 <span>Marketing IA</span>
               </button>
+
+              <button
+                onClick={() => setActiveTab('store-config')}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
+                  activeTab === 'store-config'
+                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+                }`}
+              >
+                <Store className="w-4 h-4" />
+                <span>Configurações da Loja</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('payment-config')}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
+                  activeTab === 'payment-config'
+                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
+                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
+                }`}
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>Configurações de Pagamento</span>
+              </button>
             </>
           )}
         </div>
@@ -297,6 +329,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* DASHBOARD & FINANCE */}
       {activeTab === 'dashboard' && (
         <AdminFinanceModule orders={orders} products={products} ingredients={ingredients} />
+      )}
+
+      {/* STORE CONFIG */}
+      {activeTab === 'store-config' && (
+        <AdminStoreConfigModule
+          showToast={showToast || (() => {})}
+          onStoreConfigUpdated={(cfg) => {
+            if (cfg.telefone && setStorePhone) setStorePhone(cfg.telefone);
+          }}
+        />
+      )}
+
+      {/* PAYMENT CONFIG */}
+      {activeTab === 'payment-config' && (
+        <AdminPaymentConfigModule
+          showToast={showToast || (() => {})}
+        />
       )}
 
       {/* STAFF & PERMISSIONS (RBAC) */}
