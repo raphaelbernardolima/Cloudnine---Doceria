@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Package, Plus, Trash2, Edit, AlertCircle, ChefHat } from 'lucide-react';
-import { Product, Ingredient } from '../../types/index';
+import type { Product, Ingredient } from '../../types/index';
 
 interface AdminInventoryModuleProps {
   products: Product[];
@@ -28,7 +28,7 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
 
   // Dummy form states for quick ingredient add
   const [ingNome, setIngNome] = useState('');
-  const [ingUnidade, setIngUnidade] = useState<'g'|'ml'|'un'>('g');
+  const [ingUnidade, setIngUnidade] = useState<'g' | 'ml' | 'un'>('g');
   const [ingCusto, setIngCusto] = useState('');
   const [ingEstoque, setIngEstoque] = useState('');
 
@@ -51,7 +51,7 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
           <Package className="w-5 h-5 text-[var(--color-primary)]" />
           Estoque & Catálogo
         </h3>
-        
+
         <div className="flex bg-[var(--color-surface-container)] p-1.5 rounded-2xl border border-[var(--color-outline-variant)]/30 text-xs font-bold">
           <button
             onClick={() => setActiveSubTab('products')}
@@ -103,16 +103,16 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
 
       {activeSubTab === 'ingredients' && (
         <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
-          
+
           {/* Add Ingredient Form */}
           <form onSubmit={handleAddIng} className="p-4 bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 rounded-3xl grid grid-cols-1 md:grid-cols-5 gap-3 items-end shadow-xs">
             <div className="md:col-span-2">
               <label className="text-sm font-bold uppercase text-[var(--color-outline)] mb-1 block">Insumo (Matéria-prima)</label>
-              <input required value={ingNome} onChange={e=>setIngNome(e.target.value)} placeholder="Ex: Leite Moça..." className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs" />
+              <input required value={ingNome} onChange={e => setIngNome(e.target.value)} placeholder="Ex: Leite Moça..." className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs" />
             </div>
             <div>
               <label className="text-sm font-bold uppercase text-[var(--color-outline)] mb-1 block">Unidade</label>
-              <select value={ingUnidade} onChange={e=>setIngUnidade(e.target.value as any)} className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs font-bold">
+              <select value={ingUnidade} onChange={e => setIngUnidade(e.target.value as any)} className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs font-bold">
                 <option value="g">Gramas (g)</option>
                 <option value="ml">Mililitros (ml)</option>
                 <option value="un">Unidade (un)</option>
@@ -120,7 +120,7 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
             </div>
             <div>
               <label className="text-sm font-bold uppercase text-[var(--color-outline)] mb-1 block">Custo (R$)</label>
-              <input required type="number" step="0.01" value={ingCusto} onChange={e=>setIngCusto(e.target.value)} placeholder="Ex: 8.50" className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs" />
+              <input required type="number" step="0.01" value={ingCusto} onChange={e => setIngCusto(e.target.value)} placeholder="Ex: 8.50" className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs" />
             </div>
             <button type="submit" className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors">
               <Plus className="w-4 h-4" /> Adicionar

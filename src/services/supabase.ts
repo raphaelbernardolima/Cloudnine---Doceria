@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient, User, Session } from '@supabase/supabase-js';
-import { Product, Order, UserProfile } from '../types/index';
+import type { Product, Order, UserProfile } from '../types/index';
 
 let supabaseClient: SupabaseClient | null = null;
 
@@ -11,7 +11,7 @@ export function getSupabaseConfig() {
 
 export function getSupabaseClient(): SupabaseClient | null {
   const { url, anonKey, isConfigured } = getSupabaseConfig();
-  
+
   if (!isConfigured) {
     return null;
   }
@@ -40,7 +40,7 @@ export async function updateStoreConfig(config: any): Promise<{ success: boolean
   const client = getSupabaseClient();
   try {
     localStorage.setItem('cloudnine_store_config', JSON.stringify(config));
-  } catch {}
+  } catch { }
 
   if (!client) {
     return { success: true };
@@ -98,7 +98,7 @@ export async function signInWithSupabase(email: string, password: string): Promi
     console.log('Login Perfis query result:', profile, 'Error:', profileError);
 
     let role = profile?.role || data.user.user_metadata?.role || 'cliente';
-    
+
     const nome = profile?.nome || data.user.user_metadata?.nome || email.split('@')[0];
     const sobrenome = profile?.sobrenome || data.user.user_metadata?.sobrenome || '';
 
@@ -125,9 +125,9 @@ export async function signInWithSupabase(email: string, password: string): Promi
  * Cria nova conta (sempre com perfil 'cliente')
  */
 export async function signUpWithSupabase(
-  email: string, 
-  password: string, 
-  nome: string, 
+  email: string,
+  password: string,
+  nome: string,
   sobrenome: string
 ): Promise<{ user: UserProfile | null; error: string | null }> {
   const client = getSupabaseClient();
@@ -295,7 +295,7 @@ export async function testSupabaseConnection(urlInput?: string, keyInput?: strin
   try {
     const tempClient = createClient(url, anonKey);
     const { error } = await tempClient.from('produtos').select('count', { count: 'exact', head: true });
-    
+
     if (error && error.code !== 'PGRST116' && !error.message.includes('relation "public.produtos" does not exist')) {
       return {
         success: false,
