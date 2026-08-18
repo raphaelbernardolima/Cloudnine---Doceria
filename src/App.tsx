@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { ProductCard, ProductSkeleton } from './components/shop/ProductCard';
@@ -20,7 +21,8 @@ export const STAFF_ROLES = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA
 
 export function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
-  const [activeTab, setActiveTab] = useState<'shop' | 'custom-cake' | 'loyalty' | 'admin' | 'profile'>('shop');
+  const navigate = useNavigate();
+
 
   // Auth User State
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
@@ -153,15 +155,13 @@ export function App() {
   const handleLogout = async () => {
     await signOutSupabase();
     setCurrentUser(null);
-    if (activeTab === 'admin') {
-      setActiveTab('shop');
-    }
+    navigate('/');
   };
 
   const handleLoginSuccess = (user: UserProfile) => {
     setCurrentUser(user);
     if (user.role === 'admin' || user.role === 'confeiteiro' || user.role === 'atendente') {
-      setActiveTab('admin');
+      navigate('/admin');
     }
   };
 
@@ -173,21 +173,6 @@ export function App() {
         console.error('Failed to update profile:', error);
       }
     }
-  };
-
-  // Handle Tab Change with Security Check
-  const handleTabChange = (tab: 'shop' | 'custom-cake' | 'loyalty' | 'admin') => {
-    if (tab === 'admin') {
-      if (!currentUser) {
-        handleOpenAuthModal('Acesso Administrativo: Por favor, entre com sua conta de colaborador para acessar o painel de gestão.');
-        return;
-      }
-      if (!STAFF_ROLES.includes(currentUser.role)) {
-        handleOpenAuthModal('Acesso Negado: Sua conta atual não possui permissão de Administrador ou Equipe.');
-        return;
-      }
-    }
-    setActiveTab(tab);
   };
 
   // Handle Add Standard Product to Cart
@@ -394,130 +379,128 @@ const handleAddProduct = async (newProd: Omit<Product, 'id'>) => {
       
       {/* Header */}
       <Header
-        activeTab={activeTab}
-        setActiveTab={handleTabChange}
         cartCount={cartTotalCount}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenCustomCakeModal={() => setIsCustomCakeOpen(true)}
         themeMode={themeMode}
         setThemeMode={setThemeMode}
         currentUser={currentUser}
-        onOpenAuthModal={() => handleOpenAuthModal()}
+        onOpenAuthModal={(notice) => handleOpenAuthModal(notice)}
         onLogout={handleLogout}
       />
 
       {/* Main Body View */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        
-        {/* CUSTOMER SHOP VIEW */}
-        {activeTab === 'shop' && (
-          <ShopView
-            categories={categories}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            isLoadingProducts={isLoadingProducts}
-            filteredProducts={filteredProducts}
-            onOpenCustomCake={() => setIsCustomCakeOpen(true)}
-            onNavigateLoyalty={() => handleTabChange('loyalty')}
-            onAddToCart={handleAddToCart}
-            onOpenQuickView={setSelectedQuickProduct}
-          />
-        )}
+        <Routes>
+          {/* CUSTOMER SHOP VIEW */}
+          <Route path="/" element={
+            <ShopView
+              categories={categories}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              isLoadingProducts={isLoadingProducts}
+              filteredProducts={filteredProducts}
+              onOpenCustomCake={() => setIsCustomCakeOpen(true)}
+              onNavigateLoyalty={() => navigate('/loyalty')}
+              onAddToCart={handleAddToCart}
+              onOpenQuickView={setSelectedQuickProduct}
+            />
+          } />
 
-        {/* CUSTOMER LOYALTY VIEW */}
-        {activeTab === 'loyalty' && (
-          <LoyaltyView
-            currentUser={currentUser}
-            orders={orders}
-            onOpenAuthModal={(msg) => handleOpenAuthModal(msg)}
-            onApplyRewardCoupon={(code) => {
-              handleApplyCoupon(code);
-              setIsCartOpen(true);
-            }}
-          />
-        )}
-
-        {/* CUSTOMER PORTAL / PROFILE VIEW */}
-        {activeTab === 'profile' && (
-          currentUser ? (
-            <CustomerProfileView
+          {/* CUSTOMER LOYALTY VIEW */}
+          <Route path="/loyalty" element={
+            <LoyaltyView
               currentUser={currentUser}
-              onUpdateUser={handleUpdateUser}
               orders={orders}
-              onNavigateToShop={() => setActiveTab('shop')}
-              onNavigateToAdmin={() => setActiveTab('admin')}
+              onOpenAuthModal={(msg) => handleOpenAuthModal(msg)}
+              onApplyRewardCoupon={(code) => {
+                handleApplyCoupon(code);
+                setIsCartOpen(true);
+              }}
             />
-          ) : (
-            <div className="py-20 text-center max-w-md mx-auto space-y-4">
-              <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto">
-                <User className="w-8 h-8" />
-              </div>
-              <h2 className="text-xl font-black">Portal do Cliente Cloudnine</h2>
-              <p className="text-xs text-[var(--color-outline)]">
-                Faça login ou crie sua conta para acessar seu histórico de pedidos, saldo de pontos do clube de fidelidade e personalizar seu perfil.
-              </p>
-              <button
-                onClick={() => handleOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos do clube de fidelidade.')}
-                className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Entrar ou Criar Conta</span>
-              </button>
-            </div>
-          )
-        )}
+          } />
 
-        {/* ADMIN DASHBOARD VIEW (Protected) */}
-        {activeTab === 'admin' && (
-          isUserAdminOrStaff ? (
-            <AdminDashboard
-              products={products}
-              orders={orders}
-              staff={staff}
-              auditLogs={auditLogs}
-              ingredients={ingredients}
-              drivers={drivers}
-              coupons={coupons}
-              loyaltySettings={loyaltySettings}
-              onUpdateLoyalty={setLoyaltySettings}
-              onAddIngredient={(ing) => setIngredients(prev => [...prev, { ...ing, id: Math.random().toString() }])}
-              onUpdateIngredientStock={(id, stock) => setIngredients(prev => prev.map(i => i.id === id ? { ...i, estoqueAtual: stock } : i))}
-              onDeleteIngredient={(id) => setIngredients(prev => prev.filter(i => i.id !== id))}
-              onAddCoupon={(c) => setCoupons(prev => [...prev, { ...c, id: Math.random().toString() }])}
-              onToggleCoupon={(id, ativo) => setCoupons(prev => prev.map(c => c.id === id ? { ...c, ativo } : c))}
-              onAssignDriver={(orderId, driverId) => setOrders(prev => prev.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o))}
-              currentUser={currentUser!}
-              onAddProduct={handleAddProduct}
-              onUpdateStock={handleUpdateStock}
-              onDeleteProduct={handleDeleteProduct}
-              onUpdateOrderStatus={handleUpdateOrderStatus}
-              onUpdateRole={handleUpdateRole}
-              showToast={showToast}
-              storePhone={storePhone}
-              setStorePhone={setStorePhone}
-            />
-          ) : (
-            <div className="py-20 text-center max-w-md mx-auto space-y-4">
-              <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto">
-                <ShieldAlert className="w-8 h-8" />
+          {/* CUSTOMER PORTAL / PROFILE VIEW */}
+          <Route path="/profile" element={
+            currentUser ? (
+              <CustomerProfileView
+                currentUser={currentUser}
+                onUpdateUser={handleUpdateUser}
+                orders={orders}
+                onNavigateToShop={() => navigate('/')}
+                onNavigateToAdmin={() => navigate('/admin')}
+              />
+            ) : (
+              <div className="py-20 text-center max-w-md mx-auto space-y-4">
+                <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto">
+                  <User className="w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-black">Portal do Cliente Cloudnine</h2>
+                <p className="text-xs text-[var(--color-outline)]">
+                  Faça login ou crie sua conta para acessar seu histórico de pedidos, saldo de pontos do clube de fidelidade e personalizar seu perfil.
+                </p>
+                <button
+                  onClick={() => handleOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos do clube de fidelidade.')}
+                  className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Entrar ou Criar Conta</span>
+                </button>
               </div>
-              <h2 className="text-xl font-black">Área Restrita do Sistema</h2>
-              <p className="text-xs text-[var(--color-outline)]">
-                Você precisa estar autenticado com uma conta de Administrador ou Equipe para acessar esta página.
-              </p>
-              <button
-                onClick={() => handleOpenAuthModal('Acesso Administrativo: Por favor, entre com sua conta de colaborador para acessar o painel de gestão.')}
-                className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Acessar Conta Autorizada</span>
-              </button>
-            </div>
-          )
-        )}
+            )
+          } />
 
+          {/* ADMIN DASHBOARD VIEW (Protected) */}
+          <Route path="/admin" element={
+            isUserAdminOrStaff ? (
+              <AdminDashboard
+                products={products}
+                orders={orders}
+                staff={staff}
+                auditLogs={auditLogs}
+                ingredients={ingredients}
+                drivers={drivers}
+                coupons={coupons}
+                loyaltySettings={loyaltySettings}
+                onUpdateLoyalty={setLoyaltySettings}
+                onAddIngredient={(ing) => setIngredients(prev => [...prev, { ...ing, id: Math.random().toString() }])}
+                onUpdateIngredientStock={(id, stock) => setIngredients(prev => prev.map(i => i.id === id ? { ...i, estoqueAtual: stock } : i))}
+                onDeleteIngredient={(id) => setIngredients(prev => prev.filter(i => i.id !== id))}
+                onAddCoupon={(c) => setCoupons(prev => [...prev, { ...c, id: Math.random().toString() }])}
+                onToggleCoupon={(id, ativo) => setCoupons(prev => prev.map(c => c.id === id ? { ...c, ativo } : c))}
+                onAssignDriver={(orderId, driverId) => setOrders(prev => prev.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o))}
+                currentUser={currentUser!}
+                onAddProduct={handleAddProduct}
+                onUpdateStock={handleUpdateStock}
+                onDeleteProduct={handleDeleteProduct}
+                onUpdateOrderStatus={handleUpdateOrderStatus}
+                onUpdateRole={handleUpdateRole}
+                showToast={showToast}
+                storePhone={storePhone}
+                setStorePhone={setStorePhone}
+              />
+            ) : (
+              <div className="py-20 text-center max-w-md mx-auto space-y-4">
+                <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto">
+                  <ShieldAlert className="w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-black">Área Restrita do Sistema</h2>
+                <p className="text-xs text-[var(--color-outline)]">
+                  Você precisa estar autenticado com uma conta de Administrador ou Equipe para acessar esta página.
+                </p>
+                <button
+                  onClick={() => handleOpenAuthModal('Acesso Administrativo: Por favor, entre com sua conta de colaborador para acessar o painel de gestão.')}
+                  className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Acessar Conta Autorizada</span>
+                </button>
+              </div>
+            )
+          } />
+        </Routes>
       </main>
 
       {/* Footer */}

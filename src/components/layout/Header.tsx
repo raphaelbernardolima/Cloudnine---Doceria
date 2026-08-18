@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Cake, Sparkles, Sun, Moon, Contrast, Award, Settings2, User, LogOut, Menu, X, ChevronRight } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ShoppingBag, Cake, Sparkles, Sun, Moon, Contrast, Settings2, User, LogOut, Menu, X, ChevronRight } from 'lucide-react';
 import { ThemeMode, UserProfile } from '../../types/index';
 
 interface HeaderProps {
-  activeTab: 'shop' | 'custom-cake' | 'loyalty' | 'admin' | 'profile';
-  setActiveTab: (tab: 'shop' | 'custom-cake' | 'loyalty' | 'admin' | 'profile') => void;
   cartCount: number;
   onOpenCart: () => void;
   onOpenCustomCakeModal: () => void;
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   currentUser: UserProfile | null;
-  onOpenAuthModal: () => void;
+  onOpenAuthModal: (notice?: string) => void;
   onLogout: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  activeTab,
-  setActiveTab,
   cartCount,
   onOpenCart,
   onOpenCustomCakeModal,
@@ -25,10 +22,12 @@ export const Header: React.FC<HeaderProps> = ({
   setThemeMode,
   currentUser,
   onOpenAuthModal,
-  onOpenCustomerProfile,
   onLogout
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   const toggleTheme = () => {
     if (themeMode === 'light') setThemeMode('dark');
@@ -39,26 +38,26 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleAdminClick = () => {
     setIsMobileMenuOpen(false);
-    if (activeTab === 'admin') {
-      setActiveTab('shop');
+    if (currentPath === '/admin') {
+      navigate('/');
       return;
     }
     
     if (!currentUser) {
-      onOpenAuthModal();
+      onOpenAuthModal('Faça login com uma conta de equipe para acessar o Painel de Gestão.');
       return;
     }
 
     const staffRoles = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'];
     if (staffRoles.includes(currentUser.role)) {
-      setActiveTab('admin');
+      navigate('/admin');
     } else {
-      alert("Acesso Negado: Apenas membros da equipe podem acessar o Painel de Gestão. Se você acabou de alterar seu cargo para 'admin' no Supabase, atualize a página (F5) ou faça logout e login novamente para que o app reconheça sua nova permissão.");
+      alert("Acesso Negado: Apenas membros da equipe podem acessar o Painel de Gestão.");
     }
   };
 
-  const handleNavClick = (action: () => void) => {
-    action();
+  const handleNavClick = (path: string) => {
+    navigate(path);
     setIsMobileMenuOpen(false);
   };
 
@@ -69,9 +68,9 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand Logo & Title */}
         <div 
           className="flex items-center space-x-2.5 cursor-pointer group shrink-0"
-          onClick={() => handleNavClick(() => setActiveTab('shop'))}
+          onClick={() => handleNavClick('/')}
         >
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-tertiary)] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-tertiary)] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
             <Cake className="w-5 h-5 text-[var(--color-on-primary)]" />
           </div>
           <div>
@@ -86,9 +85,9 @@ export const Header: React.FC<HeaderProps> = ({
         <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5 bg-[var(--color-surface-container)] p-1 rounded-full border border-[var(--color-outline-variant)]/30 shrink-0">
           <button
             id="nav-tab-shop"
-            onClick={() => setActiveTab('shop')}
+            onClick={() => handleNavClick('/')}
             className={`flex items-center space-x-1.5 px-3 lg:px-4 py-1.5 rounded-full text-xs font-bold transition-all min-h-[36px] ${
-              activeTab === 'shop'
+              currentPath === '/'
                 ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                 : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] hover:text-[var(--color-on-surface)]'
             }`}
@@ -106,15 +105,14 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Monte seu Bolo</span>
           </button>
 
-
           <button
             id="nav-tab-profile"
             onClick={() => {
-              if (currentUser) setActiveTab('profile');
-              else onOpenAuthModal();
+              if (currentUser) handleNavClick('/profile');
+              else onOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos do clube de fidelidade.');
             }}
             className={`flex items-center space-x-1.5 px-3 lg:px-4 py-1.5 rounded-full text-xs font-bold transition-all min-h-[36px] ${
-              activeTab === 'profile'
+              currentPath === '/profile'
                 ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                 : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] hover:text-[var(--color-on-surface)]'
             }`}
@@ -122,6 +120,21 @@ export const Header: React.FC<HeaderProps> = ({
             <User className="w-3.5 h-3.5 text-amber-400" />
             <span>Meu Perfil</span>
           </button>
+
+          {currentUser && ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'].includes(currentUser.role) && (
+            <button
+              id="nav-tab-admin"
+              onClick={handleAdminClick}
+              className={`flex items-center space-x-1.5 px-3 lg:px-4 py-1.5 rounded-full text-xs font-bold transition-all min-h-[36px] ${
+                currentPath === '/admin'
+                  ? 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)] shadow-xs'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] hover:text-[var(--color-on-surface)]'
+              }`}
+            >
+              <Settings2 className="w-3.5 h-3.5" />
+              <span>Painel de Gestão</span>
+            </button>
+          )}
         </nav>
 
         {/* Right Action Controls */}
@@ -133,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center space-x-1.5 bg-[var(--color-surface-container-high)] pl-1 pr-1 py-1 rounded-xl border border-[var(--color-outline-variant)]/30 text-xs font-bold">
                 <button
                   type="button"
-                  onClick={() => setActiveTab('profile')}
+                  onClick={() => handleNavClick('/profile')}
                   className="flex items-center space-x-1.5 hover:text-[var(--color-primary)] transition-colors"
                   title="Abrir Meu Perfil / Portal do Cliente"
                 >
@@ -159,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             ) : (
               <button
-                onClick={onOpenAuthModal}
+                onClick={() => onOpenAuthModal()}
                 className="px-3 py-2 rounded-xl text-xs font-bold bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] border border-[var(--color-outline-variant)]/30 hover:bg-[var(--color-surface-container-highest)] transition-all flex items-center space-x-1.5 min-h-[38px]"
               >
                 <User className="w-3.5 h-3.5 text-[var(--color-primary)]" />
@@ -239,14 +252,17 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => handleNavClick(() => setActiveTab('profile'))}
+                    onClick={() => handleNavClick('/profile')}
                     className="p-2.5 rounded-xl bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/30 text-[var(--color-primary)] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[var(--color-surface-container-highest)] transition-colors"
                   >
                     <User className="w-4 h-4" />
                     <span>Ver Perfil</span>
                   </button>
                   <button
-                    onClick={() => handleNavClick(onLogout)}
+                    onClick={() => {
+                      onLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
                     className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-300 font-bold text-xs flex items-center justify-center gap-2 hover:bg-rose-500/20 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
@@ -256,7 +272,10 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             ) : (
               <button
-                onClick={() => handleNavClick(onOpenAuthModal)}
+                onClick={() => {
+                  onOpenAuthModal();
+                  setIsMobileMenuOpen(false);
+                }}
                 className="w-full p-3.5 rounded-2xl bg-[var(--color-surface-container-high)] border border-[var(--color-outline-variant)]/40 text-xs font-extrabold text-[var(--color-on-surface)] flex items-center justify-between hover:bg-[var(--color-surface-container-highest)] transition-all min-h-[48px]"
               >
                 <div className="flex items-center space-x-2.5">
@@ -284,9 +303,9 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavClick(() => setActiveTab('shop'))}
+                onClick={() => handleNavClick('/')}
                 className={`w-full px-4 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-between transition-all min-h-[48px] ${
-                  activeTab === 'shop'
+                  currentPath === '/'
                     ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                     : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
                 }`}
@@ -299,12 +318,15 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavClick(() => {
-                  if (currentUser) setActiveTab('profile');
-                  else onOpenAuthModal();
-                })}
+                onClick={() => {
+                  if (currentUser) handleNavClick('/profile');
+                  else {
+                    onOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos do clube de fidelidade.');
+                    setIsMobileMenuOpen(false);
+                  }
+                }}
                 className={`w-full px-4 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-between transition-all min-h-[48px] ${
-                  activeTab === 'profile'
+                  currentPath === '/profile'
                     ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
                     : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
                 }`}
@@ -317,7 +339,10 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavClick(onOpenCustomCakeModal)}
+                onClick={() => {
+                  onOpenCustomCakeModal();
+                  setIsMobileMenuOpen(false);
+                }}
                 className="w-full px-4 py-3 rounded-2xl text-xs font-extrabold bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] flex items-center justify-between transition-all min-h-[48px]"
               >
                 <div className="flex items-center space-x-3">
@@ -327,12 +352,11 @@ export const Header: React.FC<HeaderProps> = ({
                 <ChevronRight className="w-4 h-4 opacity-70" />
               </button>
 
-
               {currentUser && ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'].includes(currentUser.role) && (
                 <button
                   onClick={handleAdminClick}
                   className={`w-full px-4 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-between transition-all min-h-[48px] ${
-                    activeTab === 'admin'
+                    currentPath === '/admin'
                       ? 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)] shadow-xs'
                       : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
                   }`}

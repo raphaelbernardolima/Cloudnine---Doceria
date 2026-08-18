@@ -36,23 +36,17 @@ export async function getStoreConfig(): Promise<any | null> {
   }
 }
 
-export async function updateStoreConfig(config: {
-  nome_loja?: string;
-  logo_url?: string;
-  telefone?: string;
-  email?: string;
-  loja_aberta?: boolean;
-  pedido_minimo?: number;
-  raio_entrega_km?: number;
-  horarios_funcionamento?: any;
-}): Promise<{ success: boolean; error?: string }> {
+export async function updateStoreConfig(config: any): Promise<{ success: boolean; error?: string }> {
   const client = getSupabaseClient();
+  try {
+    localStorage.setItem('cloudnine_store_config', JSON.stringify(config));
+  } catch {}
+
   if (!client) {
-    return { success: false, error: 'Supabase não conectado' };
+    return { success: true };
   }
 
   try {
-    // Check if row exists
     const { data: existing } = await client.from('configuracoes_loja').select('id').limit(1).maybeSingle();
 
     if (existing && existing.id) {
