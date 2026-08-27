@@ -11,11 +11,15 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@google/genai": "^2.4.0",
+    "@mui/material": "^9.4.0",
     "@supabase/supabase-js": "^2.110.8",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "^17.2.3",
+    "exceljs": "^4.4.0",
     "express": "^4.21.2",
     "lucide-react": "^0.546.0",
     "mercadopago": "^3.2.1",
@@ -25,7 +29,6 @@
     "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1",
     "vite": "^6.2.3",
-    "xlsx": "^0.18.5",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

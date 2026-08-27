@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface Product {
   id: number | string;
   created_at?: string;
@@ -76,6 +78,7 @@ export interface UserProfile {
 }
 
 export interface OrderItem {
+  nome: ReactNode;
   id?: number;
   pedido_id?: number;
   produto_id?: number | string;
