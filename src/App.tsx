@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { Header } from './components/layout/Header';
-import { Footer } from './components/layout/Footer';
-import { ProductCard, ProductSkeleton } from './components/shop/ProductCard';
-import { ShopView } from './components/shop/ShopView';
-import { ProductModal } from './components/shop/ProductModal';
-import { CustomCakeModal } from './components/shop/CustomCakeModal';
-import { CartDrawer } from './components/shop/CartDrawer';
-import { LoyaltyView } from './components/profile/LoyaltyView';
-import { AdminDashboard } from './components/admin/AdminDashboard';
-import { AuthModal } from './components/auth/AuthModal';
-import { CustomerProfileView } from './components/profile/CustomerProfileView';
+import { Header } from '@/src/core/ui/layout/Header';
+import { Footer } from '@/src/core/ui/layout/Footer';
+import { ProductCard, ProductSkeleton } from '@/src/modules/shop/ui/ProductCard';
+import { ShopView } from '@/src/modules/shop/ui/ShopView';
+import { ProductModal } from '@/src/modules/shop/ui/ProductModal';
+import { CustomCakeModal } from '@/src/modules/shop/ui/CustomCakeModal';
+import { CartDrawer } from '@/src/modules/shop/ui/CartDrawer';
+import { LoyaltyView } from '@/src/modules/profile/ui/LoyaltyView';
+import { AdminDashboard } from '@/src/modules/admin/ui/AdminDashboard';
+import { AuthModal } from '@/src/modules/auth/ui/AuthModal';
+import { CustomerProfileView } from '@/src/modules/profile/ui/CustomerProfileView';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS, INITIAL_INGREDIENTS, INITIAL_DRIVERS, INITIAL_COUPONS, INITIAL_LOYALTY_SETTINGS } from './data/doceriaData';
-import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from './types/index';
-import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB, getSupabaseClient, getStoreConfig } from './services/supabase';
-import { sendOrderStatusNotification, requestNotificationPermission } from './services/notificationService';
+import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings } from '@/src/core/types/index';
+import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB, getSupabaseClient, getStoreConfig } from '@/src/core/services/supabase';
+import { sendOrderStatusNotification, requestNotificationPermission } from '@/src/core/services/notificationService';
+import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';
 import { Search, Sparkles, Heart, ChevronRight, Cake, Gift, ArrowRight, ShieldAlert, LogIn, User } from 'lucide-react';
 
 export const STAFF_ROLES = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'];
@@ -47,6 +48,27 @@ export function App() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loyaltySettings, setLoyaltySettings] = useState<LoyaltySettings>(INITIAL_LOYALTY_SETTINGS);
   const [storePhone, setStorePhone] = useState<string>('(13) 98874-7014');
+  const [customCakeConfig, setCustomCakeConfig] = useState<any>({
+    tamanhos: [
+      { id: '13cm', label: 'Bolo M - 13cm (Rende ~10 fatias)', preco_base: 120.0, peso_estimado_kg: 1.2, fatias: 10 },
+      { id: '15cm', label: 'Bolo G - 15cm (Rende ~15 fatias)', preco_base: 160.0, peso_estimado_kg: 1.8, fatias: 15 },
+      { id: '17cm', label: 'Bolo GG - 17cm (Rende ~20 fatias)', preco_base: 210.0, peso_estimado_kg: 2.2, fatias: 20 }
+    ],
+    massas: [
+      { id: 'm1', label: 'Massa Branca (Baunilha)', preco_adicional: 0 },
+      { id: 'm2', label: 'Massa de Chocolate', preco_adicional: 0 },
+      { id: 'm3', label: 'Massa Red Velvet', preco_adicional: 15.0 },
+      { id: 'm4', label: 'Massa de Churros', preco_adicional: 10.0 }
+    ],
+    recheios: [
+      { id: 'r1', label: 'Brigadeiro Tradicional', preco_adicional: 0 },
+      { id: 'r2', label: 'Brigadeiro Branco', preco_adicional: 0 },
+      { id: 'r3', label: 'Ninho Trufado', preco_adicional: 10.0 },
+      { id: 'r4', label: 'Doce de Leite com Nozes', preco_adicional: 15.0 },
+      { id: 'r5', label: 'Geleia de Morango Artesanal', preco_adicional: 12.0 },
+      { id: 'r6', label: 'Creme de Pistache', preco_adicional: 25.0 }
+    ]
+  });
 
   useEffect(() => {
     async function loadStoreConfig() {
@@ -179,21 +201,25 @@ export function App() {
   const handleAddToCart = (product: Product, quantity = 1, customNote?: string) => {
     setCartItems(prev => {
       const existingIndex = prev.findIndex(item => item.product?.id === product.id && item.customNote === customNote);
+      let newCart;
       if (existingIndex > -1) {
         const updated = [...prev];
         updated[existingIndex].quantity += quantity;
-        return updated;
+        newCart = updated;
+      } else {
+        newCart = [
+          ...prev,
+          {
+            id: `cart-prod-${product.id}-${Date.now()}`,
+            product,
+            quantity,
+            customNote,
+            unitPrice: product.preco
+          }
+        ];
       }
-      return [
-        ...prev,
-        {
-          id: `cart-prod-${product.id}-${Date.now()}`,
-          product,
-          quantity,
-          customNote,
-          unitPrice: product.preco
-        }
-      ];
+      globalEventBus.emit(AppEvents.CART_UPDATED, { items: newCart.length, added: { product } });
+      return newCart;
     });
     setIsCartOpen(true);
   };
