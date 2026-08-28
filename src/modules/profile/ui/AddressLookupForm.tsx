@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  MapPin, Search, Navigation, Check, AlertCircle, Loader2, 
-  Map, Sparkles, Building, Settings, Compass, Info 
+import {
+  MapPin, Search, Navigation, Check, AlertCircle, Loader2,
+  Map, Sparkles, Building, Settings, Compass, Info
 } from 'lucide-react';
 import { fetchAddressByCep, formatCep, reverseGeocodeLatLng, AddressResult } from '@/src/core/services/addressService';
 
@@ -168,11 +168,11 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
 
   return (
     <div className={`animate-in fade-in duration-200 ${compact ? 'space-y-4' : 'space-y-5'}`}>
-      
+
       {/* SECTION 1: Action Bar - GPS */}
       <div className={compact ? 'space-y-3' : 'p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 space-y-4 shadow-2xs'}>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          
+
           {/* GPS Auto Location Button */}
           <button
             type="button"
@@ -228,7 +228,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
 
         {/* Row 1: CEP & Logradouro / Rua */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-          
+
           {/* CEP Input */}
           <div className="sm:col-span-4 space-y-1.5">
             <label className="font-extrabold text-xs text-[var(--color-on-surface)] flex items-center justify-between">
@@ -272,7 +272,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
 
         {/* Row 2: Número, Bairro, Cidade */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-          
+
           {/* Número */}
           <div className="sm:col-span-3 space-y-1.5">
             <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">

@@ -12,7 +12,7 @@ import { AdminDashboard } from '@/src/modules/admin/ui/AdminDashboard';
 import { AuthModal } from '@/src/modules/auth/ui/AuthModal';
 import { CustomerProfileView } from '@/src/modules/profile/ui/CustomerProfileView';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS, INITIAL_INGREDIENTS, INITIAL_DRIVERS, INITIAL_COUPONS, INITIAL_LOYALTY_SETTINGS } from './data/doceriaData';
-import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings } from '@/src/core/types/index';
+import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types/index';
 import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB, getSupabaseClient, getStoreConfig } from '@/src/core/services/supabase';
 import { sendOrderStatusNotification, requestNotificationPermission } from '@/src/core/services/notificationService';
 import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';

@@ -1,6 +1,10 @@
 {
   "name": "Cloudnine Doceria",
   "description": "E-commerce de confeitaria artesanal Cloudnine com catálogo, personalização de bolos, agendamento de entregas, fidelidade e painel admin completo.",
-  "requestFramePermissions": ["geolocation"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

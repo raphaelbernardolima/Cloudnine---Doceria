@@ -104,8 +104,14 @@ export const INITIAL_ORDERS: Order[] = [
     endereco_entreg: 'Av. Paulista, 1500 - Apt 82 - Bela Vista, São Paulo - SP',
     impressoCozinha: true,
     itens: [
-      { produto_id: 1, nomeProduto: 'Caixa Degustação Brigadeiros Gourmet Cloudnine (12 un)', quantidade: 1, preco_unitario: 48.90 },
-      { produto_id: 3, nomeProduto: 'Torre de Macarons Franceses Cloudnine (8 un)', quantidade: 1, preco_unitario: 39.90 }
+      {
+        id: 1, produto_id: 1, nomeProduto: 'Caixa Degustação Brigadeiros Gourmet Cloudnine (12 un)', quantidade: 1, preco_unitario: 48.90,
+        nome: ''
+      },
+      {
+        id: 2, produto_id: 3, nomeProduto: 'Torre de Macarons Franceses Cloudnine (8 un)', quantidade: 1, preco_unitario: 39.90,
+        nome: ''
+      }
     ]
   },
   {
@@ -123,7 +129,10 @@ export const INITIAL_ORDERS: Order[] = [
     endereco_entreg: 'Retirada no Balcão Cloudnine (Al. Gabriel Monteiro da Silva, 450)',
     impressoCozinha: true,
     itens: [
-      { produto_id: 5, nomeProduto: 'Kit Gift Luxo Cloudnine Aniversário', quantidade: 1, preco_unitario: 129.00, detalhesCustomizados: 'Escrever "Parabéns Kátia!" no cartão' }
+      {
+        id: 3, produto_id: 5, nomeProduto: 'Kit Gift Luxo Cloudnine Aniversário', quantidade: 1, preco_unitario: 129.00, detalhesCustomizados: 'Escrever "Parabéns Kátia!" no cartão',
+        nome: ''
+      }
     ]
   }
 ];
