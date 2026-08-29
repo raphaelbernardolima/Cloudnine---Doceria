@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
+import { Box, Chip, Select, MenuItem, IconButton } from '@mui/material';
 import { 
   Package, ShoppingBag, Users, FileText, Printer, Sparkles, 
   Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle, 
@@ -73,7 +76,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   storePhone,
   setStorePhone
 }) => {
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'dashboard';
+  const setActiveTab = (tab: string) => setSearchParams({ tab });
 
   
   // Notification Toast State
@@ -176,7 +181,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.</p>
         </div>
           {/* Tab Selector - Wrap layout to eliminate horizontal scrolling */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-[var(--color-surface-container)] p-2 rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs font-bold max-w-2xl justify-end">
+        <div className="hidden md:flex flex-wrap items-center gap-1.5 bg-[var(--color-surface-container)] p-2 rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs font-bold max-w-2xl justify-end">
           {['admin', 'ADMIN'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('dashboard')}
@@ -361,178 +366,80 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <h3 className="font-bold text-xl text-[var(--color-on-surface)]">
                 Pedidos
               </h3>
-              <p className="text-sm text-[var(--color-outline)]">Gestão visual e em tempo real da esteira de produção e entrega.</p>
-            </div>
-            <div className="flex gap-2">
-               <button className="px-4 py-2 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] text-sm font-bold flex items-center gap-2 hover:bg-[var(--color-surface-container-highest)]">
-                 <Filter className="w-4 h-4" />
-                 Filtrar
-               </button>
+              <p className="text-sm text-[var(--color-outline)]">Gestão visual e em tempo real usando DataGrid.</p>
             </div>
           </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
-            {/* Coluna 1: Pendentes */}
-            <div className="min-w-[320px] w-[320px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 rounded-3xl p-4 flex flex-col snap-start shrink-0">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <h4 className="font-extrabold text-[var(--color-on-surface)] flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-                  Pendentes
-                </h4>
-                <span className="bg-[var(--color-surface-container-high)] text-xs font-bold px-2 py-0.5 rounded-full">
-                  {orders.filter(o => o.status === 'pendente_pix').length}
-                </span>
-              </div>
-              <div className="flex-1 space-y-3 overflow-y-auto">
-                {orders.filter(o => o.status === 'pendente_pix').map(o => (
-                  <div key={o.id} className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/30 p-4 rounded-2xl shadow-sm hover:shadow-md hover:border-[var(--color-primary)]/40 transition-all cursor-grab">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-black text-[var(--color-primary)] text-sm">#{o.id}</span>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600">Aguardando PIX</span>
-                    </div>
-                    <div className="space-y-1 mb-3">
-                      <p className="font-bold text-[var(--color-on-surface)] text-sm">{o.cliente_nome}</p>
-                      <p className="text-xs text-[var(--color-outline)] truncate">{o.itens.map(i => `${i.quantidade}x ${i.nomeProduto}`).join(', ')}</p>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-[var(--color-outline-variant)]/20 pt-3 mt-3">
-                      <span className="font-extrabold text-sm">R$ {o.total.toFixed(2).replace('.', ',')}</span>
-                      <select
-                        value={o.status}
-                        onChange={(e) => onUpdateOrderStatus(o.id, e.target.value as any)}
-                        className="text-xs font-bold bg-[var(--color-surface-container-high)] border-none rounded-lg p-1 cursor-pointer focus:ring-2 focus:ring-[var(--color-primary)]"
-                      >
-                        <option value="pendente_pix">Pendente</option>
-                        <option value="em_preparo">Aprovar (Preparo)</option>
-                        <option value="cancelado">Cancelar</option>
-                      </select>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Coluna 2: Em Preparo */}
-            <div className="min-w-[320px] w-[320px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 rounded-3xl p-4 flex flex-col snap-start shrink-0">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <h4 className="font-extrabold text-[var(--color-on-surface)] flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-blue-500 animate-pulse"></span>
-                  Em Preparo
-                </h4>
-                <span className="bg-[var(--color-surface-container-high)] text-xs font-bold px-2 py-0.5 rounded-full">
-                  {orders.filter(o => o.status === 'em_preparo').length}
-                </span>
-              </div>
-              <div className="flex-1 space-y-3 overflow-y-auto">
-                {orders.filter(o => o.status === 'em_preparo').map(o => (
-                  <div key={o.id} className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/30 p-4 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-500/40 transition-all cursor-grab border-l-4 border-l-blue-500">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-black text-blue-600 text-sm">#{o.id}</span>
-                      <button onClick={() => setPrintingOrder(o)} className="text-xs p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors" title="Imprimir Comanda">
-                        <Printer className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="space-y-1 mb-3">
-                      <p className="font-bold text-[var(--color-on-surface)] text-sm">{o.cliente_nome}</p>
-                      <p className="text-xs text-[var(--color-outline)] whitespace-pre-wrap">{o.itens.map(i => `${i.quantidade}x ${i.nomeProduto}`).join(', ')}</p>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-[var(--color-outline-variant)]/20 pt-3 mt-3">
-                       <span className="text-xs font-bold text-[var(--color-outline)]">{o.tipo_entrega === 'retirada' ? '🏪 Retirar' : '🛵 Entregar'}</span>
-                       <select
-                        value={o.status}
-                        onChange={(e) => onUpdateOrderStatus(o.id, e.target.value as any)}
-                        className="text-xs font-bold bg-blue-50 text-blue-700 border-none rounded-lg p-1.5 cursor-pointer focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="em_preparo">Preparando...</option>
-                        <option value="pronto_retirada">Pronto!</option>
-                      </select>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Coluna 3: Pronto para Expedição */}
-            <div className="min-w-[320px] w-[320px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 rounded-3xl p-4 flex flex-col snap-start shrink-0">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <h4 className="font-extrabold text-[var(--color-on-surface)] flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-purple-500"></span>
-                  Expedição
-                </h4>
-                <span className="bg-[var(--color-surface-container-high)] text-xs font-bold px-2 py-0.5 rounded-full">
-                  {orders.filter(o => o.status === 'pronto_retirada').length}
-                </span>
-              </div>
-              <div className="flex-1 space-y-3 overflow-y-auto">
-                {orders.filter(o => o.status === 'pronto_retirada').map(o => (
-                  <div key={o.id} className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/30 p-4 rounded-2xl shadow-sm hover:shadow-md hover:border-purple-500/40 transition-all cursor-grab border-l-4 border-l-purple-500">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-black text-purple-600 text-sm">#{o.id}</span>
-                      <span className="text-xs font-bold text-[var(--color-outline)]">{o.data_agendada}</span>
-                    </div>
-                    <div className="space-y-1 mb-3">
-                      <p className="font-bold text-[var(--color-on-surface)] text-sm">{o.cliente_nome}</p>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-[var(--color-outline-variant)]/20 pt-3 mt-3">
-                       <span className="text-xs font-bold text-purple-600">{o.tipo_entrega === 'retirada' ? '🏪 Aguardando Cliente' : '🛵 Aguardando Motoboy'}</span>
-                       <select
-                        value={o.status}
-                        onChange={(e) => onUpdateOrderStatus(o.id, e.target.value as any)}
-                        className="text-xs font-bold bg-purple-50 text-purple-700 border-none rounded-lg p-1.5 cursor-pointer focus:ring-2 focus:ring-purple-500"
-                      >
-                        <option value="pronto_retirada">Expedição</option>
-                        {o.tipo_entrega === 'retirada' ? (
-                           <option value="entregue">Finalizar (Entregue)</option>
-                        ) : (
-                           <option value="saiu_entrega">Despachar (Em Rota)</option>
-                        )}
-                      </select>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Coluna 4: Em Rota */}
-            <div className="min-w-[320px] w-[320px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 rounded-3xl p-4 flex flex-col snap-start shrink-0">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <h4 className="font-extrabold text-[var(--color-on-surface)] flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                  Em Rota
-                </h4>
-                <span className="bg-[var(--color-surface-container-high)] text-xs font-bold px-2 py-0.5 rounded-full">
-                  {orders.filter(o => o.status === 'saiu_entrega').length}
-                </span>
-              </div>
-              <div className="flex-1 space-y-3 overflow-y-auto">
-                {orders.filter(o => o.status === 'saiu_entrega').map(o => (
-                  <div key={o.id} className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/30 p-4 rounded-2xl shadow-sm hover:shadow-md hover:border-emerald-500/40 transition-all cursor-grab border-l-4 border-l-emerald-500">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-black text-emerald-600 text-sm">#{o.id}</span>
-                      <Truck className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <div className="space-y-1 mb-3">
-                      <p className="font-bold text-[var(--color-on-surface)] text-sm">{o.cliente_nome}</p>
-                      <p className="text-xs text-[var(--color-outline)] line-clamp-2" title={o.endereco_entreg}>{o.endereco_entreg}</p>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-[var(--color-outline-variant)]/20 pt-3 mt-3">
-                       <select
-                        value={o.status}
-                        onChange={(e) => onUpdateOrderStatus(o.id, e.target.value as any)}
-                        className="text-xs font-bold bg-emerald-50 text-emerald-700 border-none rounded-lg p-1.5 cursor-pointer focus:ring-2 focus:ring-emerald-500 w-full text-center"
-                      >
-                        <option value="saiu_entrega">Em Rota...</option>
-                        <option value="entregue">Confirmar Entrega ✅</option>
-                      </select>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
+          <Box sx={{ height: 600, width: '100%', bgcolor: 'surfaceContainerLowest', borderRadius: 4, overflow: 'hidden' }}>
+            <DataGrid
+              rows={orders}
+              columns={[
+                { field: 'id', headerName: 'ID', width: 90 },
+                { field: 'cliente_nome', headerName: 'Cliente', width: 200 },
+                { 
+                  field: 'itens', 
+                  headerName: 'Itens', 
+                  width: 300,
+                  valueGetter: (params) => {
+                    const val = params;
+                    return Array.isArray(val) ? val.map((i: any) => `${i.quantidade}x ${i.nomeProduto}`).join(', ') : '';
+                  }
+                },
+                { 
+                  field: 'total', 
+                  headerName: 'Total', 
+                  width: 130,
+                  renderCell: (params) => `R$ ${Number(params.value || 0).toFixed(2).replace('.', ',')}`
+                },
+                { 
+                  field: 'created_at', 
+                  headerName: 'Data', 
+                  width: 180,
+                  renderCell: (params) => new Date(params.value).toLocaleString('pt-BR')
+                },
+                {
+                  field: 'status',
+                  headerName: 'Status',
+                  width: 200,
+                  renderCell: (params) => (
+                    <Select
+                      size="small"
+                      value={params.row.status}
+                      onChange={(e) => onUpdateOrderStatus(params.row.id, e.target.value as any)}
+                      sx={{ width: '100%', height: 32, fontSize: '0.875rem' }}
+                    >
+                      <MenuItem value="pendente_pix">Pendente PIX</MenuItem>
+                      <MenuItem value="preparo">Em Preparo</MenuItem>
+                      <MenuItem value="pronto">Pronto p/ Entrega</MenuItem>
+                      <MenuItem value="rota">Em Rota</MenuItem>
+                      <MenuItem value="entregue">Entregue</MenuItem>
+                    </Select>
+                  )
+                },
+                {
+                  field: 'actions',
+                  headerName: 'Ações',
+                  width: 120,
+                  renderCell: (params) => (
+                    <IconButton size="small" onClick={() => setPrintingOrder(params.row)}>
+                      <Printer className="w-4 h-4 text-gray-500" />
+                    </IconButton>
+                  )
+                }
+              ]}
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 10 },
+                },
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              disableRowSelectionOnClick
+              slots={{ toolbar: GridToolbar }}
+              slotProps={{ toolbar: { showQuickFilter: true } }}
+              sx={{ border: 'none', '& .MuiDataGrid-cell': { borderColor: 'var(--color-outline-variant)' } }}
+            />
+          </Box>
         </div>
       )}
-
       {/* TAB: CALENDAR */}
       {activeTab === 'calendar' && (
         <AdminCalendarModule orders={orders} />
@@ -844,46 +751,55 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* TAB 5: DATABASE & SUPABASE AUDIT LOGS */}
       {activeTab === 'database' && (
-        <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-5">
-          <div>
-            <h3 className="font-bold text-base text-[var(--color-on-surface)] flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              Esquema de Tabelas Supabase PostgreSQL & RLS
-            </h3>
-            <p className="text-xs text-[var(--color-outline)]">
-              Visualização administrativa das tabelas e logs de auditoria do banco da Cloudnine.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Table status card */}
-            <div className="p-4 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 space-y-2 text-xs">
-              <span className="font-bold block text-[var(--color-on-surface)]">Tabelas Ativas no Supabase Schema:</span>
-              <ul className="list-disc list-inside space-y-1 text-[var(--color-on-surface-variant)]">
-                <li><code>public.Perfis</code> (RLS ativado p/ perfis e roles)</li>
-                <li><code>public.produtos</code> (Acesso público de leitura)</li>
-                <li><code>public.pedidos</code> & <code>itens_pedidos</code></li>
-                <li><code>public.notificacoes</code> & <code>logs_auditoria</code></li>
-              </ul>
-            </div>
-
-            {/* Audit log list */}
-            <div className="p-4 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 space-y-2 text-xs">
-              <span className="font-bold block text-[var(--color-on-surface)]">Histórico de Auditoria do Sistema:</span>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {auditLogs.map((log) => (
-                  <div key={log.id} className="p-2 rounded-xl bg-[var(--color-surface-container-lowest)] text-sm">
-                    <span className="font-bold text-[var(--color-primary)]">{log.acao}</span>
-                    <p className="text-[var(--color-on-surface)]">{log.detalhes}</p>
-                    <span className="text-[var(--color-outline)] block">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
-                  </div>
-                ))}
-              </div>
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-bold text-xl text-[var(--color-on-surface)] flex items-center gap-2">
+                <ShieldCheck className="w-6 h-6 text-emerald-600" />
+                Logs de Auditoria
+              </h3>
+              <p className="text-sm text-[var(--color-outline)]">Histórico de ações e eventos do sistema.</p>
             </div>
           </div>
+          <Box sx={{ height: 500, width: '100%', bgcolor: 'surfaceContainerLowest', borderRadius: 4, overflow: 'hidden' }}>
+            <DataGrid
+              rows={auditLogs}
+              columns={[
+                { field: 'id', headerName: 'ID', width: 90 },
+                { 
+                  field: 'acao', 
+                  headerName: 'Ação', 
+                  width: 250,
+                  renderCell: (params) => (
+                    <Chip label={params.value} size="small" color="primary" variant="outlined" />
+                  )
+                },
+                { field: 'detalhes', headerName: 'Detalhes', flex: 1, minWidth: 300 },
+                { field: 'user_id', headerName: 'Usuário', width: 150 },
+                { 
+                  field: 'created_at', 
+                  headerName: 'Data', 
+                  width: 180,
+                  renderCell: (params) => new Date(params.value).toLocaleString('pt-BR')
+                }
+              ]}
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 15 },
+                },
+                sorting: {
+                  sortModel: [{ field: 'created_at', sort: 'desc' }],
+                },
+              }}
+              pageSizeOptions={[15, 30, 50]}
+              disableRowSelectionOnClick
+              slots={{ toolbar: GridToolbar }}
+              slotProps={{ toolbar: { showQuickFilter: true } }}
+              sx={{ border: 'none' }}
+            />
+          </Box>
         </div>
       )}
-
       {/* THERMAL PRINT MODAL / TICKET PREVIEW */}
       {printingOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">

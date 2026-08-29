@@ -108,7 +108,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     const newOrder: Partial<Order> = {
       id: Math.floor(1000 + Math.random() * 9000),
       created_at: new Date().toISOString(),
-      cliente_nome: nomeCliente,
+      cliente_nomeProduto: nomeCliente,
       cliente_telefone: telefoneCliente,
       total: totalFinal,
       status: metodoPagamento === 'pix' ? 'pendente_pix' : 'em_preparo',

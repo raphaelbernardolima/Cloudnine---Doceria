@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Card, CardMedia, CardContent, CardActions, Typography, Box, Button as MuiButton, IconButton } from '@mui/material';
 import { Package, Plus, Trash2, Edit, AlertCircle, ChefHat } from 'lucide-react';
 import type { Product, Ingredient } from '@/src/core/types/index';
 
@@ -77,25 +78,46 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
               <span>Novo Doce no Catálogo</span>
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((p) => (
-              <div key={p.id} className="p-4 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 flex items-center justify-between gap-3 shadow-xs">
-                <img src={p.image_url} alt={p.nome} className="w-16 h-16 rounded-2xl object-cover" referrerPolicy="no-referrer" />
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-xs text-[var(--color-on-surface)] truncate">{p.nome}</h4>
-                  <span className="text-sm text-[var(--color-primary)] font-bold block">R$ {p.preco.toFixed(2).replace('.', ',')}</span>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <span className="text-sm text-[var(--color-outline)] font-semibold">Estoque:</span>
-                    <button onClick={() => onUpdateStock(p.id, Math.max(0, p.estoque - 1))} className="px-2 py-0.5 rounded-md bg-[var(--color-surface-container-high)] text-xs font-bold">-</button>
-                    <span className="text-xs font-black">{p.estoque}</span>
-                    <button onClick={() => onUpdateStock(p.id, p.estoque + 1)} className="px-2 py-0.5 rounded-md bg-[var(--color-surface-container-high)] text-xs font-bold">+</button>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <button className="p-2 rounded-xl text-blue-500 hover:bg-blue-500/10 transition-colors"><Edit className="w-4 h-4" /></button>
-                  <button onClick={() => onDeleteProduct(p.id)} className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              </div>
+              <Card key={p.id} sx={{ display: 'flex', flexDirection: 'column', borderRadius: 4, bgcolor: 'surfaceContainerLowest', border: '1px solid', borderColor: 'outlineVariant' }}>
+                <CardMedia
+                  component="img"
+                  height="160"
+                  image={p.image_url}
+                  alt={p.nome}
+                  sx={{ objectFit: 'cover', height: 160 }}
+                />
+                <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+                  <Typography gutterBottom variant="subtitle1" component="div" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                    {p.nome}
+                  </Typography>
+                  <Typography variant="body2" color="primary.main" sx={{ fontWeight: 'bold', mb: 2 }}>
+                    R$ {p.preco.toFixed(2).replace('.', ',')}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: 'surfaceContainerHigh', p: 1, borderRadius: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                      ESTOQUE
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <MuiButton size="small" variant="outlined" color="primary" onClick={() => onUpdateStock(p.id, Math.max(0, p.estoque - 1))} sx={{ minWidth: 32, p: 0.5 }}>-1</MuiButton>
+                      <Typography variant="body2" sx={{ fontWeight: 'black', minWidth: 32, textAlign: 'center' }}>
+                        {p.estoque}
+                      </Typography>
+                      <MuiButton size="small" variant="contained" color="primary" disableElevation onClick={() => onUpdateStock(p.id, p.estoque + 1)} sx={{ minWidth: 32, p: 0.5 }}>+1</MuiButton>
+                      <MuiButton size="small" variant="contained" color="secondary" disableElevation onClick={() => onUpdateStock(p.id, p.estoque + 10)} sx={{ minWidth: 40, p: 0.5, ml: 0.5 }}>+10</MuiButton>
+                    </Box>
+                  </Box>
+                </CardContent>
+                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2, pt: 0 }}>
+                  <IconButton size="small" color="primary" sx={{ bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main', color: 'white' } }}>
+                    <Edit className="w-4 h-4" />
+                  </IconButton>
+                  <IconButton size="small" color="error" onClick={() => onDeleteProduct(p.id)} sx={{ bgcolor: 'error.light', '&:hover': { bgcolor: 'error.main', color: 'white' } }}>
+                    <Trash2 className="w-4 h-4" />
+                  </IconButton>
+                </CardActions>
+              </Card>
             ))}
           </div>
         </div>

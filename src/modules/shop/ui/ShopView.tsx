@@ -1,7 +1,8 @@
 import React from 'react';
 import { ProductCard, ProductSkeleton } from './ProductCard';
-import { Sparkles, Cake, Gift, Search } from 'lucide-react';
+import { Sparkles, Cake, Gift, Search, SlidersHorizontal } from 'lucide-react';
 import { Product } from '@/src/core/types/index';
+import { Box, Typography, Button, TextField, InputAdornment, Grid, Chip, Stack, IconButton, alpha } from '@mui/material';
 
 interface ShopViewProps {
   categories: string[];
@@ -31,113 +32,151 @@ export function ShopView({
   onOpenQuickView
 }: ShopViewProps) {
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>
       
-      {/* Hero Brand Banner */}
-      <div className="relative rounded-3xl p-8 sm:p-10 bg-gradient-to-r from-[var(--color-primary-container)] via-[var(--color-surface-container-high)] to-[var(--color-secondary-container)] border border-[var(--color-outline-variant)]/30 overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-xs">
-        <div className="space-y-3 text-center md:text-left z-10 max-w-xl">
-          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-black uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 fill-current" />
-            <span>Confeitaria Fina & Artesanal</span>
-          </span>
-          
-          <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-on-surface)] tracking-tight leading-tight">
-            Momentos Inesquecíveis Pedem Doces Especiais ☁️
-          </h1>
-          
-          <p className="text-xs sm:text-sm text-[var(--color-on-surface-variant)] leading-relaxed">
-            Ingredientes nobres importados, preparo diário e carinho em cada detalhe. Faça seu pedido para entrega agendada ou monte seu bolo exclusivo.
-          </p>
-
-          <div className="pt-2 flex flex-wrap gap-3 justify-center md:justify-start">
-            <button
-              onClick={onOpenCustomCake}
-              className="px-5 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-extrabold text-xs flex items-center space-x-2 shadow-md hover:opacity-95 transition-all"
-            >
-              <Cake className="w-4 h-4" />
-              <span>Monte seu Bolo Personalizado</span>
-            </button>
-
-            <button
-              onClick={onNavigateLoyalty}
-              className="px-5 py-3 rounded-2xl bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)] font-bold text-xs flex items-center space-x-2 border border-[var(--color-outline-variant)]/40 hover:bg-[var(--color-surface-container-high)] transition-all"
-            >
-              <Gift className="w-4 h-4 text-amber-500" />
-              <span>Conheça o Cloudnine Club</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Banner Right Image */}
-        <div className="relative w-full md:w-80 h-56 rounded-2xl overflow-hidden shadow-lg border border-white/20 transform rotate-1 hover:rotate-0 transition-transform">
-          <img 
-            src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800" 
-            alt="Doces Cloudnine" 
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+      {/* Categories (Pills) */}
+      <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1, '&::-webkit-scrollbar': { display: 'none' } }}>
+        {categories.map((cat) => (
+          <Chip
+            key={cat}
+            label={cat}
+            onClick={() => setSelectedCategory(cat)}
+            color={selectedCategory === cat ? 'primary' : 'default'}
+            variant={selectedCategory === cat ? 'filled' : 'outlined'}
+            sx={{
+              px: 1,
+              py: 2.5,
+              borderRadius: '9999px',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              bgcolor: selectedCategory === cat ? 'primary.light' : 'surfaceContainerLow',
+              color: selectedCategory === cat ? 'primary.dark' : 'text.secondary',
+              borderColor: selectedCategory === cat ? 'transparent' : 'outlineVariant',
+              '&:hover': {
+                bgcolor: selectedCategory === cat ? 'primary.light' : 'surfaceContainerHighest',
+              }
+            }}
           />
-        </div>
-      </div>
+        ))}
+      </Box>
 
-      {/* Filter & Search Bar */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          
-          {/* Categories Pills */}
-          <div className="flex items-center space-x-1.5 overflow-x-auto w-full pb-1 sm:pb-0">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                    : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+      {/* Header section (Nossas Delicias + Search) */}
+      <Stack spacing={4}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+          <TextField
+            fullWidth
+            placeholder="Descubra novos sabores..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ 
+              flexGrow: 1,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '9999px',
+                bgcolor: 'transparent',
+                '& fieldset': {
+                  borderColor: 'outlineVariant',
+                }
+              }
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search className="w-5 h-5 text-[var(--color-outline)]" />
+                  </InputAdornment>
+                ),
+              }
+            }}
+          />
+          <IconButton 
+            sx={{ 
+              border: '1px solid', 
+              borderColor: 'outlineVariant', 
+              p: 1.5,
+              display: { xs: 'none', sm: 'flex' }
+            }}
+          >
+            <SlidersHorizontal className="w-5 h-5" />
+          </IconButton>
+        </Box>
 
-          {/* Search Input */}
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-outline)]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar brigadeiro, bolo..."
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 text-xs focus:outline-none focus:border-[var(--color-primary)] text-[var(--color-on-surface)]"
-            />
-          </div>
-        </div>
-      </div>
+        <Box>
+          <Typography variant="h2" component="h1" sx={{ color: 'text.primary', mb: 1 }}>
+            Nossas Delícias
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Artesanal, delicado e feito para você.
+          </Typography>
+        </Box>
+      </Stack>
 
       {/* Product Catalog Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Grid container spacing={3}>
         {isLoadingProducts ? (
           Array.from({ length: 6 }).map((_, idx) => (
-            <ProductSkeleton key={idx} />
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={idx}>
+              <ProductSkeleton />
+            </Grid>
           ))
         ) : (
           filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={(p) => onAddToCart(p, 1)}
-              onOpenQuickView={(p) => onOpenQuickView(p)}
-            />
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={product.id}>
+              <ProductCard
+                product={product}
+                onAddToCart={(p) => onAddToCart(p, 1)}
+                onOpenQuickView={(p) => onOpenQuickView(p)}
+              />
+            </Grid>
           ))
         )}
-      </div>
+      </Grid>
 
       {!isLoadingProducts && filteredProducts.length === 0 && (
-        <div className="py-16 text-center space-y-2 text-[var(--color-outline)]">
-          <p className="font-bold text-sm text-[var(--color-on-surface)]">Nenhum doce encontrado nesta categoria</p>
-          <p className="text-xs">Tente buscar por outro termo ou escolha outra categoria do cardápio.</p>
-        </div>
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="subtitle1" color="text.primary" gutterBottom>
+            Nenhum doce encontrado nesta categoria
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Tente buscar por outro termo ou escolha outra categoria do cardápio.
+          </Typography>
+        </Box>
       )}
-    </div>
+
+      {/* Hero Brand Banner moved to bottom or removed to match screenshots better, but let's keep it as an extra action block at the bottom */}
+      <Box sx={{ 
+        p: { xs: 4, sm: 6 }, 
+        borderRadius: 4, 
+        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.surfaceContainerHighest} 100%)`,
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 4
+      }}>
+        <Box sx={{ maxWidth: 500, textAlign: { xs: 'center', md: 'left' } }}>
+          <Typography variant="h3" sx={{ mb: 2, color: 'primary.dark' }}>
+            Momentos Inesquecíveis Pedem Doces Especiais ☁️
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 4, color: 'text.secondary' }}>
+            Ingredientes nobres importados, preparo diário e carinho em cada detalhe. Faça seu pedido para entrega agendada ou monte seu bolo exclusivo.
+          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
+            <Button variant="contained" onClick={onOpenCustomCake} startIcon={<Cake className="w-4 h-4" />}>
+              Bolo Personalizado
+            </Button>
+            <Button variant="outlined" onClick={onNavigateLoyalty} startIcon={<Gift className="w-4 h-4" />}>
+              Cloudnine Club
+            </Button>
+          </Stack>
+        </Box>
+        <Box 
+          component="img" 
+          src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800"
+          alt="Doces Cloudnine"
+          sx={{ width: { xs: '100%', md: 300 }, height: 200, objectFit: 'cover', borderRadius: 3, transform: 'rotate(2deg)', boxShadow: 3 }}
+        />
+      </Box>
+
+    </Box>
   );
 }

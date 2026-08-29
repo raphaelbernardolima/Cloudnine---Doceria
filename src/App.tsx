@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '@/src/core/ui/layout/Header';
+import { MobileBottomNav } from '@/src/core/ui/layout/MobileBottomNav';
 import { Footer } from '@/src/core/ui/layout/Footer';
 import { ProductCard, ProductSkeleton } from '@/src/modules/shop/ui/ProductCard';
 import { ShopView } from '@/src/modules/shop/ui/ShopView';
@@ -23,6 +24,7 @@ export const STAFF_ROLES = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA
 export function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
   const navigate = useNavigate();
+  const location = useLocation();
 
 
   // Auth User State
@@ -409,14 +411,16 @@ export function App() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenCustomCakeModal={() => setIsCustomCakeOpen(true)}
         themeMode={themeMode}
-        setThemeMode={setThemeMode}
+        toggleTheme={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}
+        currentPath={location.pathname}
+        onNavigate={(path) => navigate(path)}
         currentUser={currentUser}
         onOpenAuthModal={(notice) => handleOpenAuthModal(notice)}
         onLogout={handleLogout}
       />
 
       {/* Main Body View */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 md:pb-6">
         <Routes>
           {/* CUSTOMER SHOP VIEW */}
           <Route path="/" element={
@@ -530,6 +534,13 @@ export function App() {
         </Routes>
       </main>
 
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav
+        onOpenCustomCakeModal={() => setIsCustomCakeOpen(true)}
+        onOpenAuthModal={handleOpenAuthModal}
+        isAuthenticated={!!currentUser}
+      />
+      
       {/* Footer */}
       <Footer />
 
@@ -578,7 +589,7 @@ export function App() {
       )}
 
       {/* Floating WhatsApp Support Button */}
-      {(() => {
+      {(!currentUser || !['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'].includes(currentUser.role)) && (() => {
         const cleanPhone = storePhone ? storePhone.replace(/\D/g, '') : '5513988747014';
         const finalPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
         const whatsappUrl = `https://wa.me/${finalPhone}?text=Olá!%20Gostaria%20de%20suporte%20com%20meu%20pedido%20na%20Cloudnine.`;

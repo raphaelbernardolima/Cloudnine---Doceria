@@ -7,7 +7,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   ScatterChart, Scatter, ZAxis, Cell, ReferenceLine
 } from 'recharts';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 interface AdminFinanceModuleProps {
   orders: Order[];
