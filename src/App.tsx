@@ -407,7 +407,7 @@ export function App() {
       {/* Header */}
       <Header
         cartCount={cartTotalCount}
-        onOpenCart={() => setIsCartOpen(true)}
+        onOpenCart={() => setIsCartOpen(prev => !prev)}
         onOpenCustomCakeModal={() => setIsCustomCakeOpen(true)}
         themeMode={themeMode}
         toggleTheme={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}
