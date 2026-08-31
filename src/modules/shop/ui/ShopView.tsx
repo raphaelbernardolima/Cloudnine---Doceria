@@ -34,17 +34,41 @@ export function ShopView({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>
       
-      {/* Categories (Pills) */}
-      <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1, '&::-webkit-scrollbar': { display: 'none' } }}>
+      {/* Categories (Pills) - Horizontal Scroll */}
+      <Box
+        id="shop-categories-filter-bar"
+        sx={{
+          display: 'flex',
+          gap: 1.5,
+          overflowX: 'auto',
+          maxWidth: '100%',
+          width: '100%',
+          py: 0.5,
+          px: 0.25,
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          scrollSnapType: 'x proximity',
+        }}
+      >
         {categories.map((cat) => (
           <Chip
+            id={`category-filter-${cat.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
             key={cat}
             label={cat}
             onClick={() => setSelectedCategory(cat)}
             color={selectedCategory === cat ? 'primary' : 'default'}
             variant={selectedCategory === cat ? 'filled' : 'outlined'}
             sx={{
-              px: 1,
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
+              scrollSnapAlign: 'start',
+              cursor: 'pointer',
+              userSelect: 'none',
+              px: 1.5,
               py: 2.5,
               borderRadius: '9999px',
               fontWeight: 600,
@@ -52,8 +76,10 @@ export function ShopView({
               bgcolor: selectedCategory === cat ? 'primary.light' : 'surfaceContainerLow',
               color: selectedCategory === cat ? 'primary.dark' : 'text.secondary',
               borderColor: selectedCategory === cat ? 'transparent' : 'outlineVariant',
+              transition: 'all 0.2s ease',
               '&:hover': {
-                bgcolor: selectedCategory === cat ? 'primary.light' : 'surfaceContainerHighest',
+                bgcolor: selectedCategory === cat ? 'primary.light' : 'surfaceContainerHigh',
+                transform: 'translateY(-1px)',
               }
             }}
           />
@@ -146,7 +172,7 @@ export function ShopView({
       <Box sx={{ 
         p: { xs: 4, sm: 6 }, 
         borderRadius: 4, 
-        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.surfaceContainerHighest} 100%)`,
+        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light} 0%, rgba(254, 240, 245, 0.8) 100%)`,
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
         alignItems: 'center',

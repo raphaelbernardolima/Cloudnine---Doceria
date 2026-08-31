@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '@/src/core/ui/layout/Header';
 import { MobileBottomNav } from '@/src/core/ui/layout/MobileBottomNav';
-import { Footer } from '@/src/core/ui/layout/Footer';
 import { ProductCard, ProductSkeleton } from '@/src/modules/shop/ui/ProductCard';
 import { ShopView } from '@/src/modules/shop/ui/ShopView';
 import { ProductModal } from '@/src/modules/shop/ui/ProductModal';
@@ -540,9 +539,6 @@ export function App() {
         onOpenAuthModal={handleOpenAuthModal}
         isAuthenticated={!!currentUser}
       />
-      
-      {/* Footer */}
-      <Footer />
 
       {/* Auth Modal */}
       <AuthModal

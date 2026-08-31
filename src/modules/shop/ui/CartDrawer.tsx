@@ -108,7 +108,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     const newOrder: Partial<Order> = {
       id: Math.floor(1000 + Math.random() * 9000),
       created_at: new Date().toISOString(),
-      cliente_nomeProduto: nomeCliente,
+      cliente_nome: nomeCliente,
       cliente_telefone: telefoneCliente,
       total: totalFinal,
       status: metodoPagamento === 'pix' ? 'pendente_pix' : 'em_preparo',
@@ -117,12 +117,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       data_agendada: dataAgendada,
       horario_agendado: horarioAgendado,
       endereco_entreg: tipoEntrega === 'entrega' ? endereco : 'Retirada no Balcão Cloudnine (Al. Gabriel Monteiro da Silva, 450)',
-      itens: items.map(i => ({
-        nomeProduto: i.product?.nome || (i.customCake ? `Bolo Personalizado ${i.customCake.tamanho}` : 'Doce Especial'),
-        quantidade: i.quantity,
-        preco_unitario: i.unitPrice,
-        detalhesCustomizados: i.customNote || (i.customCake ? `${i.customCake.massa} + ${i.customCake.recheio1}` : undefined)
-      }))
+      itens: items.map(i => {
+        const itemTitle = i.product?.nome || (i.customCake ? `Bolo Personalizado ${i.customCake.tamanho}` : 'Doce Especial');
+        return {
+          nome: itemTitle,
+          nomeProduto: itemTitle,
+          quantidade: i.quantity,
+          preco_unitario: i.unitPrice,
+          detalhesCustomizados: i.customNote || (i.customCake ? `${i.customCake.massa} + ${i.customCake.recheio1}` : undefined)
+        };
+      })
     };
 
     onPlaceOrder(newOrder);

@@ -78,11 +78,11 @@ export interface UserProfile {
 }
 
 export interface OrderItem {
-  nome: ReactNode;
   id?: number;
   pedido_id?: number;
   produto_id?: number | string;
   nomeProduto: string;
+  nome?: string;
   quantidade: number;
   preco_unitario: number;
   detalhesCustomizados?: string;

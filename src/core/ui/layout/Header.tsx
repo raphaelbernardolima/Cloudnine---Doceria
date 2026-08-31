@@ -1,7 +1,22 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Menu, X, User, LogOut, Settings2, Sparkles, ChevronRight } from 'lucide-react';
+import { 
+  ShoppingBag, 
+  Menu, 
+  X, 
+  User, 
+  LogOut, 
+  DollarSign, 
+  Send, 
+  Heart, 
+  Inbox, 
+  Gauge, 
+  Megaphone, 
+  Settings, 
+  ChefHat, 
+  Layers 
+} from 'lucide-react';
 import { UserProfile, ThemeMode } from '@/src/core/types/index';
-import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button, Chip } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button } from '@mui/material';
 
 interface HeaderProps {
   cartCount: number;
@@ -35,12 +50,13 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(false);
   };
 
-  const handleAdminClick = () => {
-    onNavigate('/admin');
-    setIsMobileMenuOpen(false);
-  };
-
   const isAdmin = currentUser && ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'].includes(currentUser.role);
+
+  const isTabActive = (tabKey: string) => {
+    if (currentPath.includes(`tab=${tabKey}`)) return true;
+    if (tabKey === 'dashboard' && (currentPath === '/admin' || currentPath === '/admin/')) return true;
+    return false;
+  };
 
   return (
     <>
@@ -123,108 +139,326 @@ export const Header: React.FC<HeaderProps> = ({
         anchor="left"
         open={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        PaperProps={{/* @ts-ignore */ sx: { width: 300, p: 2, display: 'flex', flexDirection: 'column', gap: 2 } }}
+        slotProps={{
+          paper: {
+            sx: { 
+              width: { xs: '84vw', sm: 340 }, 
+              maxWidth: 360,
+              bgcolor: '#FDF2F0', 
+              color: '#3D3331',
+              p: { xs: 2.5, sm: 3 }, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'space-between',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
+              borderTopRightRadius: { xs: 24, sm: 28 },
+              borderBottomRightRadius: { xs: 24, sm: 28 },
+            }
+          }
+        }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h5" sx={{ fontFamily: '"Libre Caslon Text", serif', fontStyle: 'italic', color: 'primary.dark' }}>
-            Cloud Nine
-          </Typography>
-          <IconButton onClick={() => setIsMobileMenuOpen(false)}>
-            <X />
-          </IconButton>
+        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+          {/* Header Title */}
+          <Box sx={{ mb: 3, pt: 1, px: 1.5 }}>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                color: '#4A3E3D', 
+                fontWeight: 500, 
+                fontSize: '16px',
+                letterSpacing: '-0.01em',
+                fontFamily: 'inherit'
+              }}
+            >
+              Painel administrativo - Cloudnine
+            </Typography>
+          </Box>
+
+          {/* Admin Navigation List */}
+          {isAdmin ? (
+            <List sx={{ display: 'flex', flexDirection: 'column', gap: 1, p: 0, flexGrow: 1 }}>
+              {/* Financeiro */}
+              {(() => {
+                const active = isTabActive('dashboard');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      onClick={() => handleNavClick('/admin?tab=dashboard')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? '#FCDDD4' : 'transparent',
+                        color: active ? '#3C2218' : '#3D3534',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <DollarSign className="w-5 h-5 stroke-[2.2]" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                        Financeiro
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* Pedidos */}
+              {(() => {
+                const active = isTabActive('orders');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      onClick={() => handleNavClick('/admin?tab=orders')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? '#FCDDD4' : 'transparent',
+                        color: active ? '#3C2218' : '#3D3534',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Send className="w-5 h-5 stroke-[2]" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                        Pedidos
+                      </Typography>
+                      <Typography sx={{ color: '#5A4A47', fontSize: '14px', fontWeight: 500 }}>
+                        100+
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* Encomendas */}
+              {(() => {
+                const active = isTabActive('calendar');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      onClick={() => handleNavClick('/admin?tab=calendar')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? '#FCDDD4' : 'transparent',
+                        color: active ? '#3C2218' : '#3D3534',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Heart className="w-5 h-5 stroke-[2]" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                        Encomendas
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* Estoque */}
+              {(() => {
+                const active = isTabActive('products');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      onClick={() => handleNavClick('/admin?tab=products')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? '#FCDDD4' : 'transparent',
+                        color: active ? '#3C2218' : '#3D3534',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Inbox className="w-5 h-5 stroke-[2]" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                        Estoque
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* Divider */}
+              <Divider sx={{ my: 1.5, borderColor: 'rgba(82, 67, 65, 0.12)' }} />
+
+              {/* Entregas */}
+              {(() => {
+                const active = isTabActive('delivery');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      onClick={() => handleNavClick('/admin?tab=delivery')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? '#FCDDD4' : 'transparent',
+                        color: active ? '#3C2218' : '#3D3534',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Gauge className="w-5 h-5 stroke-[2]" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                        Entregas
+                      </Typography>
+                      <Typography sx={{ color: '#5A4A47', fontSize: '14px', fontWeight: 500 }}>
+                        100+
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* Marketing */}
+              {(() => {
+                const active = isTabActive('marketing') || isTabActive('ai');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      onClick={() => handleNavClick('/admin?tab=marketing')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? '#FCDDD4' : 'transparent',
+                        color: active ? '#3C2218' : '#3D3534',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Megaphone className="w-5 h-5 stroke-[2]" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                        Marketing
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* Configurações */}
+              {(() => {
+                const active = isTabActive('store-config') || isTabActive('payment-config') || isTabActive('staff');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      onClick={() => handleNavClick('/admin?tab=store-config')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? '#FCDDD4' : 'transparent',
+                        color: active ? '#3C2218' : '#3D3534',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Settings className="w-5 h-5 stroke-[2]" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                        Configurações
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+            </List>
+          ) : (
+            <List sx={{ display: 'flex', flexDirection: 'column', gap: 1, p: 0, flexGrow: 1 }}>
+              <ListItem disablePadding>
+                <ListItemButton 
+                  onClick={() => handleNavClick('/')}
+                  sx={{ borderRadius: '9999px', py: 1.4, px: 2.5 }}
+                >
+                  <Typography sx={{ fontWeight: 600, fontSize: '15px' }}>
+                    Cardápio
+                  </Typography>
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton 
+                  onClick={() => { onOpenCustomCakeModal(); setIsMobileMenuOpen(false); }}
+                  sx={{ borderRadius: '9999px', py: 1.4, px: 2.5 }}
+                >
+                  <Typography sx={{ fontWeight: 600, fontSize: '15px' }}>
+                    Montar Bolo Personalizado
+                  </Typography>
+                </ListItemButton>
+              </ListItem>
+            </List>
+          )}
         </Box>
 
-        <Divider />
-
-        {currentUser ? (
-          <Box sx={{ p: 2, bgcolor: 'surfaceContainerHigh', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar src={currentUser.avatar_url || ''} sx={{ bgcolor: 'primary.light', color: 'primary.dark' }}>
-              {currentUser.nome.charAt(0)}
-            </Avatar>
-            <Box sx={{ overflow: 'hidden' }}>
-              <Typography variant="subtitle2" noWrap sx={{ fontWeight: 700 }}>
-                {currentUser.nome}
-              </Typography>
-              <Typography variant="caption" noWrap color="text.secondary">
-                {currentUser.email}
-              </Typography>
-            </Box>
-          </Box>
-        ) : (
-          <Button variant="outlined" fullWidth startIcon={<User />} onClick={() => { onOpenAuthModal(); setIsMobileMenuOpen(false); }}>
-            Entrar / Cadastrar
-          </Button>
-        )}
-
-        <List sx={{ flexGrow: 1 }}>
-          {isAdmin && (
-            <>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=dashboard')}>
-                  <ListItemText primary="Financeiro & Dashboard" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=orders')}>
-                  <ListItemText primary="Pedidos" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=calendar')}>
-                  <ListItemText primary="Calendário de Encomendas" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=products')}>
-                  <ListItemText primary="Estoque & Catálogo" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=kitchen')}>
-                  <ListItemText primary="Comanda Cozinha" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=delivery')}>
-                  <ListItemText primary="Despacho & Logística" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=marketing')}>
-                  <ListItemText primary="Marketing & Fidelidade" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=staff')}>
-                  <ListItemText primary="Equipe & Permissões" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=ai')}>
-                  <ListItemText primary="Marketing IA" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=store-config')}>
-                  <ListItemText primary="Configurações da Loja" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleNavClick('/admin?tab=payment-config')}>
-                  <ListItemText primary="Configurações de Pagamento" sx={{ "& .MuiListItemText-primary": { fontWeight: 600 } }} />
-                </ListItemButton>
-              </ListItem>
-            </>
+        {/* Bottom Button */}
+        <Box sx={{ pt: 2 }}>
+          {currentUser ? (
+            <Button 
+              fullWidth
+              variant="outlined" 
+              startIcon={<LogOut className="w-5 h-5" />} 
+              onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}
+              sx={{
+                borderRadius: '9999px',
+                borderColor: '#9E2A2B',
+                color: '#9E2A2B',
+                py: 1.4,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '15px',
+                '&:hover': {
+                  borderColor: '#7A1F20',
+                  bgcolor: 'rgba(158, 42, 43, 0.05)',
+                }
+              }}
+            >
+              Sair da conta
+            </Button>
+          ) : (
+            <Button 
+              variant="outlined" 
+              fullWidth 
+              startIcon={<User className="w-5 h-5" />} 
+              onClick={() => { onOpenAuthModal(); setIsMobileMenuOpen(false); }}
+              sx={{
+                borderRadius: '9999px',
+                borderColor: '#9E2A2B',
+                color: '#9E2A2B',
+                py: 1.4,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '15px'
+              }}
+            >
+              Entrar / Cadastrar
+            </Button>
           )}
-        </List>
-
-        <Divider />
-        
-        {currentUser && (
-          <Button color="error" fullWidth startIcon={<LogOut className="w-4 h-4" />} onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}>
-            Sair da Conta
-          </Button>
-        )}
+        </Box>
       </Drawer>
     </>
   );

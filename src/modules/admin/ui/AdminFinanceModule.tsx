@@ -140,40 +140,59 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
     };
   }, [filteredOrders, products, ingredients]);
 
-  // 3. EXPORT EXCEL VIA WEB WORKER (MOCKED SYNC VIA SHEETJS)
-  const handleExportExcel = () => {
-    // Aba 1: Resumo Executivo
-    const wsResumo = XLSX.utils.json_to_sheet([
-      { Metrica: "Faturamento Bruto", Valor: financeData.rawRevenue },
-      { Metrica: "Receita Líquida", Valor: financeData.netRevenue },
-      { Metrica: "CMV (Custo Mercadoria)", Valor: financeData.totalCMV },
-      { Metrica: "Margem Bruta (R$)", Valor: financeData.grossMargin },
-      { Metrica: "Margem Bruta (%)", Valor: financeData.grossMarginPercent.toFixed(2) + '%' },
-      { Metrica: "Custos Fixos", Valor: FIXED_COSTS },
-      { Metrica: "Resultado (EBITDA)", Valor: financeData.ebitda }
-    ]);
+  // 3. EXPORT EXCEL VIA EXCELJS
+  const handleExportExcel = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      
+      // Aba 1: Resumo Executivo
+      const sheetResumo = workbook.addWorksheet('Resumo Executivo');
+      sheetResumo.columns = [
+        { header: 'Métrica', key: 'Metrica', width: 30 },
+        { header: 'Valor', key: 'Valor', width: 25 },
+      ];
+      sheetResumo.addRows([
+        { Metrica: "Faturamento Bruto", Valor: formatBRL(financeData.rawRevenue) },
+        { Metrica: "Receita Líquida", Valor: formatBRL(financeData.netRevenue) },
+        { Metrica: "CMV (Custo Mercadoria)", Valor: formatBRL(financeData.totalCMV) },
+        { Metrica: "Margem Bruta (R$)", Valor: formatBRL(financeData.grossMargin) },
+        { Metrica: "Margem Bruta (%)", Valor: financeData.grossMarginPercent.toFixed(2) + '%' },
+        { Metrica: "Custos Fixos", Valor: formatBRL(FIXED_COSTS) },
+        { Metrica: "Resultado (EBITDA)", Valor: formatBRL(financeData.ebitda) }
+      ]);
 
-    // Aba 2: Detalhamento Vendas
-    const wsVendas = XLSX.utils.json_to_sheet(
-      filteredOrders.map(o => ({
-        ID: o.id,
-        Data: o.created_at,
-        Cliente: o.cliente_nome,
-        Total: o.total,
-        Pagamento: o.metodo_pagamento,
-        Canal: o.tipo_entrega
-      }))
-    );
+      // Aba 2: Detalhamento Vendas
+      const sheetVendas = workbook.addWorksheet('Vendas');
+      sheetVendas.columns = [
+        { header: 'ID', key: 'ID', width: 15 },
+        { header: 'Data', key: 'Data', width: 20 },
+        { header: 'Cliente', key: 'Cliente', width: 25 },
+        { header: 'Total (R$)', key: 'Total', width: 15 },
+        { header: 'Pagamento', key: 'Pagamento', width: 20 },
+        { header: 'Canal', key: 'Canal', width: 15 },
+      ];
+      filteredOrders.forEach(o => {
+        sheetVendas.addRow({
+          ID: o.id,
+          Data: new Date(o.created_at).toLocaleDateString('pt-BR'),
+          Cliente: o.cliente_nome,
+          Total: o.total,
+          Pagamento: o.metodo_pagamento,
+          Canal: o.tipo_entrega
+        });
+      });
 
-    // Aba 3: Curva ABC Produtos
-    const wsABC = XLSX.utils.json_to_sheet(financeData.scatterData);
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsResumo, "Resumo Executivo");
-    XLSX.utils.book_append_sheet(wb, wsVendas, "Vendas");
-    XLSX.utils.book_append_sheet(wb, wsABC, "Curva ABC Produtos");
-
-    XLSX.writeFile(wb, `Relatorio_Financeiro_Cloudnine_${new Date().getTime()}.xlsx`);
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Relatorio_Financeiro_Cloudnine_${new Date().getTime()}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error generating Excel report', err);
+    }
   };
 
   return (

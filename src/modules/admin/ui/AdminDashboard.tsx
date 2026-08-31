@@ -379,9 +379,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   field: 'itens', 
                   headerName: 'Itens', 
                   width: 300,
-                  valueGetter: (params) => {
-                    const val = params;
-                    return Array.isArray(val) ? val.map((i: any) => `${i.quantidade}x ${i.nomeProduto}`).join(', ') : '';
+                  valueGetter: (value: any) => {
+                    return Array.isArray(value) ? value.map((i: any) => `${i.quantidade}x ${i.nomeProduto || i.nome || 'Item'}`).join(', ') : '';
                   }
                 },
                 { 

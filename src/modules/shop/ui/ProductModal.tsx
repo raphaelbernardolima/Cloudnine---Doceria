@@ -29,13 +29,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{ /* @ts-ignore */ 
-        sx: { 
-          borderRadius: 4, 
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          bgcolor: 'surfaceContainerLow',
+      slotProps={{
+        paper: {
+          sx: { 
+            borderRadius: 4, 
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            bgcolor: 'surfaceContainerLow',
+          }
         }
       }}
     >
@@ -77,7 +79,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
         </DialogTitle>
 
         <DialogContent sx={{ flexGrow: 1 }}>
-          <Stack direction="row" spacing={1} mb={3}>
+          <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
             {product.is_best_seller && (
               <Chip icon={<Flame className="w-4 h-4" />} label="Bestseller" size="small" color="warning" variant="outlined" />
             )}
@@ -86,11 +88,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             )}
           </Stack>
 
-          <Typography variant="body1" color="text.secondary" paragraph>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             {product.descricao}
           </Typography>
 
-          <Typography variant="h4" color="primary.main" sx={{ fontWeight: 700 }} mb={4}>
+          <Typography variant="h4" color="primary.main" sx={{ fontWeight: 700, mb: 4 }}>
             R$ {product.preco.toFixed(2).replace('.', ',')}
           </Typography>
 
