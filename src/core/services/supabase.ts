@@ -94,8 +94,6 @@ export async function signInWithSupabase(email: string, password: string): Promi
       .eq('id', data.user.id)
       .maybeSingle();
 
-    console.log('Login Supabase user ID:', data.user.id);
-    console.log('Login Perfis query result:', profile, 'Error:', profileError);
 
     let role = profile?.role || data.user.user_metadata?.role || 'cliente';
 
@@ -210,8 +208,6 @@ export async function getCurrentSupabaseUser(): Promise<UserProfile | null> {
       .eq('id', user.id)
       .maybeSingle();
 
-    console.log('Supabase session user ID:', user.id);
-    console.log('Perfis query result:', profile, 'Error:', profileError);
 
     const userEmail = user.email || '';
     let userRole = profile?.role || user.user_metadata?.role || 'cliente';
