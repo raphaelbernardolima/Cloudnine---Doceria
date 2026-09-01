@@ -200,6 +200,9 @@ export const INITIAL_DRIVERS = [
 export const INITIAL_COUPONS = [
   { id: 'c1', codigo: 'BEMVINDO10', tipoDesconto: 'porcentagem' as const, valor: 10, ativo: true, minimoCompra: 50 },
   { id: 'c2', codigo: 'FRETEGRATIS', tipoDesconto: 'frete_gratis' as const, valor: 0, ativo: true, minimoCompra: 100 },
+  { id: 'c3', codigo: 'CLOUDNINE10', tipoDesconto: 'porcentagem' as const, valor: 10, ativo: true, minimoCompra: 0 },
+  { id: 'c4', codigo: 'DOCE10', tipoDesconto: 'fixo' as const, valor: 10, ativo: true, minimoCompra: 0 },
+  { id: 'c5', codigo: 'CAIXAGIFT20', tipoDesconto: 'fixo' as const, valor: 20, ativo: true, minimoCompra: 0 },
 ];
 
 export const INITIAL_LOYALTY_SETTINGS = {

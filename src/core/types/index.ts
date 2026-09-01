@@ -24,15 +24,19 @@ export interface Product {
 }
 
 export interface CustomCakeOption {
-  nome: string;
-  precoAdicional: number;
+  id: string;
+  label: string;
+  preco_base?: number;
+  preco_adicional?: number;
+  peso_estimado_kg?: number;
+  fatias?: number;
 }
 
 export interface CustomCakeConfig {
   tamanhos: CustomCakeOption[];
   massas: CustomCakeOption[];
   recheios: CustomCakeOption[];
-  coberturas: CustomCakeOption[];
+  [key: string]: CustomCakeOption[];
 }
 
 export interface CustomCakeBuilder {

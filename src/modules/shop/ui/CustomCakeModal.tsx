@@ -6,32 +6,32 @@ import { CloudinaryUploader } from '@/src/core/ui/shared/CloudinaryUploader';
 // Provide some fallback default configuration just in case
 const DEFAULT_CONFIG: CustomCakeConfig = {
   tamanhos: [
-    { nome: 'P (10 fatias)', precoAdicional: 95.00 },
-    { nome: 'M (20 fatias)', precoAdicional: 165.00 },
-    { nome: 'G (30 fatias)', precoAdicional: 230.00 },
-    { nome: '2 Andares (45 fatias)', precoAdicional: 360.00 },
+    { id: 't1', label: 'P (10 fatias)', preco_base: 95.00 },
+    { id: 't2', label: 'M (20 fatias)', preco_base: 165.00 },
+    { id: 't3', label: 'G (30 fatias)', preco_base: 230.00 },
+    { id: 't4', label: '2 Andares (45 fatias)', preco_base: 360.00 },
   ],
   massas: [
-    { nome: 'Pão de Ló Baunilha', precoAdicional: 0 },
-    { nome: 'Chocolate Cacau 100%', precoAdicional: 0 },
-    { nome: 'Red Velvet', precoAdicional: 15.00 },
-    { nome: 'Nozes com Especiarias', precoAdicional: 15.00 },
+    { id: 'm1', label: 'Pão de Ló Baunilha', preco_adicional: 0 },
+    { id: 'm2', label: 'Chocolate Cacau 100%', preco_adicional: 0 },
+    { id: 'm3', label: 'Red Velvet', preco_adicional: 15.00 },
+    { id: 'm4', label: 'Nozes com Especiarias', preco_adicional: 15.00 },
   ],
   recheios: [
-    { nome: 'Brigadeiro Belga', precoAdicional: 0 },
-    { nome: 'Ninho Cremoso', precoAdicional: 0 },
-    { nome: 'Doce de Leite com Avelã', precoAdicional: 0 },
-    { nome: 'Cream Cheese com Frutas Vermelhas', precoAdicional: 0 },
-    { nome: 'Pistache Bronte', precoAdicional: 25.00 },
-    { nome: 'Mousse de Maracujá', precoAdicional: 0 },
-    { nome: 'Geleia Caseira de Morango', precoAdicional: 0 },
-    { nome: 'Ganache Meio Amargo', precoAdicional: 0 },
+    { id: 'r1', label: 'Brigadeiro Belga', preco_adicional: 0 },
+    { id: 'r2', label: 'Ninho Cremoso', preco_adicional: 0 },
+    { id: 'r3', label: 'Doce de Leite com Avelã', preco_adicional: 0 },
+    { id: 'r4', label: 'Cream Cheese com Frutas Vermelhas', preco_adicional: 0 },
+    { id: 'r5', label: 'Pistache Bronte', preco_adicional: 25.00 },
+    { id: 'r6', label: 'Mousse de Maracujá', preco_adicional: 0 },
+    { id: 'r7', label: 'Geleia Caseira de Morango', preco_adicional: 0 },
+    { id: 'r8', label: 'Ganache Meio Amargo', preco_adicional: 0 },
   ],
   coberturas: [
-    { nome: 'Chantininho Aveludado', precoAdicional: 0 },
-    { nome: 'Buttercream Suíço', precoAdicional: 0 },
-    { nome: 'Dressed Cake Chocolate', precoAdicional: 0 },
-    { nome: 'Espatulado Rústico', precoAdicional: 0 },
+    { id: 'c1', label: 'Chantininho Aveludado', preco_adicional: 0 },
+    { id: 'c2', label: 'Buttercream Suíço', preco_adicional: 0 },
+    { id: 'c3', label: 'Dressed Cake Chocolate', preco_adicional: 0 },
+    { id: 'c4', label: 'Espatulado Rústico', preco_adicional: 0 },
   ]
 };
 
@@ -49,11 +49,11 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
   config = DEFAULT_CONFIG
 }) => {
   const [step, setStep] = useState(1);
-  const [tamanho, setTamanho] = useState<string>(config.tamanhos[0]?.nome || '');
-  const [massa, setMassa] = useState<string>(config.massas[0]?.nome || '');
-  const [recheio1, setRecheio1] = useState<string>(config.recheios[0]?.nome || '');
+  const [tamanho, setTamanho] = useState<string>(config.tamanhos[0]?.label || '');
+  const [massa, setMassa] = useState<string>(config.massas[0]?.label || '');
+  const [recheio1, setRecheio1] = useState<string>(config.recheios[0]?.label || '');
   const [recheio2, setRecheio2] = useState<string>('Sem 2º recheio');
-  const [cobertura, setCobertura] = useState<string>(config.coberturas[0]?.nome || '');
+  const [cobertura, setCobertura] = useState<string>(config.coberturas[0]?.label || '');
   const [mensagemBolo, setMensagemBolo] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [fotoReferenciaUrl, setFotoReferenciaUrl] = useState<string>('');
@@ -68,7 +68,10 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
 
   const calculateTotalPrice = () => {
     let price = 0;
-    const findPrice = (arr: CustomCakeOption[], nome: string) => arr.find(o => o.nome === nome)?.precoAdicional || 0;
+    const findPrice = (arr: CustomCakeOption[], label: string) => {
+      const opt = arr.find(o => o.label === label);
+      return opt ? (opt.preco_base || 0) + (opt.preco_adicional || 0) : 0;
+    };
     
     price += findPrice(config.tamanhos, tamanho);
     price += findPrice(config.massas, massa);
@@ -136,20 +139,20 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                 <div className="grid grid-cols-2 gap-3">
                   {config.tamanhos.map((t) => (
                     <button
-                      key={t.nome}
-                      onClick={() => setTamanho(t.nome)}
+                      key={t.id}
+                      onClick={() => setTamanho(t.label)}
                       className={`p-3 rounded-2xl border-2 text-xs font-bold text-left transition-all ${
-                        tamanho === t.nome
+                        tamanho === t.label
                           ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-xs'
                           : 'border-[var(--color-outline-variant)]/30 hover:border-[var(--color-outline)] text-[var(--color-on-surface-variant)] bg-[var(--color-surface-container-low)]'
                       }`}
                     >
                       <div className="flex justify-between items-center">
-                        <span>{t.nome}</span>
-                        {tamanho === t.nome && <Check className="w-4 h-4 shrink-0" />}
+                        <span>{t.label}</span>
+                        {tamanho === t.label && <Check className="w-4 h-4 shrink-0" />}
                       </div>
                       <div className="text-[10px] mt-1 opacity-80">
-                        Base: R$ {t.precoAdicional.toFixed(2)}
+                        Base: R$ {(t.preco_base || t.preco_adicional || 0).toFixed(2)}
                       </div>
                     </button>
                   ))}
@@ -165,16 +168,16 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                 <div className="grid grid-cols-2 gap-3">
                   {config.massas.map((m) => (
                     <button
-                      key={m.nome}
-                      onClick={() => setMassa(m.nome)}
+                      key={m.id}
+                      onClick={() => setMassa(m.label)}
                       className={`p-3 rounded-2xl border border-[var(--color-outline-variant)]/30 text-xs font-bold text-left transition-all ${
-                        massa === m.nome
+                        massa === m.label
                           ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md border-transparent'
                           : 'hover:bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)] bg-[var(--color-surface-container-lowest)]'
                       }`}
                     >
-                      <span>{m.nome}</span>
-                      {m.precoAdicional > 0 && <span className="block text-[10px] opacity-80 mt-0.5">+ R$ {m.precoAdicional.toFixed(2)}</span>}
+                      <span>{m.label}</span>
+                      {(m.preco_adicional || 0) > 0 && <span className="block text-[10px] opacity-80 mt-0.5">+ R$ {(m.preco_adicional || 0).toFixed(2)}</span>}
                     </button>
                   ))}
                 </div>
@@ -189,16 +192,16 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                 <div className="grid grid-cols-2 gap-3">
                   {config.recheios.map((r) => (
                     <button
-                      key={r.nome}
-                      onClick={() => setRecheio1(r.nome)}
+                      key={r.id}
+                      onClick={() => setRecheio1(r.label)}
                       className={`p-3 rounded-2xl border border-[var(--color-outline-variant)]/30 text-xs font-bold text-left transition-all ${
-                        recheio1 === r.nome
+                        recheio1 === r.label
                           ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md border-transparent'
                           : 'hover:bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)] bg-[var(--color-surface-container-lowest)]'
                       }`}
                     >
-                      <span>{r.nome}</span>
-                      {r.precoAdicional > 0 && <span className="block text-[10px] opacity-80 mt-0.5">+ R$ {r.precoAdicional.toFixed(2)}</span>}
+                      <span>{r.label}</span>
+                      {(r.preco_adicional || 0) > 0 && <span className="block text-[10px] opacity-80 mt-0.5">+ R$ {(r.preco_adicional || 0).toFixed(2)}</span>}
                     </button>
                   ))}
                 </div>
@@ -225,16 +228,16 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                   </button>
                   {config.recheios.map((r) => (
                     <button
-                      key={r.nome}
-                      onClick={() => setRecheio2(r.nome)}
+                      key={r.id}
+                      onClick={() => setRecheio2(r.label)}
                       className={`p-3 rounded-2xl border border-[var(--color-outline-variant)]/30 text-xs font-bold text-left transition-all ${
-                        recheio2 === r.nome
+                        recheio2 === r.label
                           ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md border-transparent'
                           : 'hover:bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)] bg-[var(--color-surface-container-lowest)]'
                       }`}
                     >
-                      <span>{r.nome}</span>
-                      {r.precoAdicional > 0 && <span className="block text-[10px] opacity-80 mt-0.5">+ R$ {r.precoAdicional.toFixed(2)}</span>}
+                      <span>{r.label}</span>
+                      {(r.preco_adicional || 0) > 0 && <span className="block text-[10px] opacity-80 mt-0.5">+ R$ {(r.preco_adicional || 0).toFixed(2)}</span>}
                     </button>
                   ))}
                 </div>
@@ -249,16 +252,16 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                 <div className="grid grid-cols-2 gap-3">
                   {config.coberturas.map((c) => (
                     <button
-                      key={c.nome}
-                      onClick={() => setCobertura(c.nome)}
+                      key={c.id}
+                      onClick={() => setCobertura(c.label)}
                       className={`p-3 rounded-2xl border border-[var(--color-outline-variant)]/30 text-xs font-bold text-left transition-all ${
-                        cobertura === c.nome
+                        cobertura === c.label
                           ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md border-transparent'
                           : 'hover:bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)] bg-[var(--color-surface-container-lowest)]'
                       }`}
                     >
-                      <span>{c.nome}</span>
-                      {c.precoAdicional > 0 && <span className="block text-[10px] opacity-80 mt-0.5">+ R$ {c.precoAdicional.toFixed(2)}</span>}
+                      <span>{c.label}</span>
+                      {(c.preco_adicional || 0) > 0 && <span className="block text-[10px] opacity-80 mt-0.5">+ R$ {(c.preco_adicional || 0).toFixed(2)}</span>}
                     </button>
                   ))}
                 </div>

@@ -10,19 +10,19 @@ interface AdminCustomCakeModuleProps {
 export function AdminCustomCakeModule({ config, onUpdateConfig }: AdminCustomCakeModuleProps) {
   const [localConfig, setLocalConfig] = useState<CustomCakeConfig>(config);
 
-  const handleUpdateItem = (category: keyof CustomCakeConfig, index: number, field: 'nome' | 'precoAdicional', value: string | number) => {
+  const handleUpdateItem = (category: keyof CustomCakeConfig, index: number, field: 'label' | 'preco_base' | 'preco_adicional', value: string | number) => {
     const updated = { ...localConfig };
     updated[category] = [...updated[category]];
     updated[category][index] = {
       ...updated[category][index],
-      [field]: field === 'precoAdicional' ? Number(value) : value
+      [field]: field !== 'label' ? Number(value) : value
     };
     setLocalConfig(updated);
   };
 
   const handleAddItem = (category: keyof CustomCakeConfig) => {
     const updated = { ...localConfig };
-    updated[category] = [...updated[category], { nome: 'Novo Item', precoAdicional: 0 }];
+    updated[category] = [...updated[category], { id: `c_${Date.now()}`, label: 'Novo Item', preco_adicional: 0 }];
     setLocalConfig(updated);
   };
 
@@ -59,17 +59,17 @@ export function AdminCustomCakeModule({ config, onUpdateConfig }: AdminCustomCak
               <label className="text-[10px] font-bold text-[var(--color-outline)] uppercase tracking-wider mb-1 block">Nome da Opção</label>
               <input
                 type="text"
-                value={item.nome}
-                onChange={(e) => handleUpdateItem(category, index, 'nome', e.target.value)}
+                value={item.label || ''}
+                onChange={(e) => handleUpdateItem(category, index, 'label', e.target.value)}
                 className="w-full bg-transparent text-sm font-bold text-[var(--color-on-surface)] focus:outline-none"
               />
             </div>
             <div className="w-full sm:w-32">
-              <label className="text-[10px] font-bold text-[var(--color-outline)] uppercase tracking-wider mb-1 block">Preço Adicional (R$)</label>
+              <label className="text-[10px] font-bold text-[var(--color-outline)] uppercase tracking-wider mb-1 block">Valor (R$)</label>
               <input
                 type="number"
-                value={item.precoAdicional}
-                onChange={(e) => handleUpdateItem(category, index, 'precoAdicional', e.target.value)}
+                value={category === 'tamanhos' ? (item.preco_base || 0) : (item.preco_adicional || 0)}
+                onChange={(e) => handleUpdateItem(category, index, category === 'tamanhos' ? 'preco_base' : 'preco_adicional', e.target.value)}
                 min="0"
                 step="0.5"
                 className="w-full bg-transparent text-sm font-mono text-[var(--color-on-surface)] focus:outline-none"
