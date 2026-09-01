@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '@/src/core/ui/layout/Header';
 import { MobileBottomNav } from '@/src/core/ui/layout/MobileBottomNav';
-import { ProductCard, ProductSkeleton } from '@/src/modules/shop/ui/ProductCard';
 import { ShopView } from '@/src/modules/shop/ui/ShopView';
 import { ProductModal } from '@/src/modules/shop/ui/ProductModal';
 import { CustomCakeModal } from '@/src/modules/shop/ui/CustomCakeModal';
 import { CartDrawer } from '@/src/modules/shop/ui/CartDrawer';
 import { LoyaltyView } from '@/src/modules/profile/ui/LoyaltyView';
-import { AdminDashboard } from '@/src/modules/admin/ui/AdminDashboard';
 import { AuthModal } from '@/src/modules/auth/ui/AuthModal';
-import { CustomerProfileView } from '@/src/modules/profile/ui/CustomerProfileView';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS, INITIAL_INGREDIENTS, INITIAL_DRIVERS, INITIAL_COUPONS, INITIAL_LOYALTY_SETTINGS } from './data/doceriaData';
 import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types/index';
 import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB, getSupabaseClient, getStoreConfig } from '@/src/core/services/supabase';
 import { sendOrderStatusNotification, requestNotificationPermission } from '@/src/core/services/notificationService';
 import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';
-import { Search, Sparkles, Heart, ChevronRight, Cake, Gift, ArrowRight, ShieldAlert, LogIn, User } from 'lucide-react';
+import { isStaff } from '@/src/core/constants/roles';
+import { Sparkles, ShieldAlert, LogIn, User } from 'lucide-react';
 
-export const STAFF_ROLES = ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'];
+// Lazy-loaded heavy modules (code splitting)
+const AdminDashboard = lazy(() => import('@/src/modules/admin/ui/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const CustomerProfileView = lazy(() => import('@/src/modules/profile/ui/CustomerProfileView').then(m => ({ default: m.CustomerProfileView })));
 
 export function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
@@ -46,10 +46,10 @@ export function App() {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>(INITIAL_COUPONS);
   const [loyaltySettings, setLoyaltySettings] = useState<LoyaltySettings>(INITIAL_LOYALTY_SETTINGS);
   const [storePhone, setStorePhone] = useState<string>('(13) 98874-7014');
-  const [customCakeConfig, setCustomCakeConfig] = useState<any>({
+  const [customCakeConfig, setCustomCakeConfig] = useState<CustomCakeConfig>({
     tamanhos: [
       { id: '13cm', label: 'Bolo M - 13cm (Rende ~10 fatias)', preco_base: 120.0, peso_estimado_kg: 1.2, fatias: 10 },
       { id: '15cm', label: 'Bolo G - 15cm (Rende ~15 fatias)', preco_base: 160.0, peso_estimado_kg: 1.8, fatias: 15 },
@@ -148,15 +148,14 @@ export function App() {
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get('payment');
 
-    if (paymentStatus === 'success') {
-      alert('🎉 Pagamento aprovado com sucesso! Seu pedido já está sendo preparado.');
-      // Limpa os parâmetros da URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (paymentStatus === 'failure') {
-      alert('⚠️ Houve um problema com o pagamento. Por favor, tente novamente ou escolha outra forma de pagamento.');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (paymentStatus === 'pending') {
-      alert('⏳ Seu pagamento está em análise. Avisaremos assim que for aprovado.');
+    const messages: Record<string, string> = {
+      success: '🎉 Pagamento aprovado com sucesso! Seu pedido já está sendo preparado.',
+      failure: '⚠️ Houve um problema com o pagamento. Por favor, tente novamente ou escolha outra forma de pagamento.',
+      pending: '⏳ Seu pagamento está em análise. Avisaremos assim que for aprovado.',
+    };
+
+    if (paymentStatus && messages[paymentStatus]) {
+      showToast(messages[paymentStatus]);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -183,7 +182,7 @@ export function App() {
 
   const handleLoginSuccess = (user: UserProfile) => {
     setCurrentUser(user);
-    if (user.role === 'admin' || user.role === 'confeiteiro' || user.role === 'atendente') {
+    if (isStaff(user)) {
       navigate('/admin');
     }
   };
@@ -249,18 +248,26 @@ export function App() {
   };
 
   const handleApplyCoupon = (code: string) => {
-    if (code.toUpperCase() === 'CLOUDNINE10') {
+    const upperCode = code.toUpperCase();
+    const matchedCoupon = coupons.find(c => c.codigo.toUpperCase() === upperCode && c.ativo);
+
+    if (matchedCoupon) {
       const subtotal = cartItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-      setAppliedDiscount(subtotal * 0.10);
-      showToast('Cupom CLOUDNINE10 de 10% de desconto aplicado com sucesso!');
-    } else if (code.toUpperCase() === 'DOCE10') {
-      setAppliedDiscount(10.00);
-      showToast('Cupom DOCE10 de R$ 10,00 OFF aplicado!');
-    } else if (code.toUpperCase() === 'CAIXAGIFT20') {
-      setAppliedDiscount(20.00);
-      showToast('Desconto de R$ 20,00 aplicado com sucesso!');
-    } else if (code.toUpperCase() === 'BRIGADEIROSGRATIS') {
-      showToast('Recompensa de Brigadeiros resgatada! Adicionaremos ao seu pedido.');
+
+      if (subtotal < matchedCoupon.minimoCompra) {
+        showToast(`Pedido mínimo de R$ ${matchedCoupon.minimoCompra.toFixed(2)} para este cupom.`);
+        return;
+      }
+
+      if (matchedCoupon.tipoDesconto === 'porcentagem') {
+        setAppliedDiscount(subtotal * (matchedCoupon.valor / 100));
+        showToast(`Cupom ${matchedCoupon.codigo} de ${matchedCoupon.valor}% aplicado!`);
+      } else if (matchedCoupon.tipoDesconto === 'fixo') {
+        setAppliedDiscount(matchedCoupon.valor);
+        showToast(`Cupom ${matchedCoupon.codigo} de R$ ${matchedCoupon.valor.toFixed(2)} OFF aplicado!`);
+      } else if (matchedCoupon.tipoDesconto === 'frete_gratis') {
+        showToast(`Frete grátis aplicado com o cupom ${matchedCoupon.codigo}!`);
+      }
     } else {
       showToast('Cupom inválido ou expirado.');
     }
@@ -399,7 +406,7 @@ export function App() {
 
   const cartTotalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const isUserAdminOrStaff = currentUser && STAFF_ROLES.includes(currentUser.role);
+  const isUserAdminOrStaff = isStaff(currentUser);
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-on-surface)] transition-colors font-sans flex flex-col">
@@ -454,13 +461,15 @@ export function App() {
           {/* CUSTOMER PORTAL / PROFILE VIEW */}
           <Route path="/profile" element={
             currentUser ? (
-              <CustomerProfileView
-                currentUser={currentUser}
-                onUpdateUser={handleUpdateUser}
-                orders={orders}
-                onNavigateToShop={() => navigate('/')}
-                onNavigateToAdmin={() => navigate('/admin')}
-              />
+              <Suspense fallback={<div className="py-20 text-center text-[var(--color-outline)]">Carregando perfil...</div>}>
+                <CustomerProfileView
+                  currentUser={currentUser}
+                  onUpdateUser={handleUpdateUser}
+                  orders={orders}
+                  onNavigateToShop={() => navigate('/')}
+                  onNavigateToAdmin={() => navigate('/admin')}
+                />
+              </Suspense>
             ) : (
               <div className="py-20 text-center max-w-md mx-auto space-y-4">
                 <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto">
@@ -484,6 +493,7 @@ export function App() {
           {/* ADMIN DASHBOARD VIEW (Protected) */}
           <Route path="/admin" element={
             isUserAdminOrStaff ? (
+            <Suspense fallback={<div className="py-20 text-center text-[var(--color-outline)]">Carregando painel...</div>}>
               <AdminDashboard
                 products={products}
                 orders={orders}
@@ -508,9 +518,10 @@ export function App() {
                 onUpdateRole={handleUpdateRole}
                 showToast={showToast}
                 storePhone={storePhone}
-                setStorePhone={setStorePhone} customCakeConfig={undefined} onUpdateCustomCakeConfig={function (config: CustomCakeConfig): void {
-                  throw new Error('Function not implemented.');
-                }} />
+                setStorePhone={setStorePhone}
+                customCakeConfig={customCakeConfig}
+                onUpdateCustomCakeConfig={setCustomCakeConfig} />
+            </Suspense>
             ) : (
               <div className="py-20 text-center max-w-md mx-auto space-y-4">
                 <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto">
@@ -585,7 +596,7 @@ export function App() {
       )}
 
       {/* Floating WhatsApp Support Button */}
-      {(!currentUser || !['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'].includes(currentUser.role)) && (() => {
+      {!isStaff(currentUser) && (() => {
         const cleanPhone = storePhone ? storePhone.replace(/\D/g, '') : '5513988747014';
         const finalPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
         const whatsappUrl = `https://wa.me/${finalPhone}?text=Olá!%20Gostaria%20de%20suporte%20com%20meu%20pedido%20na%20Cloudnine.`;

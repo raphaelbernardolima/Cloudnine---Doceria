@@ -6,3 +6,20 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# ── AI Studio generated scripts ──────────────────────────────
+fix_*.py
+fix_*.cjs
+fix_*.sh
+fix-*.cjs
+generate_*.py
+hide_*.py
+update_*.cjs
+parse-*.js
+metadata.json
+
+# ── IDE / OS ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+Thumbs.db

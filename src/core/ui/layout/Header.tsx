@@ -16,6 +16,7 @@ import {
   Layers 
 } from 'lucide-react';
 import { UserProfile, ThemeMode } from '@/src/core/types/index';
+import { isStaff } from '@/src/core/constants/roles';
 import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button } from '@mui/material';
 
 interface HeaderProps {
@@ -50,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(false);
   };
 
-  const isAdmin = currentUser && ['admin', 'confeiteiro', 'atendente', 'ADMIN', 'CAIXA', 'COZINHA', 'LIMPEZA', 'ATENDIMENTO'].includes(currentUser.role);
+  const isAdmin = isStaff(currentUser);
 
   const isTabActive = (tabKey: string) => {
     if (currentPath.includes(`tab=${tabKey}`)) return true;
