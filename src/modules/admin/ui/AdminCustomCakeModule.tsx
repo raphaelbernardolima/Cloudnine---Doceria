@@ -37,15 +37,15 @@ export function AdminCustomCakeModule({ config, onUpdateConfig }: AdminCustomCak
   };
 
   const renderSection = (title: string, category: keyof CustomCakeConfig) => (
-    <div className="bg-[var(--color-surface-container-low)] rounded-3xl p-6 border border-[var(--color-outline-variant)]/30 space-y-4">
-      <div className="flex items-center justify-between border-b border-[var(--color-outline-variant)]/30 pb-4 mb-4">
-        <h3 className="text-sm font-black text-[var(--color-on-surface)] flex items-center gap-2">
-          <Cake className="w-4 h-4 text-[var(--color-primary)]" />
+    <div className="bg-(--color-surface-container-low) rounded-3xl p-6 border border-(--color-outline-variant)/30 space-y-4">
+      <div className="flex items-center justify-between border-b border-(--color-outline-variant)/30 pb-4 mb-4">
+        <h3 className="text-sm font-black text-(--color-on-surface) flex items-center gap-2">
+          <Cake className="w-4 h-4 text-(--color-primary)" />
           {title}
         </h3>
         <button
           onClick={() => handleAddItem(category)}
-          className="p-2 rounded-xl bg-[var(--color-surface-container-high)] hover:bg-[var(--color-primary)] hover:text-[var(--color-on-primary)] transition-all flex items-center justify-center"
+          className="p-2 rounded-xl bg-(--color-surface-container-high) hover:bg-(--color-primary) hover:text-(--color-on-primary) transition-all flex items-center justify-center"
           title="Adicionar Opção"
         >
           <Plus className="w-4 h-4" />
@@ -54,25 +54,25 @@ export function AdminCustomCakeModule({ config, onUpdateConfig }: AdminCustomCak
 
       <div className="space-y-3">
         {localConfig[category].map((item, index) => (
-          <div key={index} className="flex flex-col sm:flex-row gap-3 items-center bg-[var(--color-surface-container-lowest)] p-3 rounded-2xl border border-[var(--color-outline-variant)]/20">
+          <div key={index} className="flex flex-col sm:flex-row gap-3 items-center bg-(--color-surface-container-lowest) p-3 rounded-2xl border border-(--color-outline-variant)/20">
             <div className="flex-1 w-full">
-              <label className="text-[10px] font-bold text-[var(--color-outline)] uppercase tracking-wider mb-1 block">Nome da Opção</label>
+              <label className="text-[10px] font-bold text-(--color-outline) uppercase tracking-wider mb-1 block">Nome da Opção</label>
               <input
                 type="text"
                 value={item.label || ''}
                 onChange={(e) => handleUpdateItem(category, index, 'label', e.target.value)}
-                className="w-full bg-transparent text-sm font-bold text-[var(--color-on-surface)] focus:outline-none"
+                className="w-full bg-transparent text-sm font-bold text-(--color-on-surface) focus:outline-none"
               />
             </div>
             <div className="w-full sm:w-32">
-              <label className="text-[10px] font-bold text-[var(--color-outline)] uppercase tracking-wider mb-1 block">Valor (R$)</label>
+              <label className="text-[10px] font-bold text-(--color-outline) uppercase tracking-wider mb-1 block">Valor (R$)</label>
               <input
                 type="number"
                 value={category === 'tamanhos' ? (item.preco_base || 0) : (item.preco_adicional || 0)}
                 onChange={(e) => handleUpdateItem(category, index, category === 'tamanhos' ? 'preco_base' : 'preco_adicional', e.target.value)}
                 min="0"
                 step="0.5"
-                className="w-full bg-transparent text-sm font-mono text-[var(--color-on-surface)] focus:outline-none"
+                className="w-full bg-transparent text-sm font-mono text-(--color-on-surface) focus:outline-none"
               />
             </div>
             <button
@@ -91,17 +91,17 @@ export function AdminCustomCakeModule({ config, onUpdateConfig }: AdminCustomCak
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-[var(--color-on-surface)] flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-[var(--color-primary)]" />
+          <h2 className="text-xl font-black text-(--color-on-surface) flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-(--color-primary)" />
             Configurador de Bolos
           </h2>
-          <p className="text-xs text-[var(--color-outline)] mt-1 max-w-xl">
+          <p className="text-xs text-(--color-outline) mt-1 max-w-xl">
             Gerencie as opções de tamanho, massas, recheios e coberturas oferecidas no construtor de bolos customizados para os clientes.
           </p>
         </div>
         <button
           onClick={handleSave}
-          className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-sm flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition-all shrink-0"
+          className="px-6 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-sm flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition-all shrink-0"
         >
           <Save className="w-4 h-4" />
           <span>Salvar Alterações</span>

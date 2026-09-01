@@ -44,15 +44,15 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto text-2xl">
               ⚠️
             </div>
-            <h2 className="text-xl font-black text-[var(--color-on-surface)]">
+            <h2 className="text-xl font-black text-(--color-on-surface)">
               Algo deu errado
             </h2>
-            <p className="text-sm text-[var(--color-outline)]">
+            <p className="text-sm text-(--color-outline)">
               Ocorreu um erro inesperado. Tente recarregar a página ou clique no botão abaixo.
             </p>
             {this.state.error && (
-              <details className="text-xs text-left bg-[var(--color-surface-container)] p-3 rounded-xl">
-                <summary className="cursor-pointer font-bold text-[var(--color-outline)]">
+              <details className="text-xs text-left bg-(--color-surface-container) p-3 rounded-xl">
+                <summary className="cursor-pointer font-bold text-(--color-outline)">
                   Detalhes técnicos
                 </summary>
                 <pre className="mt-2 whitespace-pre-wrap break-all text-rose-600">
@@ -62,7 +62,7 @@ export class ErrorBoundary extends Component<Props, State> {
             )}
             <button
               onClick={this.handleRetry}
-              className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-sm shadow-md hover:shadow-lg transition-all"
+              className="px-6 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-sm shadow-md hover:shadow-lg transition-all"
             >
               Tentar novamente
             </button>

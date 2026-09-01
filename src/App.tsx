@@ -12,6 +12,10 @@ import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS, IN
 import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types/index';
 import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB, getSupabaseClient, getStoreConfig } from '@/src/core/services/supabase';
 import { sendOrderStatusNotification, requestNotificationPermission } from '@/src/core/services/notificationService';
+import { useStore } from '@/src/core/store/useStore';
+import { useSupabaseSync } from '@/src/core/hooks/useSupabaseSync';
+import { usePaymentHandler } from '@/src/core/hooks/usePaymentHandler';
+import { useCouponLogic } from '@/src/core/hooks/useCouponLogic';
 import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';
 import { isStaff } from '@/src/core/constants/roles';
 import { Sparkles, ShieldAlert, LogIn, User } from 'lucide-react';
@@ -21,144 +25,39 @@ const AdminDashboard = lazy(() => import('@/src/modules/admin/ui/AdminDashboard'
 const CustomerProfileView = lazy(() => import('@/src/modules/profile/ui/CustomerProfileView').then(m => ({ default: m.CustomerProfileView })));
 
 export function App() {
-  const [themeMode, setThemeMode] = useState<ThemeMode>('light');
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Custom Hooks for Logic Separation
+  useSupabaseSync();
+  usePaymentHandler();
+  const { handleApplyCoupon } = useCouponLogic();
 
-  // Auth User State
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authRequiredNotice, setAuthRequiredNotice] = useState<string | undefined>(undefined);
+  // Global State (Zustand)
+  const {
+    themeMode, setThemeMode,
+    currentUser, setCurrentUser,
+    isAuthModalOpen, setIsAuthModalOpen, authRequiredNotice,
+    toastMessage, showToast,
+    products, setProducts, isLoadingProducts,
+    orders, setOrders,
+    staff, setStaff,
+    auditLogs, setAuditLogs,
+    ingredients, setIngredients,
+    drivers, setDrivers,
+    coupons, setCoupons,
+    loyaltySettings, setLoyaltySettings,
+    storePhone, setStorePhone,
+    customCakeConfig, setCustomCakeConfig,
+    appliedDiscount, setAppliedDiscount,
+    cartItems, isCartOpen, setIsCartOpen, addToCart, updateQuantity, removeFromCart, clearCart
+  } = useStore();
 
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
-  };
-
-  // Datasets
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [staff, setStaff] = useState<UserProfile[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [coupons, setCoupons] = useState<Coupon[]>(INITIAL_COUPONS);
-  const [loyaltySettings, setLoyaltySettings] = useState<LoyaltySettings>(INITIAL_LOYALTY_SETTINGS);
-  const [storePhone, setStorePhone] = useState<string>('(13) 98874-7014');
-  const [customCakeConfig, setCustomCakeConfig] = useState<CustomCakeConfig>({
-    tamanhos: [
-      { id: '13cm', label: 'Bolo M - 13cm (Rende ~10 fatias)', preco_base: 120.0, peso_estimado_kg: 1.2, fatias: 10 },
-      { id: '15cm', label: 'Bolo G - 15cm (Rende ~15 fatias)', preco_base: 160.0, peso_estimado_kg: 1.8, fatias: 15 },
-      { id: '17cm', label: 'Bolo GG - 17cm (Rende ~20 fatias)', preco_base: 210.0, peso_estimado_kg: 2.2, fatias: 20 }
-    ],
-    massas: [
-      { id: 'm1', label: 'Massa Branca (Baunilha)', preco_adicional: 0 },
-      { id: 'm2', label: 'Massa de Chocolate', preco_adicional: 0 },
-      { id: 'm3', label: 'Massa Red Velvet', preco_adicional: 15.0 },
-      { id: 'm4', label: 'Massa de Churros', preco_adicional: 10.0 }
-    ],
-    recheios: [
-      { id: 'r1', label: 'Brigadeiro Tradicional', preco_adicional: 0 },
-      { id: 'r2', label: 'Brigadeiro Branco', preco_adicional: 0 },
-      { id: 'r3', label: 'Ninho Trufado', preco_adicional: 10.0 },
-      { id: 'r4', label: 'Doce de Leite com Nozes', preco_adicional: 15.0 },
-      { id: 'r5', label: 'Geleia de Morango Artesanal', preco_adicional: 12.0 },
-      { id: 'r6', label: 'Creme de Pistache', preco_adicional: 25.0 }
-    ]
-  });
-
-  useEffect(() => {
-    async function loadStoreConfig() {
-      const config = await getStoreConfig();
-      if (config && config.telefone) {
-        setStorePhone(config.telefone);
-      }
-    }
-    loadStoreConfig();
-  }, []);
-
-
-  // Fetch real data from Supabase
-  useEffect(() => {
-    const fetchSupabaseData = async () => {
-      setIsLoadingProducts(true);
-      const client = getSupabaseClient();
-      if (!client) {
-        // Fallback to initial if no supabase configured
-        setProducts(INITIAL_PRODUCTS);
-        setIsLoadingProducts(false);
-        return;
-      }
-
-      try {
-        // Fetch products
-        const { data: prodData, error: prodErr } = await client.from('produtos').select('*');
-        if (!prodErr && prodData && prodData.length > 0) {
-          setProducts(prodData);
-        } else {
-          setProducts([]);
-        }
-
-        // Fetch orders
-        const { data: ordData, error: ordErr } = await client.from('pedidos').select('*, itens_pedidos(*)');
-        if (!ordErr && ordData && ordData.length > 0) {
-          // Transform db format to app format if needed, but assuming compatible for now
-          setOrders(ordData as any);
-        } else {
-          setOrders([]);
-        }
-
-      } catch (err) {
-        console.error("Error fetching from Supabase", err);
-      } finally {
-        setIsLoadingProducts(false);
-      }
-    };
-
-    fetchSupabaseData();
-  }, []);
-  // Cart & UI State
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  // Local UI State (Modals & Filters)
   const [isCustomCakeOpen, setIsCustomCakeOpen] = useState(false);
   const [selectedQuickProduct, setSelectedQuickProduct] = useState<Product | null>(null);
-
-  // Category & Filter
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
-
-  // Check Supabase user session on startup
-  useEffect(() => {
-    async function loadUser() {
-      const user = await getCurrentSupabaseUser();
-      if (user) {
-        setCurrentUser(user);
-      }
-    }
-    loadUser();
-  }, []);
-
-  // Handle Mercado Pago Callback
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const paymentStatus = params.get('payment');
-
-    const messages: Record<string, string> = {
-      success: '🎉 Pagamento aprovado com sucesso! Seu pedido já está sendo preparado.',
-      failure: '⚠️ Houve um problema com o pagamento. Por favor, tente novamente ou escolha outra forma de pagamento.',
-      pending: '⏳ Seu pagamento está em análise. Avisaremos assim que for aprovado.',
-    };
-
-    if (paymentStatus && messages[paymentStatus]) {
-      showToast(messages[paymentStatus]);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
 
   // Synchronize theme attribute on body
   useEffect(() => {
@@ -170,8 +69,7 @@ export function App() {
 
   // Handle Auth open
   const handleOpenAuthModal = (notice?: string) => {
-    setAuthRequiredNotice(notice);
-    setIsAuthModalOpen(true);
+    setIsAuthModalOpen(true, notice);
   };
 
   const handleLogout = async () => {
@@ -199,78 +97,17 @@ export function App() {
 
   // Handle Add Standard Product to Cart
   const handleAddToCart = (product: Product, quantity = 1, customNote?: string) => {
-    setCartItems(prev => {
-      const existingIndex = prev.findIndex(item => item.product?.id === product.id && item.customNote === customNote);
-      let newCart;
-      if (existingIndex > -1) {
-        const updated = [...prev];
-        updated[existingIndex].quantity += quantity;
-        newCart = updated;
-      } else {
-        newCart = [
-          ...prev,
-          {
-            id: `cart-prod-${product.id}-${Date.now()}`,
-            product,
-            quantity,
-            customNote,
-            unitPrice: product.preco
-          }
-        ];
-      }
-      globalEventBus.emit(AppEvents.CART_UPDATED, { items: newCart.length, added: { product } });
-      return newCart;
-    });
-    setIsCartOpen(true);
+    addToCart({ product, quantity, customNote, unitPrice: product.preco });
   };
 
   // Handle Add Custom Cake to Cart
   const handleAddCustomCakeToCart = (cake: CustomCakeBuilder) => {
-    setCartItems(prev => [
-      ...prev,
-      {
-        id: `cart-cake-${Date.now()}`,
-        customCake: cake,
-        quantity: 1,
-        customNote: `Frase no bolo: ${cake.mensagemBolo || 'Nenhuma'} | Obs: ${cake.observacoes || 'Nenhuma'}`,
-        unitPrice: cake.precoCalculado
-      }
-    ]);
-    setIsCartOpen(true);
-  };
-
-  const handleUpdateQuantity = (id: string, newQty: number) => {
-    setCartItems(prev => prev.map(item => item.id === id ? { ...item, quantity: newQty } : item));
-  };
-
-  const handleRemoveCartItem = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
-  };
-
-  const handleApplyCoupon = (code: string) => {
-    const upperCode = code.toUpperCase();
-    const matchedCoupon = coupons.find(c => c.codigo.toUpperCase() === upperCode && c.ativo);
-
-    if (matchedCoupon) {
-      const subtotal = cartItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-
-      if (subtotal < matchedCoupon.minimoCompra) {
-        showToast(`Pedido mínimo de R$ ${matchedCoupon.minimoCompra.toFixed(2)} para este cupom.`);
-        return;
-      }
-
-      if (matchedCoupon.tipoDesconto === 'porcentagem') {
-        setAppliedDiscount(subtotal * (matchedCoupon.valor / 100));
-        showToast(`Cupom ${matchedCoupon.codigo} de ${matchedCoupon.valor}% aplicado!`);
-      } else if (matchedCoupon.tipoDesconto === 'fixo') {
-        setAppliedDiscount(matchedCoupon.valor);
-        showToast(`Cupom ${matchedCoupon.codigo} de R$ ${matchedCoupon.valor.toFixed(2)} OFF aplicado!`);
-      } else if (matchedCoupon.tipoDesconto === 'frete_gratis') {
-        showToast(`Frete grátis aplicado com o cupom ${matchedCoupon.codigo}!`);
-      }
-    } else {
-      showToast('Cupom inválido ou expirado.');
-    }
+    addToCart({
+      customCake: cake,
+      quantity: 1,
+      customNote: `Frase no bolo: ${cake.mensagemBolo || 'Nenhuma'} | Obs: ${cake.observacoes || 'Nenhuma'}`,
+      unitPrice: cake.precoCalculado
+    });
   };
 
   const handlePlaceOrder = async (newOrderData: Partial<Order>) => {
@@ -319,8 +156,8 @@ export function App() {
       }
     }
 
-    setOrders(prev => [fullOrder, ...prev]);
-    setCartItems([]);
+    setOrders([fullOrder, ...orders]);
+    clearCart();
     setAppliedDiscount(0);
 
     // Audit log entry
@@ -341,7 +178,7 @@ export function App() {
       }]);
     }
 
-    setAuditLogs(prev => [novoLog, ...prev]);
+    setAuditLogs([novoLog, ...auditLogs]);
   };
 
   // Product Admin handlers
@@ -350,13 +187,13 @@ export function App() {
     if (client) {
       const { data, error } = await client.from('produtos').insert([newProd]).select();
       if (!error && data) {
-        setProducts(prev => [data[0], ...prev]);
+        setProducts([data[0], ...products]);
         return;
       }
     }
     // Fallback if no client or error
     const created: Product = { ...newProd, id: Date.now() };
-    setProducts(prev => [created, ...prev]);
+    setProducts([created, ...products]);
   };
 
   const handleUpdateStock = async (id: number | string, newStock: number) => {
@@ -364,7 +201,7 @@ export function App() {
     if (client) {
       await client.from('produtos').update({ estoque: newStock }).eq('id', id);
     }
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, estoque: newStock } : p));
+    setProducts(products.map(p => p.id === id ? { ...p, estoque: newStock } : p));
   };
 
   const handleDeleteProduct = async (id: number | string) => {
@@ -372,7 +209,7 @@ export function App() {
     if (client) {
       await client.from('produtos').delete().eq('id', id);
     }
-    setProducts(prev => prev.filter(p => p.id !== id));
+    setProducts(products.filter(p => p.id !== id));
   };
 
   const handleUpdateOrderStatus = async (orderId: number | string, newStatus: Order['status']) => {
@@ -381,7 +218,7 @@ export function App() {
     if (client) {
       await client.from('pedidos').update({ status: newStatus }).eq('id', orderId);
     }
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
 
     if (newStatus === 'saiu_entrega' || newStatus === 'entregue') {
       sendOrderStatusNotification(orderId, newStatus, targetOrder?.cliente_nome);
@@ -389,9 +226,9 @@ export function App() {
   };
 
   const handleUpdateRole = (userId: string, newRole: UserProfile['role']) => {
-    setStaff(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    setStaff(staff.map(u => u.id === userId ? { ...u, role: newRole } : u));
     if (currentUser?.id === userId) {
-      setCurrentUser(prev => prev ? { ...prev, role: newRole } : null);
+      setCurrentUser({ ...currentUser, role: newRole });
     }
   };
 
@@ -409,12 +246,12 @@ export function App() {
   const isUserAdminOrStaff = isStaff(currentUser);
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-on-surface)] transition-colors font-sans flex flex-col">
+    <div className="min-h-screen bg-(--color-surface) text-(--color-on-surface) transition-colors font-sans flex flex-col">
 
       {/* Header */}
       <Header
         cartCount={cartTotalCount}
-        onOpenCart={() => setIsCartOpen(prev => !prev)}
+        onOpenCart={() => setIsCartOpen(!isCartOpen)}
         onOpenCustomCakeModal={() => setIsCustomCakeOpen(true)}
         themeMode={themeMode}
         toggleTheme={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}
@@ -461,7 +298,7 @@ export function App() {
           {/* CUSTOMER PORTAL / PROFILE VIEW */}
           <Route path="/profile" element={
             currentUser ? (
-              <Suspense fallback={<div className="py-20 text-center text-[var(--color-outline)]">Carregando perfil...</div>}>
+              <Suspense fallback={<div className="py-20 text-center text-(--color-outline)">Carregando perfil...</div>}>
                 <CustomerProfileView
                   currentUser={currentUser}
                   onUpdateUser={handleUpdateUser}
@@ -472,16 +309,16 @@ export function App() {
               </Suspense>
             ) : (
               <div className="py-20 text-center max-w-md mx-auto space-y-4">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-(--color-primary)/10 text-(--color-primary) flex items-center justify-center mx-auto">
                   <User className="w-8 h-8" />
                 </div>
                 <h2 className="text-xl font-black">Portal do Cliente Cloudnine</h2>
-                <p className="text-xs text-[var(--color-outline)]">
+                <p className="text-xs text-(--color-outline)">
                   Faça login ou crie sua conta para acessar seu histórico de pedidos, saldo de pontos do clube de fidelidade e personalizar seu perfil.
                 </p>
                 <button
                   onClick={() => handleOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos do clube de fidelidade.')}
-                  className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
+                  className="px-6 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Entrar ou Criar Conta</span>
@@ -493,47 +330,47 @@ export function App() {
           {/* ADMIN DASHBOARD VIEW (Protected) */}
           <Route path="/admin" element={
             isUserAdminOrStaff ? (
-            <Suspense fallback={<div className="py-20 text-center text-[var(--color-outline)]">Carregando painel...</div>}>
-              <AdminDashboard
-                products={products}
-                orders={orders}
-                staff={staff}
-                auditLogs={auditLogs}
-                ingredients={ingredients}
-                drivers={drivers}
-                coupons={coupons}
-                loyaltySettings={loyaltySettings}
-                onUpdateLoyalty={setLoyaltySettings}
-                onAddIngredient={(ing) => setIngredients(prev => [...prev, { ...ing, id: Math.random().toString() }])}
-                onUpdateIngredientStock={(id, stock) => setIngredients(prev => prev.map(i => i.id === id ? { ...i, estoqueAtual: stock } : i))}
-                onDeleteIngredient={(id) => setIngredients(prev => prev.filter(i => i.id !== id))}
-                onAddCoupon={(c) => setCoupons(prev => [...prev, { ...c, id: Math.random().toString() }])}
-                onToggleCoupon={(id, ativo) => setCoupons(prev => prev.map(c => c.id === id ? { ...c, ativo } : c))}
-                onAssignDriver={(orderId, driverId) => setOrders(prev => prev.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o))}
-                currentUser={currentUser!}
-                onAddProduct={handleAddProduct}
-                onUpdateStock={handleUpdateStock}
-                onDeleteProduct={handleDeleteProduct}
-                onUpdateOrderStatus={handleUpdateOrderStatus}
-                onUpdateRole={handleUpdateRole}
-                showToast={showToast}
-                storePhone={storePhone}
-                setStorePhone={setStorePhone}
-                customCakeConfig={customCakeConfig}
-                onUpdateCustomCakeConfig={setCustomCakeConfig} />
-            </Suspense>
+              <Suspense fallback={<div className="py-20 text-center text-(--color-outline)">Carregando painel...</div>}>
+                <AdminDashboard
+                  products={products}
+                  orders={orders}
+                  staff={staff}
+                  auditLogs={auditLogs}
+                  ingredients={ingredients}
+                  drivers={drivers}
+                  coupons={coupons}
+                  loyaltySettings={loyaltySettings}
+                  onUpdateLoyalty={setLoyaltySettings}
+                  onAddIngredient={(ing) => setIngredients([...ingredients, { ...ing, id: Math.random().toString() }])}
+                  onUpdateIngredientStock={(id, stock) => setIngredients(ingredients.map(i => i.id === id ? { ...i, estoqueAtual: stock } : i))}
+                  onDeleteIngredient={(id) => setIngredients(ingredients.filter(i => i.id !== id))}
+                  onAddCoupon={(c) => setCoupons([...coupons, { ...c, id: Math.random().toString() }])}
+                  onToggleCoupon={(id, ativo) => setCoupons(coupons.map(c => c.id === id ? { ...c, ativo } : c))}
+                  onAssignDriver={(orderId, driverId) => setOrders(orders.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o))}
+                  currentUser={currentUser!}
+                  onAddProduct={handleAddProduct}
+                  onUpdateStock={handleUpdateStock}
+                  onDeleteProduct={handleDeleteProduct}
+                  onUpdateOrderStatus={handleUpdateOrderStatus}
+                  onUpdateRole={handleUpdateRole}
+                  showToast={showToast}
+                  storePhone={storePhone}
+                  setStorePhone={setStorePhone}
+                  customCakeConfig={customCakeConfig}
+                  onUpdateCustomCakeConfig={setCustomCakeConfig} />
+              </Suspense>
             ) : (
               <div className="py-20 text-center max-w-md mx-auto space-y-4">
                 <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto">
                   <ShieldAlert className="w-8 h-8" />
                 </div>
                 <h2 className="text-xl font-black">Área Restrita do Sistema</h2>
-                <p className="text-xs text-[var(--color-outline)]">
+                <p className="text-xs text-(--color-outline)">
                   Você precisa estar autenticado com uma conta de Administrador ou Equipe para acessar esta página.
                 </p>
                 <button
                   onClick={() => handleOpenAuthModal('Acesso Administrativo: Por favor, entre com sua conta de colaborador para acessar o painel de gestão.')}
-                  className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
+                  className="px-6 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Acessar Conta Autorizada</span>
@@ -579,9 +416,9 @@ export function App() {
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         items={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveCartItem}
-        onClearCart={() => setCartItems([])}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeFromCart}
+        onClearCart={clearCart}
         onPlaceOrder={handlePlaceOrder}
         appliedDiscount={appliedDiscount}
         onApplyCoupon={handleApplyCoupon}
@@ -589,7 +426,7 @@ export function App() {
 
       {/* Global Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] bg-[var(--color-on-surface)] text-[var(--color-surface)] px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 text-sm font-bold">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-999 bg-(--color-on-surface) text-(--color-surface) px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 text-sm font-bold">
           <Sparkles className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
