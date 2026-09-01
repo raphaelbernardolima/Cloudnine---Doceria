@@ -34,8 +34,8 @@ export function App() {
   const { handleApplyCoupon } = useCouponLogic();
 
   // Global State (Zustand)
-  const { 
-    themeMode, setThemeMode, 
+  const {
+    themeMode, setThemeMode,
     currentUser, setCurrentUser,
     isAuthModalOpen, setIsAuthModalOpen, authRequiredNotice,
     toastMessage, showToast,
@@ -246,7 +246,7 @@ export function App() {
   const isUserAdminOrStaff = isStaff(currentUser);
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-on-surface)] transition-colors font-sans flex flex-col">
+    <div className="min-h-screen bg-(--color-surface) text-(--color-on-surface) transition-colors font-sans flex flex-col">
 
       {/* Header */}
       <Header
@@ -298,7 +298,7 @@ export function App() {
           {/* CUSTOMER PORTAL / PROFILE VIEW */}
           <Route path="/profile" element={
             currentUser ? (
-              <Suspense fallback={<div className="py-20 text-center text-[var(--color-outline)]">Carregando perfil...</div>}>
+              <Suspense fallback={<div className="py-20 text-center text-(--color-outline)">Carregando perfil...</div>}>
                 <CustomerProfileView
                   currentUser={currentUser}
                   onUpdateUser={handleUpdateUser}
@@ -309,16 +309,16 @@ export function App() {
               </Suspense>
             ) : (
               <div className="py-20 text-center max-w-md mx-auto space-y-4">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-(--color-primary)/10 text-(--color-primary) flex items-center justify-center mx-auto">
                   <User className="w-8 h-8" />
                 </div>
                 <h2 className="text-xl font-black">Portal do Cliente Cloudnine</h2>
-                <p className="text-xs text-[var(--color-outline)]">
+                <p className="text-xs text-(--color-outline)">
                   Faça login ou crie sua conta para acessar seu histórico de pedidos, saldo de pontos do clube de fidelidade e personalizar seu perfil.
                 </p>
                 <button
                   onClick={() => handleOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos do clube de fidelidade.')}
-                  className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
+                  className="px-6 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Entrar ou Criar Conta</span>
@@ -330,47 +330,47 @@ export function App() {
           {/* ADMIN DASHBOARD VIEW (Protected) */}
           <Route path="/admin" element={
             isUserAdminOrStaff ? (
-            <Suspense fallback={<div className="py-20 text-center text-[var(--color-outline)]">Carregando painel...</div>}>
-              <AdminDashboard
-                products={products}
-                orders={orders}
-                staff={staff}
-                auditLogs={auditLogs}
-                ingredients={ingredients}
-                drivers={drivers}
-                coupons={coupons}
-                loyaltySettings={loyaltySettings}
-                onUpdateLoyalty={setLoyaltySettings}
-                onAddIngredient={(ing) => setIngredients([...ingredients, { ...ing, id: Math.random().toString() }])}
-                onUpdateIngredientStock={(id, stock) => setIngredients(ingredients.map(i => i.id === id ? { ...i, estoqueAtual: stock } : i))}
-                onDeleteIngredient={(id) => setIngredients(ingredients.filter(i => i.id !== id))}
-                onAddCoupon={(c) => setCoupons([...coupons, { ...c, id: Math.random().toString() }])}
-                onToggleCoupon={(id, ativo) => setCoupons(coupons.map(c => c.id === id ? { ...c, ativo } : c))}
-                onAssignDriver={(orderId, driverId) => setOrders(orders.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o))}
-                currentUser={currentUser!}
-                onAddProduct={handleAddProduct}
-                onUpdateStock={handleUpdateStock}
-                onDeleteProduct={handleDeleteProduct}
-                onUpdateOrderStatus={handleUpdateOrderStatus}
-                onUpdateRole={handleUpdateRole}
-                showToast={showToast}
-                storePhone={storePhone}
-                setStorePhone={setStorePhone}
-                customCakeConfig={customCakeConfig}
-                onUpdateCustomCakeConfig={setCustomCakeConfig} />
-            </Suspense>
+              <Suspense fallback={<div className="py-20 text-center text-(--color-outline)">Carregando painel...</div>}>
+                <AdminDashboard
+                  products={products}
+                  orders={orders}
+                  staff={staff}
+                  auditLogs={auditLogs}
+                  ingredients={ingredients}
+                  drivers={drivers}
+                  coupons={coupons}
+                  loyaltySettings={loyaltySettings}
+                  onUpdateLoyalty={setLoyaltySettings}
+                  onAddIngredient={(ing) => setIngredients([...ingredients, { ...ing, id: Math.random().toString() }])}
+                  onUpdateIngredientStock={(id, stock) => setIngredients(ingredients.map(i => i.id === id ? { ...i, estoqueAtual: stock } : i))}
+                  onDeleteIngredient={(id) => setIngredients(ingredients.filter(i => i.id !== id))}
+                  onAddCoupon={(c) => setCoupons([...coupons, { ...c, id: Math.random().toString() }])}
+                  onToggleCoupon={(id, ativo) => setCoupons(coupons.map(c => c.id === id ? { ...c, ativo } : c))}
+                  onAssignDriver={(orderId, driverId) => setOrders(orders.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o))}
+                  currentUser={currentUser!}
+                  onAddProduct={handleAddProduct}
+                  onUpdateStock={handleUpdateStock}
+                  onDeleteProduct={handleDeleteProduct}
+                  onUpdateOrderStatus={handleUpdateOrderStatus}
+                  onUpdateRole={handleUpdateRole}
+                  showToast={showToast}
+                  storePhone={storePhone}
+                  setStorePhone={setStorePhone}
+                  customCakeConfig={customCakeConfig}
+                  onUpdateCustomCakeConfig={setCustomCakeConfig} />
+              </Suspense>
             ) : (
               <div className="py-20 text-center max-w-md mx-auto space-y-4">
                 <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto">
                   <ShieldAlert className="w-8 h-8" />
                 </div>
                 <h2 className="text-xl font-black">Área Restrita do Sistema</h2>
-                <p className="text-xs text-[var(--color-outline)]">
+                <p className="text-xs text-(--color-outline)">
                   Você precisa estar autenticado com uma conta de Administrador ou Equipe para acessar esta página.
                 </p>
                 <button
                   onClick={() => handleOpenAuthModal('Acesso Administrativo: Por favor, entre com sua conta de colaborador para acessar o painel de gestão.')}
-                  className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
+                  className="px-6 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Acessar Conta Autorizada</span>
@@ -426,7 +426,7 @@ export function App() {
 
       {/* Global Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] bg-[var(--color-on-surface)] text-[var(--color-surface)] px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 text-sm font-bold">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-999 bg-(--color-on-surface) text-(--color-surface) px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 text-sm font-bold">
           <Sparkles className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  ShoppingBag, 
-  Menu, 
-  X, 
-  User, 
-  LogOut, 
-  DollarSign, 
-  Send, 
-  Heart, 
-  Inbox, 
-  Gauge, 
-  Megaphone, 
-  Settings, 
-  ChefHat, 
-  Layers 
+import {
+  ShoppingBag,
+  Menu,
+  X,
+  User,
+  LogOut,
+  DollarSign,
+  Send,
+  Heart,
+  Inbox,
+  Gauge,
+  Megaphone,
+  Settings,
+  ChefHat,
+  Layers
 } from 'lucide-react';
 import { UserProfile, ThemeMode } from '@/src/core/types/index';
 import { isStaff } from '@/src/core/constants/roles';
@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <AppBar position="sticky" sx={{ bgcolor: 'surfaceContainerLow', color: 'text.primary' }}>
         <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 4 } }}>
-          
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {isAdmin && (
               <IconButton
@@ -76,12 +76,12 @@ export const Header: React.FC<HeaderProps> = ({
                 <Menu />
               </IconButton>
             )}
-            
-            <Typography 
-              variant="h4" 
-              component="div" 
-              sx={{ 
-                cursor: 'pointer', 
+
+            <Typography
+              variant="h4"
+              component="div"
+              sx={{
+                cursor: 'pointer',
                 fontFamily: '"Libre Caslon Text", serif',
                 color: 'primary.dark',
                 fontStyle: 'italic',
@@ -113,8 +113,8 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Desktop User Logic */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
               {currentUser ? (
-                <Button 
-                  color="inherit" 
+                <Button
+                  color="inherit"
                   onClick={() => onNavigate('/profile')}
                   startIcon={<Avatar src={currentUser.avatar_url || ''} sx={{ width: 24, height: 24 }}>{currentUser.nome.charAt(0)}</Avatar>}
                 >
@@ -142,14 +142,14 @@ export const Header: React.FC<HeaderProps> = ({
         onClose={() => setIsMobileMenuOpen(false)}
         slotProps={{
           paper: {
-            sx: { 
-              width: { xs: '84vw', sm: 340 }, 
+            sx: {
+              width: { xs: '84vw', sm: 340 },
               maxWidth: 360,
-              bgcolor: '#FDF2F0', 
+              bgcolor: '#FDF2F0',
               color: '#3D3331',
-              p: { xs: 2.5, sm: 3 }, 
-              display: 'flex', 
-              flexDirection: 'column', 
+              p: { xs: 2.5, sm: 3 },
+              display: 'flex',
+              flexDirection: 'column',
               justifyContent: 'space-between',
               boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
               borderTopRightRadius: { xs: 24, sm: 28 },
@@ -161,11 +161,11 @@ export const Header: React.FC<HeaderProps> = ({
         <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           {/* Header Title */}
           <Box sx={{ mb: 3, pt: 1, px: 1.5 }}>
-            <Typography 
-              variant="body1" 
-              sx={{ 
-                color: '#4A3E3D', 
-                fontWeight: 500, 
+            <Typography
+              variant="body1"
+              sx={{
+                color: '#4A3E3D',
+                fontWeight: 500,
                 fontSize: '16px',
                 letterSpacing: '-0.01em',
                 fontFamily: 'inherit'
@@ -183,7 +183,7 @@ export const Header: React.FC<HeaderProps> = ({
                 const active = isTabActive('dashboard');
                 return (
                   <ListItem disablePadding>
-                    <ListItemButton 
+                    <ListItemButton
                       onClick={() => handleNavClick('/admin?tab=dashboard')}
                       sx={{
                         borderRadius: '9999px',
@@ -212,7 +212,7 @@ export const Header: React.FC<HeaderProps> = ({
                 const active = isTabActive('orders');
                 return (
                   <ListItem disablePadding>
-                    <ListItemButton 
+                    <ListItemButton
                       onClick={() => handleNavClick('/admin?tab=orders')}
                       sx={{
                         borderRadius: '9999px',
@@ -226,7 +226,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Send className="w-5 h-5 stroke-[2]" />
+                        <Send className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Pedidos
@@ -244,7 +244,7 @@ export const Header: React.FC<HeaderProps> = ({
                 const active = isTabActive('calendar');
                 return (
                   <ListItem disablePadding>
-                    <ListItemButton 
+                    <ListItemButton
                       onClick={() => handleNavClick('/admin?tab=calendar')}
                       sx={{
                         borderRadius: '9999px',
@@ -258,7 +258,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Heart className="w-5 h-5 stroke-[2]" />
+                        <Heart className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Encomendas
@@ -273,7 +273,7 @@ export const Header: React.FC<HeaderProps> = ({
                 const active = isTabActive('products');
                 return (
                   <ListItem disablePadding>
-                    <ListItemButton 
+                    <ListItemButton
                       onClick={() => handleNavClick('/admin?tab=products')}
                       sx={{
                         borderRadius: '9999px',
@@ -287,7 +287,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Inbox className="w-5 h-5 stroke-[2]" />
+                        <Inbox className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Estoque
@@ -305,7 +305,7 @@ export const Header: React.FC<HeaderProps> = ({
                 const active = isTabActive('delivery');
                 return (
                   <ListItem disablePadding>
-                    <ListItemButton 
+                    <ListItemButton
                       onClick={() => handleNavClick('/admin?tab=delivery')}
                       sx={{
                         borderRadius: '9999px',
@@ -319,7 +319,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Gauge className="w-5 h-5 stroke-[2]" />
+                        <Gauge className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Entregas
@@ -337,7 +337,7 @@ export const Header: React.FC<HeaderProps> = ({
                 const active = isTabActive('marketing') || isTabActive('ai');
                 return (
                   <ListItem disablePadding>
-                    <ListItemButton 
+                    <ListItemButton
                       onClick={() => handleNavClick('/admin?tab=marketing')}
                       sx={{
                         borderRadius: '9999px',
@@ -351,7 +351,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Megaphone className="w-5 h-5 stroke-[2]" />
+                        <Megaphone className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Marketing
@@ -366,7 +366,7 @@ export const Header: React.FC<HeaderProps> = ({
                 const active = isTabActive('store-config') || isTabActive('payment-config') || isTabActive('staff');
                 return (
                   <ListItem disablePadding>
-                    <ListItemButton 
+                    <ListItemButton
                       onClick={() => handleNavClick('/admin?tab=store-config')}
                       sx={{
                         borderRadius: '9999px',
@@ -380,7 +380,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Settings className="w-5 h-5 stroke-[2]" />
+                        <Settings className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Configurações
@@ -393,7 +393,7 @@ export const Header: React.FC<HeaderProps> = ({
           ) : (
             <List sx={{ display: 'flex', flexDirection: 'column', gap: 1, p: 0, flexGrow: 1 }}>
               <ListItem disablePadding>
-                <ListItemButton 
+                <ListItemButton
                   onClick={() => handleNavClick('/')}
                   sx={{ borderRadius: '9999px', py: 1.4, px: 2.5 }}
                 >
@@ -403,7 +403,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
-                <ListItemButton 
+                <ListItemButton
                   onClick={() => { onOpenCustomCakeModal(); setIsMobileMenuOpen(false); }}
                   sx={{ borderRadius: '9999px', py: 1.4, px: 2.5 }}
                 >
@@ -419,10 +419,10 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Bottom Button */}
         <Box sx={{ pt: 2 }}>
           {currentUser ? (
-            <Button 
+            <Button
               fullWidth
-              variant="outlined" 
-              startIcon={<LogOut className="w-5 h-5" />} 
+              variant="outlined"
+              startIcon={<LogOut className="w-5 h-5" />}
               onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}
               sx={{
                 borderRadius: '9999px',
@@ -441,10 +441,10 @@ export const Header: React.FC<HeaderProps> = ({
               Sair da conta
             </Button>
           ) : (
-            <Button 
-              variant="outlined" 
-              fullWidth 
-              startIcon={<User className="w-5 h-5" />} 
+            <Button
+              variant="outlined"
+              fullWidth
+              startIcon={<User className="w-5 h-5" />}
               onClick={() => { onOpenAuthModal(); setIsMobileMenuOpen(false); }}
               sx={{
                 borderRadius: '9999px',
