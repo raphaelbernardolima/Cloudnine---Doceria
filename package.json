@@ -1,7 +1,8 @@
 {
-  "name": "react-example",
+  "name": "cloudnine-doceria",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Plataforma e-commerce e sistema de gestão da Cloudnine Doceria",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
