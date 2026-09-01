@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Product, CartItem, CustomCakeBuilder, UserProfile, ThemeMode } from '@/src/core/types';
+import { Product, CartItem, CustomCakeBuilder, UserProfile, ThemeMode, Order, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types';
 import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';
 
 interface StoreState {
@@ -23,6 +23,34 @@ interface StoreState {
 
   toastMessage: string | null;
   showToast: (msg: string) => void;
+
+  // Datasets
+  products: Product[];
+  setProducts: (products: Product[]) => void;
+  isLoadingProducts: boolean;
+  setIsLoadingProducts: (loading: boolean) => void;
+  orders: Order[];
+  setOrders: (orders: Order[]) => void;
+  staff: UserProfile[];
+  setStaff: (staff: UserProfile[]) => void;
+  auditLogs: AuditLog[];
+  setAuditLogs: (logs: AuditLog[]) => void;
+  ingredients: Ingredient[];
+  setIngredients: (ingredients: Ingredient[]) => void;
+  drivers: Driver[];
+  setDrivers: (drivers: Driver[]) => void;
+  coupons: Coupon[];
+  setCoupons: (coupons: Coupon[]) => void;
+  loyaltySettings: LoyaltySettings;
+  setLoyaltySettings: (settings: LoyaltySettings) => void;
+  storePhone: string;
+  setStorePhone: (phone: string) => void;
+  customCakeConfig: CustomCakeConfig;
+  setCustomCakeConfig: (config: CustomCakeConfig) => void;
+
+  // Shop state
+  appliedDiscount: number;
+  setAppliedDiscount: (discount: number) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -72,5 +100,31 @@ export const useStore = create<StoreState>((set) => ({
   showToast: (msg) => {
     set({ toastMessage: msg });
     setTimeout(() => set({ toastMessage: null }), 3500);
-  }
+  },
+
+  products: [],
+  setProducts: (products) => set({ products }),
+  isLoadingProducts: true,
+  setIsLoadingProducts: (loading) => set({ isLoadingProducts: loading }),
+  orders: [],
+  setOrders: (orders) => set({ orders }),
+  staff: [],
+  setStaff: (staff) => set({ staff }),
+  auditLogs: [],
+  setAuditLogs: (logs) => set({ auditLogs: logs }),
+  ingredients: [],
+  setIngredients: (ingredients) => set({ ingredients }),
+  drivers: [],
+  setDrivers: (drivers) => set({ drivers }),
+  coupons: [],
+  setCoupons: (coupons) => set({ coupons }),
+  loyaltySettings: { pontosPorReal: 1, valorResgatePorPonto: 0.05 },
+  setLoyaltySettings: (settings) => set({ loyaltySettings: settings }),
+  storePhone: '(13) 98874-7014',
+  setStorePhone: (phone) => set({ storePhone: phone }),
+  customCakeConfig: { tamanhos: [], massas: [], recheios: [], coberturas: [] },
+  setCustomCakeConfig: (config) => set({ customCakeConfig: config }),
+
+  appliedDiscount: 0,
+  setAppliedDiscount: (discount) => set({ appliedDiscount: discount }),
 }));
