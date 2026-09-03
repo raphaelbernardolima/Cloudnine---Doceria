@@ -174,16 +174,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     <div className="space-y-6 max-w-7xl mx-auto py-4">
 
       {/* Top Header & Admin Tabs */}
-      <div className="p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
+      <div className="p-8 rounded-[32px] bg-white border border-[#FCDDD4]/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.15)' }}>
         <div>
-          <span className="text-sm font-extrabold uppercase tracking-wider text-(--color-primary) bg-(--color-primary-container) px-2.5 py-1 rounded-md">
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8C6B63] bg-[#FFF0EC] px-3 py-1.5 rounded-full">
             Painel Administrativo Restrito
           </span>
-          <h1 className="text-2xl font-black text-(--color-on-surface) mt-1">
+          <h1 className="text-3xl mt-3" style={{ fontFamily: '"Libre Caslon Text", serif', color: '#3C2218', fontStyle: 'italic' }}>
             Gestão Operacional Cloudnine
           </h1>
-          <p className="text-xs text-(--color-outline)">
-            Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.</p>
+          <p className="text-sm text-[#5A4A47] mt-1 font-medium">
+            Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.
+          </p>
         </div>
         {/* Tab Selector - Wrap layout to eliminate horizontal scrolling */}
         <div className="hidden md:flex flex-wrap items-center gap-1.5 bg-(--color-surface-container) p-2 rounded-2xl border border-(--color-outline-variant)/20 text-xs font-bold max-w-2xl justify-end">
@@ -385,15 +386,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* TAB 1: ORDERS MANAGEMENT */}
       {activeTab === 'orders' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
             <div>
-              <h3 className="font-bold text-xl text-(--color-on-surface)">
-                Pedidos
+              <h3 className="text-2xl" style={{ fontFamily: '"Libre Caslon Text", serif', color: '#3C2218', fontStyle: 'italic' }}>
+                Pedidos Recentes
               </h3>
-              <p className="text-sm text-(--color-outline)">Gestão visual e em tempo real usando DataGrid.</p>
+              <p className="text-sm text-[#8C6B63]">Acompanhe e atualize o status das entregas em tempo real.</p>
             </div>
           </div>
-          <Box sx={{ height: 600, width: '100%', bgcolor: 'surfaceContainerLowest', borderRadius: 4, overflow: 'hidden' }}>
+          <Box sx={{ height: 600, width: '100%', bgcolor: '#FFFFFF', borderRadius: 6, overflow: 'hidden', boxShadow: '0 12px 40px rgba(220, 160, 145, 0.1)', border: '1px solid rgba(252, 221, 212, 0.5)' }}>
             <DataGrid
               rows={orders}
               columns={[

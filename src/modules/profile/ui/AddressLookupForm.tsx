@@ -170,7 +170,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
     <div className={`animate-in fade-in duration-200 ${compact ? 'space-y-4' : 'space-y-5'}`}>
 
       {/* SECTION 1: Action Bar - GPS */}
-      <div className={compact ? 'space-y-3' : 'p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 space-y-4 shadow-2xs'}>
+      <div className={compact ? 'space-y-3' : 'p-4 sm:p-5 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/30 space-y-4 shadow-2xs'}>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
 
           {/* GPS Auto Location Button */}
@@ -178,7 +178,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
             type="button"
             onClick={handleUseCurrentLocation}
             disabled={loadingGeo}
-            className="w-full px-4 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-black text-xs sm:text-sm shadow-xs flex items-center justify-center space-x-2.5 transition-all hover:opacity-90 min-h-[48px] disabled:opacity-60 cursor-pointer"
+            className="w-full px-4 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-black text-xs sm:text-sm shadow-xs flex items-center justify-center space-x-2.5 transition-all hover:opacity-90 min-h-12 disabled:opacity-60 cursor-pointer"
           >
             {loadingGeo ? (
               <Loader2 className="w-5 h-5 animate-spin shrink-0" />
@@ -192,7 +192,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
 
       {/* Notifications */}
       {loadingCep && (
-        <div className="p-3.5 rounded-2xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-extrabold text-xs flex items-center space-x-2.5 border border-[var(--color-primary)]/30">
+        <div className="p-3.5 rounded-2xl bg-(--color-primary)/10 text-(--color-primary) font-extrabold text-xs flex items-center space-x-2.5 border border-(--color-primary)/30">
           <Loader2 className="w-4 h-4 animate-spin shrink-0" />
           <span>Buscando endereço pelo CEP nas bases oficiais da API de CEP...</span>
         </div>
@@ -213,10 +213,10 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
       )}
 
       {/* SECTION 2: Address Fields Form Grid (Spacious & Modern) */}
-      <div className={compact ? 'space-y-4 pt-1' : 'p-4 sm:p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-4 shadow-xs'}>
-        <div className="border-b border-[var(--color-outline-variant)]/20 pb-3 flex flex-wrap items-center justify-between gap-2">
-          <h4 className="font-extrabold text-sm text-[var(--color-on-surface)] flex items-center gap-2">
-            <Building className="w-4 h-4 text-[var(--color-primary)]" />
+      <div className={compact ? 'space-y-4 pt-1' : 'p-4 sm:p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 space-y-4 shadow-xs'}>
+        <div className="border-b border-(--color-outline-variant)/20 pb-3 flex flex-wrap items-center justify-between gap-2">
+          <h4 className="font-extrabold text-sm text-(--color-on-surface) flex items-center gap-2">
+            <Building className="w-4 h-4 text-(--color-primary)" />
             <span>Dados do Endereço</span>
           </h4>
           {geoCoords && (
@@ -231,9 +231,9 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
 
           {/* CEP Input */}
           <div className="sm:col-span-4 space-y-1.5">
-            <label className="font-extrabold text-xs text-[var(--color-on-surface)] flex items-center justify-between">
+            <label className="font-extrabold text-xs text-(--color-on-surface) flex items-center justify-between">
               <span>CEP <span className="text-rose-500">*</span></span>
-              <span className="text-sm text-[var(--color-primary)] font-bold">Busca Automática</span>
+              <span className="text-sm text-(--color-primary) font-bold">Busca Automática</span>
             </label>
             <div className="relative">
               <input
@@ -242,22 +242,22 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
                 onChange={handleCepInput}
                 placeholder="00000-000"
                 maxLength={9}
-                className="w-full p-3 pr-10 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-black text-sm tracking-wide focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
+                className="w-full p-3 pr-10 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-black text-sm tracking-wide focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all min-h-11.5"
               />
               {loadingCep ? (
-                <Loader2 className="w-5 h-5 animate-spin text-[var(--color-primary)] absolute right-3 top-3" />
+                <Loader2 className="w-5 h-5 animate-spin text-(--color-primary) absolute right-3 top-3" />
               ) : (
-                <Search className="w-5 h-5 text-[var(--color-outline)] absolute right-3 top-3" />
+                <Search className="w-5 h-5 text-(--color-outline) absolute right-3 top-3" />
               )}
             </div>
-            <span className="text-sm text-[var(--color-outline)] block">
+            <span className="text-sm text-(--color-outline) block">
               Digite os 8 números do CEP.
             </span>
           </div>
 
           {/* Rua / Logradouro */}
           <div className="sm:col-span-8 space-y-1.5">
-            <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
+            <label className="font-extrabold text-xs text-(--color-on-surface) block">
               Rua / Logradouro <span className="text-rose-500">*</span>
             </label>
             <input
@@ -265,7 +265,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
               value={logradouro}
               onChange={(e) => setLogradouro(e.target.value)}
               placeholder="Ex: Av. Paulista, Alameda Santos"
-              className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-extrabold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
+              className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-extrabold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all min-h-11.5"
             />
           </div>
         </div>
@@ -275,7 +275,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
 
           {/* Número */}
           <div className="sm:col-span-3 space-y-1.5">
-            <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
+            <label className="font-extrabold text-xs text-(--color-on-surface) block">
               Número <span className="text-rose-500">*</span>
             </label>
             <input
@@ -283,13 +283,13 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
               value={numero}
               onChange={(e) => setNumero(e.target.value)}
               placeholder="1500, S/N"
-              className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-black text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
+              className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-black text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all min-h-11.5"
             />
           </div>
 
           {/* Bairro */}
           <div className="sm:col-span-5 space-y-1.5">
-            <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
+            <label className="font-extrabold text-xs text-(--color-on-surface) block">
               Bairro <span className="text-rose-500">*</span>
             </label>
             <input
@@ -297,13 +297,13 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
               value={bairro}
               onChange={(e) => setBairro(e.target.value)}
               placeholder="Ex: Gonzaga, Boqueirão"
-              className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-extrabold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
+              className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-extrabold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all min-h-11.5"
             />
           </div>
 
           {/* Cidade */}
           <div className="sm:col-span-4 space-y-1.5">
-            <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
+            <label className="font-extrabold text-xs text-(--color-on-surface) block">
               Cidade
             </label>
             <input
@@ -311,7 +311,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
               value={cidade}
               onChange={(e) => setCidade(e.target.value)}
               placeholder="Ex: Santos"
-              className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-extrabold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
+              className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-extrabold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all min-h-11.5"
             />
           </div>
         </div>
@@ -321,7 +321,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             {/* Complemento */}
             <div className="space-y-1.5">
-              <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
+              <label className="font-extrabold text-xs text-(--color-on-surface) block">
                 Complemento / Apto / Bloco
               </label>
               <input
@@ -329,13 +329,13 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
                 value={complemento}
                 onChange={(e) => setComplemento(e.target.value)}
                 placeholder="Ex: Apto 42, Bloco B, Casa 2"
-                className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
+                className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all min-h-11.5"
               />
             </div>
 
             {/* Ponto de Referência */}
             <div className="space-y-1.5">
-              <label className="font-extrabold text-xs text-[var(--color-on-surface)] block">
+              <label className="font-extrabold text-xs text-(--color-on-surface) block">
                 Ponto de Referência
               </label>
               <input
@@ -343,7 +343,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
                 value={pontoReferencia}
                 onChange={(e) => setPontoReferencia(e.target.value)}
                 placeholder="Ex: Próximo à estação do metrô, portaria 2"
-                className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all min-h-[46px]"
+                className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all min-h-11.5"
               />
             </div>
           </div>

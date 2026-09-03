@@ -10,13 +10,13 @@ interface LoyaltyViewProps {
 }
 
 export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ currentUser, orders, onApplyRewardCoupon, onOpenAuthModal }) => {
-  const userOrders = currentUser 
+  const userOrders = currentUser
     ? orders.filter(o => (currentUser.email && (o as any).clienteEmail?.toLowerCase() === currentUser.email.toLowerCase()) || (currentUser.telefone && (o as any).telefone === currentUser.telefone))
     : [];
-  
+
   const totalSpent = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
   const points = currentUser?.pontosFidelidade !== undefined ? currentUser.pontosFidelidade : Math.floor(totalSpent);
-  
+
   let level = 'Bronze';
   let nextTierPoints = 100;
   let nextTierName = 'Prata';
@@ -80,7 +80,7 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ currentUser, orders, o
       )}
 
       {/* Banner Points Status */}
-      <div className="relative rounded-3xl p-8 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-[var(--color-on-primary)] shadow-md overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div className="relative rounded-3xl p-8 bg-linear-gradient-primary-to-secondary text-on-primary shadow-md overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="space-y-2 text-center sm:text-left z-10">
           <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-extrabold backdrop-blur-xs">
             <Sparkles className="w-3.5 h-3.5 fill-current" />
@@ -94,9 +94,9 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ currentUser, orders, o
           </p>
         </div>
         {/* Counter Card */}
-        <div className="z-10 bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)] p-5 rounded-2xl border border-[var(--color-outline-variant)]/30 text-center min-w-[180px] shadow-lg">
-          <span className="text-sm uppercase font-bold text-[var(--color-outline)] block">Saldo de Pontos</span>
-          <span className="text-3xl font-black text-[var(--color-primary)] block my-1">{points} pts</span>
+        <div className="z-10 bg-surface-container-lowest text-on-surface p-5 rounded-2xl border border-outline-variant/30 text-center min-w-45 shadow-lg">
+          <span className="text-sm uppercase font-bold text-outline block">Saldo de Pontos</span>
+          <span className="text-3xl font-black text-primary block my-1">{points} pts</span>
           <span className="text-xs text-emerald-600 font-bold bg-emerald-500/10 px-2 py-1 rounded-full block">
             {nextTierPoints > 0 ? `+${nextTierPoints} pts para o Nível ${nextTierName}` : 'Nível Máximo Alcançado!'}
           </span>
@@ -105,37 +105,37 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ currentUser, orders, o
 
       {/* User Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-3xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 text-center">
-          <span className="text-[10px] font-bold text-[var(--color-outline)] uppercase tracking-wider block">Pedidos Realizados</span>
-          <span className="text-2xl font-black text-[var(--color-on-surface)] mt-1 block">{userOrders.length}</span>
+        <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 text-center">
+          <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">Pedidos Realizados</span>
+          <span className="text-2xl font-black text-on-surface mt-1 block">{userOrders.length}</span>
         </div>
-        <div className="p-5 rounded-3xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 text-center">
-          <span className="text-[10px] font-bold text-[var(--color-outline)] uppercase tracking-wider block">Total Gasto em Pedidos</span>
-          <span className="text-2xl font-black text-[var(--color-on-surface)] mt-1 block">R$ {totalSpent.toFixed(2).replace('.', ',')}</span>
+        <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 text-center">
+          <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">Total Gasto em Pedidos</span>
+          <span className="text-2xl font-black text-on-surface mt-1 block">R$ {totalSpent.toFixed(2).replace('.', ',')}</span>
         </div>
-        <div className="p-5 rounded-3xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 text-center">
-          <span className="text-[10px] font-bold text-[var(--color-outline)] uppercase tracking-wider block">Recompensas Resgatadas</span>
-          <span className="text-2xl font-black text-[var(--color-on-surface)] mt-1 block">0</span>
+        <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 text-center">
+          <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">Recompensas Resgatadas</span>
+          <span className="text-2xl font-black text-on-surface mt-1 block">0</span>
         </div>
       </div>
 
       {/* Rewards Catalog */}
       <div className="space-y-4">
-        <h3 className="text-base font-bold text-[var(--color-on-surface)] flex items-center gap-2">
-          <Gift className="w-5 h-5 text-[var(--color-primary)]" />
+        <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
+          <Gift className="w-5 h-5 text-primary" />
           Recompensas Disponíveis para Resgate
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {rewards.map((reward, idx) => {
             const canRedeem = points >= reward.pointsCost;
             return (
-              <div 
+              <div
                 key={idx}
-                className="p-5 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-3 flex flex-col justify-between shadow-xs hover:border-[var(--color-primary)]/50 transition-all"
+                className="p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 space-y-3 flex flex-col justify-between shadow-xs hover:border-primary/50 transition-all"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)]">
+                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-on-primary-container">
                       {reward.pointsCost} pontos
                     </span>
                     {canRedeem && (
@@ -144,10 +144,10 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ currentUser, orders, o
                       </span>
                     )}
                   </div>
-                  <h4 className="text-sm font-bold text-[var(--color-on-surface)] mb-1">
+                  <h4 className="text-sm font-bold text-on-surface mb-1">
                     {reward.title}
                   </h4>
-                  <p className="text-xs text-[var(--color-on-surface-variant)] leading-relaxed">
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
                     {reward.description}
                   </p>
                 </div>
@@ -156,11 +156,10 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ currentUser, orders, o
                   onClick={() => {
                     onApplyRewardCoupon(reward.code, reward.pointsCost);
                   }}
-                  className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center space-x-2 transition-all ${
-                    canRedeem
-                      ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs hover:opacity-95 cursor-pointer'
-                      : 'bg-[var(--color-surface-container-high)] text-[var(--color-outline)] cursor-not-allowed'
-                  }`}
+                  className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center space-x-2 transition-all ${canRedeem
+                    ? 'bg-primary text-on-primary shadow-xs hover:opacity-95 cursor-pointer'
+                    : 'bg-surface-container-high text-outline cursor-not-allowed'
+                    }`}
                 >
                   <span>{canRedeem ? 'Resgatar Recompensa' : 'Pontos Insuficientes'}</span>
                 </button>
