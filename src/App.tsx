@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '@/src/core/ui/layout/Header';
+import { SplashScreen } from '@/src/core/ui/components/SplashScreen';
 import { MobileBottomNav } from '@/src/core/ui/layout/MobileBottomNav';
 import { ShopView } from '@/src/modules/shop/ui/ShopView';
 import { ProductModal } from '@/src/modules/shop/ui/ProductModal';
@@ -27,6 +28,7 @@ const CustomerProfileView = lazy(() => import('@/src/modules/profile/ui/Customer
 export function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showSplash, setShowSplash] = useState(true);
 
   // Custom Hooks for Logic Separation
   useSupabaseSync();
@@ -247,6 +249,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-(--color-surface) text-(--color-on-surface) transition-colors font-sans flex flex-col">
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
       {/* Header */}
       <Header
@@ -260,6 +263,7 @@ export function App() {
         currentUser={currentUser}
         onOpenAuthModal={(notice) => handleOpenAuthModal(notice)}
         onLogout={handleLogout}
+        orders={orders}
       />
 
       {/* Main Body View */}
