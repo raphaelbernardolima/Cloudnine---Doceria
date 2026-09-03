@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { Box, Chip, Select, MenuItem, IconButton } from '@mui/material';
-import { 
-  Package, ShoppingBag, Users, FileText, Printer, Sparkles, 
-  Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle, 
-  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud, LayoutDashboard, CreditCard, Settings, Calendar, Gift, Store
+import {
+  Package, ShoppingBag, Users, FileText, Printer, Sparkles,
+  Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle,
+  Database, ShieldCheck, Search, Filter, ArrowUpRight, BarChart3, RefreshCw, Truck, Image as ImageIcon, UploadCloud, LayoutDashboard, CreditCard, Settings, Calendar, Gift, Store, Cake
 } from 'lucide-react';
 import { Product, Order, UserProfile, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types/index';
 import { AdminCustomCakeModule } from './AdminCustomCakeModule';
@@ -20,6 +20,7 @@ import { AdminMarketingModule } from './AdminMarketingModule';
 import { AdminFinanceModule } from './AdminFinanceModule';
 import { AdminStoreConfigModule } from './AdminStoreConfigModule';
 import { AdminPaymentConfigModule } from './AdminPaymentConfigModule';
+import { updateStoreConfig } from '@/src/core/services/supabase';
 
 interface AdminDashboardProps {
   products: Product[];
@@ -39,6 +40,7 @@ interface AdminDashboardProps {
   onUpdateLoyalty: (settings: LoyaltySettings) => void;
   customCakeConfig: CustomCakeConfig;
   onUpdateCustomCakeConfig: (config: CustomCakeConfig) => void;
+  setCustomCakeConfig?: (config: CustomCakeConfig) => void;
   onAddIngredient: (ing: Omit<Ingredient, 'id'>) => void;
   onUpdateIngredientStock: (id: string, newStock: number) => void;
   onDeleteIngredient: (id: string) => void;
@@ -66,6 +68,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   coupons,
   loyaltySettings,
   onUpdateLoyalty,
+  customCakeConfig,
+  onUpdateCustomCakeConfig,
+  setCustomCakeConfig,
   onAddIngredient,
   onUpdateIngredientStock,
   onDeleteIngredient,
@@ -80,7 +85,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const activeTab = searchParams.get('tab') || 'dashboard';
   const setActiveTab = (tab: string) => setSearchParams({ tab });
 
-  
+
   // Notification Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const previousOrderCount = React.useRef(orders.length);
@@ -89,7 +94,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (orders.length > previousOrderCount.current) {
       const newOrder = orders[orders.length - 1] || orders[0];
       setToastMessage(`🎉 Novo pedido #${newOrder?.id || ''} recebido de ${newOrder?.cliente_nome || 'Cliente'}!`);
-      
+
       // Play a simple notification sound (optional, but requested simple observer)
       // Hide toast after 5 seconds
       setTimeout(() => setToastMessage(null), 5000);
@@ -167,29 +172,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto py-4">
-      
+
       {/* Top Header & Admin Tabs */}
-      <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
+      <div className="p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
         <div>
-          <span className="text-sm font-extrabold uppercase tracking-wider text-[var(--color-primary)] bg-[var(--color-primary-container)] px-2.5 py-1 rounded-md">
+          <span className="text-sm font-extrabold uppercase tracking-wider text-(--color-primary) bg-(--color-primary-container) px-2.5 py-1 rounded-md">
             Painel Administrativo Restrito
           </span>
-          <h1 className="text-2xl font-black text-[var(--color-on-surface)] mt-1">
+          <h1 className="text-2xl font-black text-(--color-on-surface) mt-1">
             Gestão Operacional Cloudnine
           </h1>
-          <p className="text-xs text-[var(--color-outline)]">
+          <p className="text-xs text-(--color-outline)">
             Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.</p>
         </div>
-          {/* Tab Selector - Wrap layout to eliminate horizontal scrolling */}
-        <div className="hidden md:flex flex-wrap items-center gap-1.5 bg-[var(--color-surface-container)] p-2 rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs font-bold max-w-2xl justify-end">
+        {/* Tab Selector - Wrap layout to eliminate horizontal scrolling */}
+        <div className="hidden md:flex flex-wrap items-center gap-1.5 bg-(--color-surface-container) p-2 rounded-2xl border border-(--color-outline-variant)/20 text-xs font-bold max-w-2xl justify-end">
           {['admin', 'ADMIN'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                activeTab === 'dashboard'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'dashboard'
+                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                }`}
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Financeiro & Dashboard</span>
@@ -199,11 +203,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'CAIXA', 'ATENDIMENTO', 'atendente'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('orders')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                activeTab === 'orders'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'orders'
+                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                }`}
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Pedidos ({orders.length})</span>
@@ -213,11 +216,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'COZINHA'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('calendar')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                activeTab === 'calendar'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'calendar'
+                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                }`}
             >
               <Calendar className="w-4 h-4" />
               <span>Calendário de Encomendas</span>
@@ -226,11 +228,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'COZINHA'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('products')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                activeTab === 'products'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'products'
+                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                }`}
             >
               <Package className="w-4 h-4" />
               <span>Estoque & Catálogo</span>
@@ -240,11 +241,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'COZINHA', 'confeiteiro'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('kitchen')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                activeTab === 'kitchen'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'kitchen'
+                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                }`}
             >
               <Printer className="w-4 h-4" />
               <span>Comanda Cozinha</span>
@@ -254,11 +254,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'ATENDIMENTO'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('delivery')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                activeTab === 'delivery'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'delivery'
+                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                }`}
             >
               <Truck className="w-4 h-4" />
               <span>Despacho & Logística</span>
@@ -267,11 +266,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('marketing')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                activeTab === 'marketing'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'marketing'
+                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                }`}
             >
               <Gift className="w-4 h-4" />
               <span>Marketing & Fidelidade</span>
@@ -281,11 +279,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <>
               <button
                 onClick={() => setActiveTab('staff')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                  activeTab === 'staff'
-                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-                }`}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'staff'
+                  ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                  }`}
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Equipe & Permissões</span>
@@ -293,11 +290,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               <button
                 onClick={() => setActiveTab('ai')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                  activeTab === 'ai'
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xs'
-                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-                }`}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'ai'
+                  ? 'bg-linear-to-r from-(--color-primary) to-(--color-primary-container) text-(--color-on-primary) shadow-xs'
+                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                  }`}
               >
                 <Sparkles className="w-4 h-4" />
                 <span>Marketing IA</span>
@@ -305,23 +301,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               <button
                 onClick={() => setActiveTab('store-config')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                  activeTab === 'store-config'
-                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-                }`}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'store-config'
+                  ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                  }`}
               >
                 <Store className="w-4 h-4" />
                 <span>Configurações da Loja</span>
               </button>
 
               <button
+                onClick={() => setActiveTab('custom-cake')}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'custom-cake'
+                  ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                  }`}
+              >
+                <Cake className="w-4 h-4" />
+                <span>Bolos Personalizados</span>
+              </button>
+
+              <button
                 onClick={() => setActiveTab('payment-config')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${
-                  activeTab === 'payment-config'
-                    ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-xs'
-                    : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)]'
-                }`}
+                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'payment-config'
+                  ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
+                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                  }`}
               >
                 <CreditCard className="w-4 h-4" />
                 <span>Configurações de Pagamento</span>
@@ -339,7 +344,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* STORE CONFIG */}
       {activeTab === 'store-config' && (
         <AdminStoreConfigModule
-          showToast={showToast || (() => {})}
+          showToast={showToast || (() => { })}
           onStoreConfigUpdated={(cfg) => {
             if (cfg.telefone && setStorePhone) setStorePhone(cfg.telefone);
           }}
@@ -349,7 +354,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* PAYMENT CONFIG */}
       {activeTab === 'payment-config' && (
         <AdminPaymentConfigModule
-          showToast={showToast || (() => {})}
+          showToast={showToast || (() => { })}
+        />
+      )}
+
+      {/* CUSTOM CAKE CONFIG */}
+      {activeTab === 'custom-cake' && (
+        <AdminCustomCakeModule
+          config={customCakeConfig || { tamanhos: [], massas: [], recheios: [], coberturas: [] }}
+          onUpdateConfig={async (newConfig) => {
+            if (setCustomCakeConfig) setCustomCakeConfig(newConfig);
+            showToast?.('Configurações do Bolo Personalizado atualizadas localmente!');
+
+            // Salvar no DB
+            const res = await updateStoreConfig({ custom_cake_config: newConfig });
+            if (res.success) {
+              showToast?.('Configurações salvas no banco com sucesso!');
+            } else {
+              showToast?.('Erro ao salvar no banco: ' + res.error);
+            }
+          }}
         />
       )}
 
@@ -359,14 +383,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {/* TAB 1: ORDERS MANAGEMENT */}
-{activeTab === 'orders' && (
+      {activeTab === 'orders' && (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="font-bold text-xl text-[var(--color-on-surface)]">
+              <h3 className="font-bold text-xl text-(--color-on-surface)">
                 Pedidos
               </h3>
-              <p className="text-sm text-[var(--color-outline)]">Gestão visual e em tempo real usando DataGrid.</p>
+              <p className="text-sm text-(--color-outline)">Gestão visual e em tempo real usando DataGrid.</p>
             </div>
           </div>
           <Box sx={{ height: 600, width: '100%', bgcolor: 'surfaceContainerLowest', borderRadius: 4, overflow: 'hidden' }}>
@@ -375,23 +399,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               columns={[
                 { field: 'id', headerName: 'ID', width: 90 },
                 { field: 'cliente_nome', headerName: 'Cliente', width: 200 },
-                { 
-                  field: 'itens', 
-                  headerName: 'Itens', 
+                {
+                  field: 'itens',
+                  headerName: 'Itens',
                   width: 300,
                   valueGetter: (value: any) => {
                     return Array.isArray(value) ? value.map((i: any) => `${i.quantidade}x ${i.nomeProduto || i.nome || 'Item'}`).join(', ') : '';
                   }
                 },
-                { 
-                  field: 'total', 
-                  headerName: 'Total', 
+                {
+                  field: 'total',
+                  headerName: 'Total',
                   width: 130,
                   renderCell: (params) => `R$ ${Number(params.value || 0).toFixed(2).replace('.', ',')}`
                 },
-                { 
-                  field: 'created_at', 
-                  headerName: 'Data', 
+                {
+                  field: 'created_at',
+                  headerName: 'Data',
                   width: 180,
                   renderCell: (params) => new Date(params.value).toLocaleString('pt-BR')
                 },
@@ -482,19 +506,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* TAB 3: KITCHEN THERMAL PRINTING & POS INTEGRATION */}
       {activeTab === 'kitchen' && (
         <div className="space-y-6">
-          
+
           {/* Thermal Printer Hardware Configuration Panel */}
-          <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-4 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--color-outline-variant)]/20 pb-4">
+          <div className="p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 space-y-4 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-(--color-outline-variant)/20 pb-4">
               <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)]">
+                <div className="p-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary)">
                   <Printer className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-[var(--color-on-surface)] flex items-center gap-2">
+                  <h3 className="font-extrabold text-base text-(--color-on-surface) flex items-center gap-2">
                     Integração com Maquininhas e Impressoras Térmicas
                   </h3>
-                  <p className="text-xs text-[var(--color-outline)]">
+                  <p className="text-xs text-(--color-outline)">
                     Suporte nativo a protocolos ESC/POS, bobinas de 80mm/58mm e maquininhas Smart POS Android/Windows (Bematech, Elgin, Epson, Sunmi, Gertec, Daruma).
                   </p>
                 </div>
@@ -511,63 +535,59 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* Config Controls */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div>
-                <label className="font-bold text-[var(--color-on-surface)] block mb-1">Largura do Papel Térmico</label>
+                <label className="font-bold text-(--color-on-surface) block mb-1">Largura do Papel Térmico</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setPaperWidth('80mm')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${
-                      paperWidth === '80mm'
-                        ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] border-transparent shadow-xs'
-                        : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border-[var(--color-outline-variant)]/40'
-                    }`}
+                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${paperWidth === '80mm'
+                      ? 'bg-(--color-primary) text-(--color-on-primary) border-transparent shadow-xs'
+                      : 'bg-(--color-surface-container-low) text-(--color-on-surface) border-(--color-outline-variant)/40'
+                      }`}
                   >
                     80mm (Padrão Cozinha)
-</button>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setPaperWidth('58mm')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${
-                      paperWidth === '58mm'
-                        ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] border-transparent shadow-xs'
-                        : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border-[var(--color-outline-variant)]/40'
-                    }`}
+                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${paperWidth === '58mm'
+                      ? 'bg-(--color-primary) text-(--color-on-primary) border-transparent shadow-xs'
+                      : 'bg-(--color-surface-container-low) text-(--color-on-surface) border-(--color-outline-variant)/40'
+                      }`}
                   >
                     58mm (Maquininha POS)
-</button>
+                  </button>
                 </div>
               </div>
 
               <div>
-                <label className="font-bold text-[var(--color-on-surface)] block mb-1">Via da Impressão</label>
+                <label className="font-bold text-(--color-on-surface) block mb-1">Via da Impressão</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setReceiptType('cozinha')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${
-                      receiptType === 'cozinha'
-                        ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] border-transparent shadow-xs'
-                        : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border-[var(--color-outline-variant)]/40'
-                    }`}
+                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${receiptType === 'cozinha'
+                      ? 'bg-(--color-primary) text-(--color-on-primary) border-transparent shadow-xs'
+                      : 'bg-(--color-surface-container-low) text-(--color-on-surface) border-(--color-outline-variant)/40'
+                      }`}
                   >
                     👨‍🍳 Via Cozinha
-</button>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setReceiptType('cliente')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${
-                      receiptType === 'cliente'
-                        ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] border-transparent shadow-xs'
-                        : 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border-[var(--color-outline-variant)]/40'
-                    }`}
+                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${receiptType === 'cliente'
+                      ? 'bg-(--color-primary) text-(--color-on-primary) border-transparent shadow-xs'
+                      : 'bg-(--color-surface-container-low) text-(--color-on-surface) border-(--color-outline-variant)/40'
+                      }`}
                   >
                     🛍️ Via Cliente / Balcão
-</button>
+                  </button>
                 </div>
               </div>
 
               <div>
-                <label className="font-bold text-[var(--color-on-surface)] block mb-1">Protocolo de Comunicação</label>
+                <label className="font-bold text-(--color-on-surface) block mb-1">Protocolo de Comunicação</label>
                 <select
                   value={printerProtocol}
                   onChange={(e) => {
@@ -578,7 +598,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     else if (proto === 'bluetooth') setPrinterStatusMessage('Conectado via Bluetooth POS');
                     else setPrinterStatusMessage('Pronta para impressão (Driver do Sistema / Spooler)');
                   }}
-                  className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 font-bold focus:outline-none"
+                  className="w-full p-2.5 rounded-xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-bold focus:outline-none"
                 >
                   <option value="system">🖨️ Driver de Spooler do Sistema (Geral)</option>
                   <option value="escpos">⚡ ESC/POS Direto (USB / Serial RAW)</option>
@@ -589,8 +609,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             {/* Test Printing Trigger */}
-            <div className="pt-2 flex flex-wrap gap-2 items-center justify-between border-t border-[var(--color-outline-variant)]/20">
-              <p className="text-sm text-[var(--color-outline)] font-medium">
+            <div className="pt-2 flex flex-wrap gap-2 items-center justify-between border-t border-(--color-outline-variant)/20">
+              <p className="text-sm text-(--color-outline) font-medium">
                 💡 As comandas são impressas em mono com suporte a caracteres acentuados, separador serrilhado e corte automático ESC/POS.
               </p>
 
@@ -613,22 +633,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     created_at: new Date().toISOString()
                   } as any);
                 }}
-                className="px-4 py-2 rounded-xl bg-[var(--color-surface-container-high)] hover:bg-[var(--color-surface-container-highest)] font-bold text-xs flex items-center space-x-1.5 text-[var(--color-on-surface)] transition-all min-h-[38px]"
+                className="px-4 py-2 rounded-xl bg-(--color-surface-container-high) hover:bg-(--color-surface-container-highest) font-bold text-xs flex items-center space-x-1.5 text-(--color-on-surface) transition-all min-h-9.5"
               >
-                <Printer className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                <Printer className="w-3.5 h-3.5 text-(--color-primary)" />
                 <span>Testar Impressão de Exemplo</span>
-       </button>
+              </button>
             </div>
           </div>
 
           {/* Production Queue List */}
-          <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-4">
+          <div className="p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-base text-[var(--color-on-surface)]">
+                <h3 className="font-bold text-base text-(--color-on-surface)">
                   Fila de Produção da Confeitaria ({orders.length} pedidos)
                 </h3>
-                <p className="text-xs text-[var(--color-outline)]">
+                <p className="text-xs text-(--color-outline)">
                   Selecione qualquer pedido para enviar a comanda direto para a bancada da cozinha ou balcão.
                 </p>
               </div>
@@ -636,12 +656,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {orders.map((o) => (
-                <div 
+                <div
                   key={o.id}
-                  className="p-5 rounded-3xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/30 space-y-3"
+                  className="p-5 rounded-3xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/30 space-y-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-sm text-[var(--color-primary)]">
+                    <span className="font-black text-sm text-(--color-primary)">
                       PEDIDO #{o.id}
                     </span>
                     <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600">
@@ -649,13 +669,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </span>
                   </div>
 
-                  <div className="text-xs space-y-1 text-[var(--color-on-surface)]">
+                  <div className="text-xs space-y-1 text-(--color-on-surface)">
                     <p><strong>Cliente:</strong> {o.cliente_nome} ({o.cliente_telefone})</p>
                     <p><strong>Agendado:</strong> {o.data_agendada} às {o.horario_agendado}</p>
                     <p><strong>Tipo:</strong> {o.tipo_entrega.toUpperCase()}</p>
                   </div>
 
-                  <div className="p-3 bg-[var(--color-surface-container-lowest)] rounded-2xl border border-[var(--color-outline-variant)]/20 text-xs space-y-1 font-mono">
+                  <div className="p-3 bg-(--color-surface-container-lowest) rounded-2xl border border-(--color-outline-variant)/20 text-xs space-y-1 font-mono">
                     {o.itens.map((item, idx) => (
                       <div key={idx} className="flex justify-between">
                         <span>{item.quantidade}x {item.nomeProduto}</span>
@@ -670,21 +690,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         setReceiptType('cozinha');
                         setPrintingOrder(o);
                       }}
-                      className="py-2.5 px-3 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-1.5 shadow-xs"
+                      className="py-2.5 px-3 rounded-xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center justify-center space-x-1.5 shadow-xs"
                     >
                       <Printer className="w-3.5 h-3.5" />
                       <span>Comanda Cozinha</span>
-</button>
+                    </button>
                     <button
                       onClick={() => {
                         setReceiptType('cliente');
                         setPrintingOrder(o);
                       }}
-                      className="py-2.5 px-3 rounded-xl bg-[var(--color-secondary)] text-[var(--color-on-secondary)] font-bold text-xs flex items-center justify-center space-x-1.5 shadow-xs"
+                      className="py-2.5 px-3 rounded-xl bg-(--color-secondary) text-(--color-on-secondary) font-bold text-xs flex items-center justify-center space-x-1.5 shadow-xs"
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       <span>Via do Cliente</span>
-</button>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -696,28 +716,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* TAB 4: GEMINI MARKETING ASSISTANT */}
       {activeTab === 'ai' && (
-        <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-4">
+        <div className="p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 space-y-4">
           <div className="flex items-center space-x-3">
             <div className="p-2.5 rounded-2xl bg-purple-600 text-white">
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-[var(--color-on-surface)]">
+              <h3 className="font-bold text-base text-(--color-on-surface)">
                 Assistente de Copys & Marketing IA (Gemini)
               </h3>
-              <p className="text-xs text-[var(--color-outline)]">
+              <p className="text-xs text-(--color-outline)">
                 Crie legendas encantadoras para redes sociais, promoções do dia e descrições irresistíveis.
               </p>
             </div>
           </div>
 
           <div className="space-y-3 text-xs">
-            <label className="font-bold text-[var(--color-on-surface)] block">O que você gostaria de divulgar hoje?</label>
+            <label className="font-bold text-(--color-on-surface) block">O que você gostaria de divulgar hoje?</label>
             <textarea
               rows={3}
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
-              className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 focus:outline-none"
+              className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 focus:outline-none"
             />
 
             <button
@@ -732,7 +752,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {aiResponse && (
               <div className="p-5 rounded-3xl bg-purple-500/10 border border-purple-500/30 text-xs leading-relaxed space-y-2 mt-4">
                 <span className="font-bold text-purple-700 dark:text-purple-300 block uppercase tracking-wider text-sm">Resultado Gerado:</span>
-                <p className="whitespace-pre-line text-[var(--color-on-surface)] font-medium">{aiResponse}</p>
+                <p className="whitespace-pre-line text-(--color-on-surface) font-medium">{aiResponse}</p>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(aiResponse);
@@ -741,7 +761,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   className="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-bold text-sm mt-2 inline-block"
                 >
                   Copiar Texto
-</button>
+                </button>
               </div>
             )}
           </div>
@@ -753,11 +773,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="font-bold text-xl text-[var(--color-on-surface)] flex items-center gap-2">
+              <h3 className="font-bold text-xl text-(--color-on-surface) flex items-center gap-2">
                 <ShieldCheck className="w-6 h-6 text-emerald-600" />
                 Logs de Auditoria
               </h3>
-              <p className="text-sm text-[var(--color-outline)]">Histórico de ações e eventos do sistema.</p>
+              <p className="text-sm text-(--color-outline)">Histórico de ações e eventos do sistema.</p>
             </div>
           </div>
           <Box sx={{ height: 500, width: '100%', bgcolor: 'surfaceContainerLowest', borderRadius: 4, overflow: 'hidden' }}>
@@ -765,9 +785,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               rows={auditLogs}
               columns={[
                 { field: 'id', headerName: 'ID', width: 90 },
-                { 
-                  field: 'acao', 
-                  headerName: 'Ação', 
+                {
+                  field: 'acao',
+                  headerName: 'Ação',
                   width: 250,
                   renderCell: (params) => (
                     <Chip label={params.value} size="small" color="primary" variant="outlined" />
@@ -775,9 +795,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 },
                 { field: 'detalhes', headerName: 'Detalhes', flex: 1, minWidth: 300 },
                 { field: 'user_id', headerName: 'Usuário', width: 150 },
-                { 
-                  field: 'created_at', 
-                  headerName: 'Data', 
+                {
+                  field: 'created_at',
+                  headerName: 'Data',
                   width: 180,
                   renderCell: (params) => new Date(params.value).toLocaleString('pt-BR')
                 }
@@ -803,7 +823,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {printingOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
           <div className="bg-white text-black p-6 rounded-2xl max-w-sm w-full font-mono text-xs space-y-3 shadow-2xl printable-receipt">
-            
+
             {/* Controls Bar inside preview modal (hidden when printing) */}
             <div className="no-print p-2 rounded-xl bg-gray-100 flex items-center justify-between text-sm font-sans font-bold mb-2">
               <div className="flex gap-1">
@@ -813,14 +833,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   className={`px-2 py-1 rounded-lg ${receiptType === 'cozinha' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                 >
                   Cozinha
-</button>
+                </button>
                 <button
                   type="button"
                   onClick={() => setReceiptType('cliente')}
                   className={`px-2 py-1 rounded-lg ${receiptType === 'cliente' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                 >
                   Cliente
-</button>
+                </button>
               </div>
 
               <div className="flex gap-1">
@@ -830,19 +850,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   className={`px-2 py-1 rounded-lg ${paperWidth === '80mm' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                 >
                   80mm
-</button>
+                </button>
                 <button
                   type="button"
                   onClick={() => setPaperWidth('58mm')}
                   className={`px-2 py-1 rounded-lg ${paperWidth === '58mm' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                 >
                   58mm
-</button>
+                </button>
               </div>
             </div>
 
             {/* Ticket Thermal Receipt Layout */}
-            <div className={`mx-auto space-y-2 ${paperWidth === '58mm' ? 'max-w-[200px] text-sm' : 'max-w-[260px]'}`}>
+            <div className={`mx-auto space-y-2 ${paperWidth === '58mm' ? 'max-w-50 text-sm' : 'max-w-65'}`}>
               <div className="text-center border-b border-dashed border-black pb-2 space-y-0.5">
                 <h2 className="font-black text-sm uppercase tracking-widest">CLOUD NINE DOCERIA</h2>
                 <p className="text-xs">Alameda Gabriel Monteiro da Silva, 450</p>
@@ -886,21 +906,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setPrintingOrder(null)}
-                className="w-1/2 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 text-black font-bold font-sans transition-colors min-h-[42px]"
+                className="w-1/2 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 text-black font-bold font-sans transition-colors min-h-10.5"
               >
                 Fechar
-       </button>
+              </button>
               <button
                 type="button"
                 onClick={() => {
                   window.print();
                   setPrintingOrder(null);
                 }}
-                className="w-1/2 py-2.5 rounded-xl bg-black hover:bg-gray-900 text-white font-bold font-sans transition-colors flex items-center justify-center space-x-1.5 shadow-md min-h-[42px]"
+                className="w-1/2 py-2.5 rounded-xl bg-black hover:bg-gray-900 text-white font-bold font-sans transition-colors flex items-center justify-center space-x-1.5 shadow-md min-h-10.5"
               >
                 <Printer className="w-4 h-4" />
                 <span>Imprimir Agora</span>
-       </button>
+              </button>
             </div>
 
           </div>
@@ -911,11 +931,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* NEW PRODUCT MODAL */}
       {showAddProductModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <form 
+          <form
             onSubmit={handleCreateProduct}
-            className="w-full max-w-md bg-[var(--color-surface)] p-6 rounded-3xl space-y-4 text-xs shadow-2xl border border-[var(--color-outline-variant)]/40"
+            className="w-full max-w-md bg-(--color-surface) p-6 rounded-3xl space-y-4 text-xs shadow-2xl border border-(--color-outline-variant)/40"
           >
-            <h3 className="font-black text-base text-[var(--color-on-surface)]">Cadastrar Novo Doce</h3>
+            <h3 className="font-black text-base text-(--color-on-surface)">Cadastrar Novo Doce</h3>
 
             <div>
               <label className="font-bold block mb-1">Nome do Doce</label>
@@ -925,7 +945,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Ex: Torta de Pistache com Chocolate Belga"
-                className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40"
+                className="w-full p-2.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/40"
               />
             </div>
 
@@ -937,7 +957,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
                 placeholder="Ex: Deliciosa massa folhada com ganache nobre..."
-                className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40"
+                className="w-full p-2.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/40"
               />
             </div>
 
@@ -950,7 +970,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={preco}
                   onChange={(e) => setPreco(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40"
+                  className="w-full p-2.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/40"
                 />
               </div>
 
@@ -959,7 +979,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <select
                   value={categoria}
                   onChange={(e) => setCategoria(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40"
+                  className="w-full p-2.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/40"
                 >
                   <option value="Brigadeiros">Brigadeiros</option>
                   <option value="Bolos de Pote">Bolos de Pote</option>
@@ -976,13 +996,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={estoque}
                   onChange={(e) => setEstoque(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40"
+                  className="w-full p-2.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/40"
                 />
               </div>
             </div>
 
             {/* Image Uploader */}
-            <CloudinaryUploader 
+            <CloudinaryUploader
               onImageUploaded={(url) => setImageUrl(url)}
               currentImageUrl={imageUrl}
               label="Foto do Doce (Upload Direto / Galeria)"
@@ -992,16 +1012,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowAddProductModal(false)}
-                className="w-1/2 py-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] font-bold"
+                className="w-1/2 py-2.5 rounded-xl bg-(--color-surface-container-high) text-(--color-on-surface) font-bold"
               >
                 Cancelar
-       </button>
+              </button>
               <button
                 type="submit"
-                className="w-1/2 py-2.5 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold"
+                className="w-1/2 py-2.5 rounded-xl bg-(--color-primary) text-(--color-on-primary) font-bold"
               >
                 Salvar Produto
-       </button>
+              </button>
             </div>
           </form>
         </div>
@@ -1009,7 +1029,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* NEW ORDER NOTIFICATION TOAST */}
       {toastMessage && (
-        <div className="fixed bottom-4 right-4 z-[9999] bg-[var(--color-primary)] text-[var(--color-on-primary)] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">
+        <div className="fixed bottom-4 right-4 z-9999 bg-(--color-primary) text-(--color-on-primary) px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
             <ShoppingBag className="w-5 h-5 text-white" />
           </div>
@@ -1019,7 +1039,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
           <button onClick={() => setToastMessage(null)} className="ml-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
             X
-</button>
+          </button>
         </div>
       )}
     </div>

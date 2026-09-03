@@ -409,6 +409,7 @@ export function App() {
         isOpen={isCustomCakeOpen}
         onClose={() => setIsCustomCakeOpen(false)}
         onAddCustomCake={handleAddCustomCakeToCart}
+        config={customCakeConfig}
       />
 
       {/* Cart & Checkout Drawer */}
