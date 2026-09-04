@@ -15,7 +15,7 @@ import {
   ChefHat,
   Layers
 } from 'lucide-react';
-import { UserProfile, ThemeMode } from '@/src/core/types/index';
+import { UserProfile, ThemeMode, Order } from '@/src/core/types/index';
 import { isStaff } from '@/src/core/constants/roles';
 import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button } from '@mui/material';
 
@@ -30,6 +30,7 @@ interface HeaderProps {
   onOpenCustomCakeModal: () => void;
   themeMode: ThemeMode;
   toggleTheme: () => void;
+  orders?: Order[];
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -42,7 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigate,
   onOpenCustomCakeModal,
   themeMode,
-  toggleTheme
+  toggleTheme,
+  orders = []
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -232,7 +234,7 @@ export const Header: React.FC<HeaderProps> = ({
                         Pedidos
                       </Typography>
                       <Typography sx={{ color: '#5A4A47', fontSize: '14px', fontWeight: 500 }}>
-                        100+
+                        {orders.filter(o => o.status === 'pendente_pix').length}
                       </Typography>
                     </ListItemButton>
                   </ListItem>
@@ -325,7 +327,7 @@ export const Header: React.FC<HeaderProps> = ({
                         Entregas
                       </Typography>
                       <Typography sx={{ color: '#5A4A47', fontSize: '14px', fontWeight: 500 }}>
-                        100+
+
                       </Typography>
                     </ListItemButton>
                   </ListItem>

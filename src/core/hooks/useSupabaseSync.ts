@@ -9,7 +9,8 @@ export function useSupabaseSync() {
     setStorePhone, 
     setProducts, 
     setIsLoadingProducts, 
-    setOrders 
+    setOrders,
+    setCustomCakeConfig
   } = useStore();
 
   // Load User Session
@@ -27,12 +28,17 @@ export function useSupabaseSync() {
   useEffect(() => {
     async function loadStoreConfig() {
       const config = await getStoreConfig();
-      if (config && config.telefone) {
-        setStorePhone(config.telefone);
+      if (config) {
+        if (config.telefone) {
+          setStorePhone(config.telefone);
+        }
+        if (config.custom_cake_config) {
+          setCustomCakeConfig(config.custom_cake_config);
+        }
       }
     }
     loadStoreConfig();
-  }, [setStorePhone]);
+  }, [setStorePhone, setCustomCakeConfig]);
 
   // Fetch real data from Supabase
   useEffect(() => {

@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  X, 
-  Trash2, 
-  ShoppingBag, 
-  CheckCircle, 
-  ChevronRight, 
-  Copy, 
-  Check, 
-  Send, 
-  Truck, 
-  Store, 
-  Loader2, 
+import {
+  X,
+  Trash2,
+  ShoppingBag,
+  CheckCircle,
+  ChevronRight,
+  Copy,
+  Check,
+  Send,
+  Truck,
+  Store,
+  Loader2,
   ArrowLeft,
-  QrCode, 
-  CreditCard, 
+  QrCode,
+  CreditCard,
   Cake,
   Tag
 } from 'lucide-react';
@@ -119,7 +119,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         }
 
         const data = await response.json();
-        
+
         // Redirect to Mercado Pago checkout if available
         if (data.init_point) {
           window.location.href = data.init_point;
@@ -167,22 +167,22 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-[100] flex justify-end bg-black/60 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in"
+    <div
+      className="fixed inset-0 z-100 flex justify-end bg-black/60 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in"
       onClick={onClose}
       aria-modal="true"
       role="dialog"
     >
-      <div 
-        className="w-full max-w-md bg-[#FFF8F7] dark:bg-[#1E1716] text-[#3D3331] dark:text-[#E8DFDC] h-full max-h-[100dvh] shadow-2xl flex flex-col justify-between overflow-hidden border-l border-rose-200/50 dark:border-neutral-800"
+      <div
+        className="w-full max-w-md bg-[#FFF8F7] dark:bg-[#1E1716] text-[#3D3331] dark:text-[#E8DFDC] h-full max-h-dvh shadow-2xl flex flex-col justify-between overflow-hidden border-l border-rose-200/50 dark:border-neutral-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="px-5 py-4 bg-[#FDF2F0] dark:bg-[#2A201F] border-b border-rose-100 dark:border-neutral-800 flex items-center justify-between shadow-xs">
           <div className="flex items-center space-x-2.5">
             {step === 'checkout' ? (
-              <button 
-                onClick={() => setStep('cart')} 
+              <button
+                onClick={() => setStep('cart')}
                 className="p-1.5 -ml-1.5 rounded-full hover:bg-rose-200/50 text-[#3D3331] dark:text-[#E8DFDC] transition-colors"
                 title="Voltar para a sacola"
               >
@@ -206,8 +206,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               )}
             </div>
           </div>
-          
-          <button 
+
+          <button
             onClick={onClose}
             className="w-9 h-9 rounded-full bg-rose-100/70 hover:bg-rose-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-[#3C2218] dark:text-[#E8DFDC] flex items-center justify-center transition-all cursor-pointer"
             aria-label="Fechar sacola"
@@ -244,14 +244,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <>
                 <div className="space-y-3">
                   {items.map((item) => (
-                    <div 
+                    <div
                       key={item.id}
                       className="p-3.5 rounded-2xl bg-white dark:bg-[#261D1C] border border-rose-100 dark:border-neutral-800 flex items-center justify-between gap-3 shadow-xs hover:border-rose-300/60 transition-colors"
                     >
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        <img 
-                          src={item.product?.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=200'} 
-                          alt="Item" 
+                        <img
+                          src={item.product?.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=200'}
+                          alt="Item"
                           className="w-14 h-14 rounded-xl object-cover border border-rose-100 dark:border-neutral-700 shrink-0"
                           referrerPolicy="no-referrer"
                         />
@@ -278,17 +278,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       {/* Quantity & Delete */}
                       <div className="flex items-center space-x-1.5 shrink-0">
                         <div className="flex items-center space-x-1 bg-rose-50 dark:bg-neutral-800 border border-rose-100 dark:border-neutral-700 px-2 py-1 rounded-xl">
-                          <button 
+                          <button
                             onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
                             className="w-6 h-6 rounded-lg flex items-center justify-center font-black text-rose-800 dark:text-rose-200 hover:bg-rose-200/60 dark:hover:bg-neutral-700 transition-colors"
                             aria-label="Diminuir quantidade"
                           >
                             -
                           </button>
-                          <span className="font-bold text-sm px-1.5 min-w-[20px] text-center text-[#3C2218] dark:text-rose-100">
+                          <span className="font-bold text-sm px-1.5 min-w-5 text-center text-[#3C2218] dark:text-rose-100">
                             {item.quantity}
                           </span>
-                          <button 
+                          <button
                             onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
                             className="w-6 h-6 rounded-lg flex items-center justify-center font-black text-rose-800 dark:text-rose-200 hover:bg-rose-200/60 dark:hover:bg-neutral-700 transition-colors"
                             aria-label="Aumentar quantidade"
@@ -297,7 +297,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           </button>
                         </div>
 
-                        <button 
+                        <button
                           onClick={() => onRemoveItem(item.id)}
                           className="p-1.5 rounded-xl text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors"
                           title="Remover da sacola"
@@ -367,11 +367,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setTipoEntrega('entrega')}
-                  className={`p-3 rounded-2xl border font-bold text-xs flex flex-col items-center justify-center gap-1 transition-all ${
-                    tipoEntrega === 'entrega'
+                  className={`p-3 rounded-2xl border font-bold text-xs flex flex-col items-center justify-center gap-1 transition-all ${tipoEntrega === 'entrega'
                       ? 'bg-[#9E2A2B] text-white border-transparent shadow-sm'
                       : 'bg-white dark:bg-[#261D1C] text-[#3C2218] dark:text-rose-100 border-rose-200/70 dark:border-neutral-800'
-                  }`}
+                    }`}
                 >
                   <Truck className="w-5 h-5" />
                   <span>Entrega (R$ 12,00)</span>
@@ -379,11 +378,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setTipoEntrega('retirada')}
-                  className={`p-3 rounded-2xl border font-bold text-xs flex flex-col items-center justify-center gap-1 transition-all ${
-                    tipoEntrega === 'retirada'
+                  className={`p-3 rounded-2xl border font-bold text-xs flex flex-col items-center justify-center gap-1 transition-all ${tipoEntrega === 'retirada'
                       ? 'bg-[#9E2A2B] text-white border-transparent shadow-sm'
                       : 'bg-white dark:bg-[#261D1C] text-[#3C2218] dark:text-rose-100 border-rose-200/70 dark:border-neutral-800'
-                  }`}
+                    }`}
                 >
                   <Store className="w-5 h-5" />
                   <span>Retirada no Balcão</span>
@@ -452,11 +450,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setMetodoPagamento('pix')}
-                  className={`p-2.5 rounded-xl border font-bold text-xs flex items-center justify-center space-x-1.5 transition-all ${
-                    metodoPagamento === 'pix'
+                  className={`p-2.5 rounded-xl border font-bold text-xs flex items-center justify-center space-x-1.5 transition-all ${metodoPagamento === 'pix'
                       ? 'bg-emerald-700 text-white border-transparent shadow-xs'
                       : 'bg-white dark:bg-[#261D1C] text-[#3C2218] dark:text-rose-100 border-rose-200/70 dark:border-neutral-800'
-                  }`}
+                    }`}
                 >
                   <QrCode className="w-4 h-4" />
                   <span>Pix (Instantâneo)</span>
@@ -464,11 +461,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setMetodoPagamento('cartao_credito')}
-                  className={`p-2.5 rounded-xl border font-bold text-xs flex items-center justify-center space-x-1.5 transition-all ${
-                    metodoPagamento === 'cartao_credito'
+                  className={`p-2.5 rounded-xl border font-bold text-xs flex items-center justify-center space-x-1.5 transition-all ${metodoPagamento === 'cartao_credito'
                       ? 'bg-[#9E2A2B] text-white border-transparent shadow-xs'
                       : 'bg-white dark:bg-[#261D1C] text-[#3C2218] dark:text-rose-100 border-rose-200/70 dark:border-neutral-800'
-                  }`}
+                    }`}
                 >
                   <CreditCard className="w-4 h-4" />
                   <span>Cartão no Local</span>
@@ -482,8 +478,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   Chave Pix E-mail da Confeitaria
                 </span>
                 <div className="p-2 bg-white rounded-xl inline-block shadow-xs">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(pixKey)}`} 
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(pixKey)}`}
                     alt="QR Code Pix"
                     className="w-28 h-28 mx-auto"
                   />
@@ -560,7 +556,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <span>Subtotal ({totalQuantity} {totalQuantity === 1 ? 'item' : 'itens'})</span>
                 <span className="font-semibold">R$ {subtotal.toFixed(2).replace('.', ',')}</span>
               </div>
-              
+
               <div className="flex justify-between text-[#7A6C68] dark:text-[#B5A5A2]">
                 <span>Taxa de Entrega ({tipoEntrega === 'entrega' ? 'Padrão' : 'Retirada'})</span>
                 <span className="font-semibold">

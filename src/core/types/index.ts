@@ -21,6 +21,11 @@ export interface Product {
     sabores?: string[];
     coberturas?: string[];
   };
+  packaging_cost?: number;
+  waste_percentage?: number;
+  target_margin?: number;
+  current_cost?: number;
+  suggested_price?: number;
 }
 
 export interface CustomCakeOption {
@@ -144,6 +149,8 @@ export interface Ingredient {
   custoPorUnidade: number;
   estoqueAtual: number;
   estoqueMinimo: number;
+  tamanho_embalagem?: number;
+  preco_embalagem?: number;
 }
 
 export interface RecipeItem {

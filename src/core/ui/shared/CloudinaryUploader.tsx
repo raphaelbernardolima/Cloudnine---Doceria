@@ -55,15 +55,11 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
 
   return (
     <div className="space-y-2 text-xs">
-      <div className="flex items-center justify-between">
-        <label className="font-bold text-[var(--color-on-surface)] flex items-center gap-1.5">
-          <ImageIcon className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+      <div className="flex items-center justify-between mb-3">
+        <label className="font-medium text-[#5A4A47] flex items-center gap-2">
+          <ImageIcon className="w-4 h-4 text-[#D9A89B]" />
           <span>{label}</span>
         </label>
-        <span className="text-sm px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          <span>Upload Direto em Alta Definição</span>
-        </span>
       </div>
 
       <div className="p-3 rounded-2xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/40 flex flex-col sm:flex-row items-center gap-3">

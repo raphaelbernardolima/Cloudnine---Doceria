@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Card, CardMedia, CardContent, CardActions, Typography, Box, Button as MuiButton, IconButton } from '@mui/material';
-import { Package, Plus, Trash2, Edit, AlertCircle, ChefHat } from 'lucide-react';
-import type { Product, Ingredient } from '@/src/core/types/index';
+import { Package, Plus, Trash2, Edit, AlertCircle, ChefHat, Receipt } from 'lucide-react';
+import type { Product, Ingredient, RecipeItem } from '@/src/core/types/index';
+import { AdminRecipeModal } from './AdminRecipeModal';
+import { AdminQuickPriceModal } from './AdminQuickPriceModal';
 
 interface AdminInventoryModuleProps {
   products: Product[];
@@ -26,6 +28,8 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
   onDeleteIngredient
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'products' | 'ingredients'>('products');
+  const [selectedProductForRecipe, setSelectedProductForRecipe] = useState<Product | null>(null);
+  const [showQuickPriceModal, setShowQuickPriceModal] = useState(false);
 
   // Dummy form states for quick ingredient add
   const [ingNome, setIngNome] = useState('');
@@ -48,21 +52,21 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h3 className="font-bold text-lg text-[var(--color-on-surface)] flex items-center gap-2">
-          <Package className="w-5 h-5 text-[var(--color-primary)]" />
+        <h3 className="font-bold text-lg text-(--color-on-surface) flex items-center gap-2">
+          <Package className="w-5 h-5 text-(--color-primary)" />
           Estoque & Catálogo
         </h3>
 
-        <div className="flex bg-[var(--color-surface-container)] p-1.5 rounded-2xl border border-[var(--color-outline-variant)]/30 text-xs font-bold">
+        <div className="flex bg-(--color-surface-container) p-1.5 rounded-2xl border border-(--color-outline-variant)/30 text-xs font-bold">
           <button
             onClick={() => setActiveSubTab('products')}
-            className={`px-4 py-2 rounded-xl transition-all ${activeSubTab === 'products' ? 'bg-[var(--color-primary)] text-white shadow-xs' : 'text-[var(--color-on-surface-variant)]'}`}
+            className={`px-4 py-2 rounded-xl transition-all ${activeSubTab === 'products' ? 'bg-(--color-primary) text-white shadow-xs' : 'text-(--color-on-surface-variant)'}`}
           >
             Catálogo Final
           </button>
           <button
             onClick={() => setActiveSubTab('ingredients')}
-            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${activeSubTab === 'ingredients' ? 'bg-amber-500 text-white shadow-xs' : 'text-[var(--color-on-surface-variant)]'}`}
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${activeSubTab === 'ingredients' ? 'bg-amber-500 text-white shadow-xs' : 'text-(--color-on-surface-variant)'}`}
           >
             <ChefHat className="w-4 h-4" />
             Insumos & Ficha Técnica
@@ -73,7 +77,7 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
       {activeSubTab === 'products' && (
         <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
           <div className="flex justify-end">
-            <button onClick={onAddProduct} className="px-4 py-2.5 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center space-x-2 shadow-xs">
+            <button onClick={onAddProduct} className="px-4 py-2.5 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center space-x-2 shadow-xs">
               <Plus className="w-4 h-4" />
               <span>Novo Doce no Catálogo</span>
             </button>
@@ -110,9 +114,14 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
                   </Box>
                 </CardContent>
                 <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2, pt: 0 }}>
-                  <IconButton size="small" color="primary" sx={{ bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main', color: 'white' } }}>
-                    <Edit className="w-4 h-4" />
-                  </IconButton>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton size="small" color="primary" sx={{ bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main', color: 'white' } }}>
+                      <Edit className="w-4 h-4" />
+                    </IconButton>
+                    <IconButton size="small" color="secondary" onClick={() => setSelectedProductForRecipe(p)} sx={{ bgcolor: 'secondary.light', '&:hover': { bgcolor: 'secondary.main', color: 'white' } }} title="Ficha Técnica">
+                      <Receipt className="w-4 h-4" />
+                    </IconButton>
+                  </Box>
                   <IconButton size="small" color="error" onClick={() => onDeleteProduct(p.id)} sx={{ bgcolor: 'error.light', '&:hover': { bgcolor: 'error.main', color: 'white' } }}>
                     <Trash2 className="w-4 h-4" />
                   </IconButton>
@@ -126,23 +135,34 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
       {activeSubTab === 'ingredients' && (
         <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
 
+          <div className="flex justify-end">
+            <MuiButton
+              variant="contained"
+              color="secondary"
+              onClick={() => setShowQuickPriceModal(true)}
+              sx={{ borderRadius: 2, fontWeight: 'bold', boxShadow: 'none' }}
+            >
+              Atualização Rápida de Preços
+            </MuiButton>
+          </div>
+
           {/* Add Ingredient Form */}
-          <form onSubmit={handleAddIng} className="p-4 bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 rounded-3xl grid grid-cols-1 md:grid-cols-5 gap-3 items-end shadow-xs">
+          <form onSubmit={handleAddIng} className="p-4 bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 rounded-3xl grid grid-cols-1 md:grid-cols-5 gap-3 items-end shadow-xs">
             <div className="md:col-span-2">
-              <label className="text-sm font-bold uppercase text-[var(--color-outline)] mb-1 block">Insumo (Matéria-prima)</label>
-              <input required value={ingNome} onChange={e => setIngNome(e.target.value)} placeholder="Ex: Leite Moça..." className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs" />
+              <label className="text-sm font-bold uppercase text-(--color-outline) mb-1 block">Insumo (Matéria-prima)</label>
+              <input required value={ingNome} onChange={e => setIngNome(e.target.value)} placeholder="Ex: Leite Moça..." className="w-full p-2.5 rounded-xl bg-(--color-surface-container-high) text-xs" />
             </div>
             <div>
-              <label className="text-sm font-bold uppercase text-[var(--color-outline)] mb-1 block">Unidade</label>
-              <select value={ingUnidade} onChange={e => setIngUnidade(e.target.value as any)} className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs font-bold">
+              <label className="text-sm font-bold uppercase text-(--color-outline) mb-1 block">Unidade</label>
+              <select value={ingUnidade} onChange={e => setIngUnidade(e.target.value as any)} className="w-full p-2.5 rounded-xl bg-(--color-surface-container-high) text-xs font-bold">
                 <option value="g">Gramas (g)</option>
                 <option value="ml">Mililitros (ml)</option>
                 <option value="un">Unidade (un)</option>
               </select>
             </div>
             <div>
-              <label className="text-sm font-bold uppercase text-[var(--color-outline)] mb-1 block">Custo (R$)</label>
-              <input required type="number" step="0.01" value={ingCusto} onChange={e => setIngCusto(e.target.value)} placeholder="Ex: 8.50" className="w-full p-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-xs" />
+              <label className="text-sm font-bold uppercase text-(--color-outline) mb-1 block">Custo (R$)</label>
+              <input required type="number" step="0.01" value={ingCusto} onChange={e => setIngCusto(e.target.value)} placeholder="Ex: 8.50" className="w-full p-2.5 rounded-xl bg-(--color-surface-container-high) text-xs" />
             </div>
             <button type="submit" className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors">
               <Plus className="w-4 h-4" /> Adicionar
@@ -150,10 +170,10 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
           </form>
 
           {/* Ingredient List */}
-          <div className="bg-[var(--color-surface-container-lowest)] rounded-3xl border border-[var(--color-outline-variant)]/30 overflow-hidden shadow-xs">
+          <div className="bg-(--color-surface-container-lowest) rounded-3xl border border-(--color-outline-variant)/30 overflow-hidden shadow-xs">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-[var(--color-surface-container-low)] border-b border-[var(--color-outline-variant)]/20 text-sm uppercase font-bold text-[var(--color-outline)]">
+                <tr className="bg-(--color-surface-container-low) border-b border-(--color-outline-variant)/20 text-sm uppercase font-bold text-(--color-outline)">
                   <th className="py-3 px-4">Insumo</th>
                   <th className="py-3 px-4">Custo Un.</th>
                   <th className="py-3 px-4">Estoque Atual</th>
@@ -164,7 +184,7 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
                 {ingredients.map(ing => {
                   const isLow = ing.estoqueAtual <= ing.estoqueMinimo;
                   return (
-                    <tr key={ing.id} className="border-b border-[var(--color-outline-variant)]/10 hover:bg-[var(--color-surface-container-lowest)]/50 transition-colors">
+                    <tr key={ing.id} className="border-b border-(--color-outline-variant)/10 hover:bg-(--color-surface-container-lowest)/50 transition-colors">
                       <td className="py-3 px-4 font-bold flex items-center gap-2">
                         {isLow && <AlertCircle className="w-4 h-4 text-rose-500" />}
                         {ing.nome}
@@ -172,11 +192,11 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
                       <td className="py-3 px-4">R$ {ing.custoPorUnidade.toFixed(2)} / {ing.unidadeMedida}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <button onClick={() => onUpdateIngredientStock(ing.id, Math.max(0, ing.estoqueAtual - 100))} className="p-1 bg-[var(--color-surface-container-high)] rounded-md font-bold">-</button>
-                          <span className={`w-16 text-center font-black ${isLow ? 'text-rose-500' : 'text-[var(--color-on-surface)]'}`}>
+                          <button onClick={() => onUpdateIngredientStock(ing.id, Math.max(0, ing.estoqueAtual - 100))} className="p-1 bg-(--color-surface-container-high) rounded-md font-bold">-</button>
+                          <span className={`w-16 text-center font-black ${isLow ? 'text-rose-500' : 'text-(--color-on-surface)'}`}>
                             {ing.estoqueAtual} {ing.unidadeMedida}
                           </span>
-                          <button onClick={() => onUpdateIngredientStock(ing.id, ing.estoqueAtual + 100)} className="p-1 bg-[var(--color-surface-container-high)] rounded-md font-bold">+</button>
+                          <button onClick={() => onUpdateIngredientStock(ing.id, ing.estoqueAtual + 100)} className="p-1 bg-(--color-surface-container-high) rounded-md font-bold">+</button>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-right">
@@ -189,7 +209,7 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
                 })}
                 {ingredients.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-xs text-[var(--color-outline)] font-bold italic">Nenhum insumo cadastrado.</td>
+                    <td colSpan={4} className="py-8 text-center text-xs text-(--color-outline) font-bold italic">Nenhum insumo cadastrado.</td>
                   </tr>
                 )}
               </tbody>
@@ -197,6 +217,37 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
           </div>
 
         </div>
+      )}
+
+      {selectedProductForRecipe && (
+        <AdminRecipeModal
+          isOpen={!!selectedProductForRecipe}
+          onClose={() => setSelectedProductForRecipe(null)}
+          product={selectedProductForRecipe}
+          ingredients={ingredients}
+          onSave={(id, recipe, pkgCost, waste, targetMargin, suggestedPrice) => {
+            // Ideally call a backend mutation here. For now we rely on the main state/props or dummy logic.
+            // Since this is UI mockup level plus some real state, let's close it.
+            // In a real scenario, we'd fire an 'onUpdateRecipe' prop.
+            setSelectedProductForRecipe(null);
+          }}
+          onApplySuggestedPrice={(id, price) => {
+            // Similarly, update the product price here via a prop like onUpdateProductPrice(id, price)
+          }}
+        />
+      )}
+
+      {showQuickPriceModal && (
+        <AdminQuickPriceModal
+          isOpen={showQuickPriceModal}
+          onClose={() => setShowQuickPriceModal(false)}
+          ingredients={ingredients}
+          onSavePrices={(changed) => {
+            // Ideally call a backend mutation here. 
+            // e.g. updateIngredients(changed);
+            setShowQuickPriceModal(false);
+          }}
+        />
       )}
 
     </div>
