@@ -1,0 +1,17 @@
+{
+  "translation": {
+    "app": {
+      "name": "Cloudnine Doceria"
+    },
+    "shop": {
+      "title": "Our Sweets",
+      "cart": "Cart",
+      "checkout": "Checkout"
+    },
+    "settings": {
+      "language": "Language",
+      "theme": "Theme",
+      "dark_mode": "Dark Mode"
+    }
+  }
+}

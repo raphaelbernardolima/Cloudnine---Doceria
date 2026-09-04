@@ -13,11 +13,14 @@ import {
   Megaphone,
   Settings,
   ChefHat,
-  Layers
+  Layers,
+  Moon,
+  Sun
 } from 'lucide-react';
-import { UserProfile, ThemeMode, Order } from '@/src/core/types/index';
+import { UserProfile, Order } from '@/src/core/types/index';
 import { isStaff } from '@/src/core/constants/roles';
-import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button, Switch } from '@mui/material';
+import { useAppTheme } from '@/src/core/theme/ThemeContext';
 
 interface HeaderProps {
   cartCount: number;
@@ -28,8 +31,6 @@ interface HeaderProps {
   currentPath: string;
   onNavigate: (path: string) => void;
   onOpenCustomCakeModal: () => void;
-  themeMode: ThemeMode;
-  toggleTheme: () => void;
   orders?: Order[];
 }
 
@@ -42,11 +43,10 @@ export const Header: React.FC<HeaderProps> = ({
   currentPath,
   onNavigate,
   onOpenCustomCakeModal,
-  themeMode,
-  toggleTheme,
   orders = []
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { mode, toggleTheme } = useAppTheme();
 
   const handleNavClick = (path: string) => {
     onNavigate(path);
@@ -85,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
               sx={{
                 cursor: 'pointer',
                 fontFamily: '"Libre Caslon Text", serif',
-                color: 'primary.dark',
+                color: 'primary.light',
                 fontStyle: 'italic',
                 fontWeight: 400
               }}
@@ -128,6 +128,12 @@ export const Header: React.FC<HeaderProps> = ({
                 </Button>
               )}
             </Box>
+            
+            {/* Desktop Theme Toggle */}
+            <IconButton color="inherit" onClick={toggleTheme} sx={{ display: { xs: 'none', md: 'inline-flex' } }}>
+              {mode === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </IconButton>
+
             <IconButton color="inherit" onClick={onOpenCart}>
               <Badge badgeContent={cartCount} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}>
                 <ShoppingBag />
@@ -418,8 +424,19 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </Box>
 
-        {/* Bottom Button */}
-        <Box sx={{ pt: 2 }}>
+        {/* Bottom Area: Theme Toggle & Logout */}
+        <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1, bgcolor: 'background.paper', borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: 'text.secondary' }}>
+              {mode === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              <Typography sx={{ fontWeight: 600, fontSize: '14px', color: 'text.primary' }}>
+                Tema Escuro
+              </Typography>
+            </Box>
+            <Switch checked={mode === 'dark'} onChange={toggleTheme} color="primary" />
+          </Box>
+
           {currentUser ? (
             <Button
               fullWidth

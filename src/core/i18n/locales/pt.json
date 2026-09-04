@@ -1,0 +1,17 @@
+{
+  "translation": {
+    "app": {
+      "name": "Cloudnine Doceria"
+    },
+    "shop": {
+      "title": "Nossos Doces",
+      "cart": "Carrinho",
+      "checkout": "Finalizar Pedido"
+    },
+    "settings": {
+      "language": "Idioma",
+      "theme": "Tema",
+      "dark_mode": "Modo Escuro"
+    }
+  }
+}

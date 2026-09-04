@@ -256,8 +256,6 @@ export function App() {
         cartCount={cartTotalCount}
         onOpenCart={() => setIsCartOpen(!isCartOpen)}
         onOpenCustomCakeModal={() => setIsCustomCakeOpen(true)}
-        themeMode={themeMode}
-        toggleTheme={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}
         currentPath={location.pathname}
         onNavigate={(path) => navigate(path)}
         currentUser={currentUser}

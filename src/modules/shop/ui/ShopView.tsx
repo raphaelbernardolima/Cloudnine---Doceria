@@ -33,7 +33,7 @@ export function ShopView({
 }: ShopViewProps) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>
-      
+
       {/* Categories (Pills) - Horizontal Scroll */}
       <Box
         id="shop-categories-filter-bar"
@@ -94,7 +94,7 @@ export function ShopView({
             placeholder="Descubra novos sabores..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ 
+            sx={{
               flexGrow: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: '9999px',
@@ -108,16 +108,16 @@ export function ShopView({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search className="w-5 h-5 text-[var(--color-outline)]" />
+                    <Search className="w-5 h-5 text-(--color-outline)" />
                   </InputAdornment>
                 ),
               }
             }}
           />
-          <IconButton 
-            sx={{ 
-              border: '1px solid', 
-              borderColor: 'outlineVariant', 
+          <IconButton
+            sx={{
+              border: '1px solid',
+              borderColor: 'outlineVariant',
               p: 1.5,
               display: { xs: 'none', sm: 'flex' }
             }}
@@ -169,9 +169,9 @@ export function ShopView({
       )}
 
       {/* Hero Brand Banner moved to bottom or removed to match screenshots better, but let's keep it as an extra action block at the bottom */}
-      <Box sx={{ 
-        p: { xs: 4, sm: 6 }, 
-        borderRadius: 4, 
+      <Box sx={{
+        p: { xs: 4, sm: 6 },
+        borderRadius: 4,
         background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light} 0%, rgba(254, 240, 245, 0.8) 100%)`,
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
@@ -195,8 +195,8 @@ export function ShopView({
             </Button>
           </Stack>
         </Box>
-        <Box 
-          component="img" 
+        <Box
+          component="img"
           src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800"
           alt="Doces Cloudnine"
           sx={{ width: { xs: '100%', md: 300 }, height: 200, objectFit: 'cover', borderRadius: 3, transform: 'rotate(2deg)', boxShadow: 3 }}
