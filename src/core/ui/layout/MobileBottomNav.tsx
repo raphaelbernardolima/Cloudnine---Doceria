@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, BottomNavigation, BottomNavigationAction } from '@mui/material';
-import { ShoppingBag, User, Sparkles } from 'lucide-react';
+import { ShoppingBag, User, Sparkles, Store } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MobileBottomNavProps {
@@ -21,6 +21,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   let value = 0;
   if (currentPath === '/') value = 0;
   else if (currentPath === '/profile') value = 2;
+  else if (currentPath === '/sobre') value = 3;
   else value = -1; // No matching tab, e.g. /admin
 
   return (
@@ -39,6 +40,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             } else {
               onOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos.');
             }
+          } else if (newValue === 3) {
+            navigate('/sobre');
           }
         }}
         sx={{
@@ -54,6 +57,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         <BottomNavigationAction label="Cardápio" icon={<ShoppingBag className="w-5 h-5" />} />
         <BottomNavigationAction label="Montar Bolo" icon={<Sparkles className="w-5 h-5" />} />
         <BottomNavigationAction label="Meu Perfil" icon={<User className="w-5 h-5" />} />
+        <BottomNavigationAction label="Sobre Nós" icon={<Store className="w-5 h-5" />} />
       </BottomNavigation>
     </Paper>
   );

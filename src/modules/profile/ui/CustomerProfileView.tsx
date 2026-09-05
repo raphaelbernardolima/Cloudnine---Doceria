@@ -50,10 +50,10 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
   const [pontoReferencia, setPontoReferencia] = useState(currentUser.endereco_referencia || '');
 
   // Dietary Preferences
-  const [zeroLactose, setZeroLactose] = useState(false);
-  const [semGluten, setSemGluten] = useState(false);
-  const [zeroAcucar, setZeroAcucar] = useState(false);
-  const [alergiaNozes, setAlergiaNozes] = useState(true);
+  const [zeroLactose, setZeroLactose] = useState(currentUser.restricao_zero_lactose || false);
+  const [semGluten, setSemGluten] = useState(currentUser.restricao_sem_gluten || false);
+  const [zeroAcucar, setZeroAcucar] = useState(currentUser.restricao_zero_acucar || false);
+  const [alergiaNozes, setAlergiaNozes] = useState(currentUser.restricao_alergia_nozes || false);
 
   // Notification Preferences
   const [notifWhatsapp, setNotifWhatsapp] = useState(true);
@@ -124,7 +124,12 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
       endereco_cidade: cidade,
       endereco_cep: cep,
       endereco_complemento: complemento,
-      endereco_referencia: pontoReferencia
+      endereco_referencia: pontoReferencia,
+      endereco_uf: 'SP',
+      restricao_zero_lactose: zeroLactose,
+      restricao_sem_gluten: semGluten,
+      restricao_zero_acucar: zeroAcucar,
+      restricao_alergia_nozes: alergiaNozes
     };
     onUpdateUser(updated);
     setIsSaved(true);
@@ -141,16 +146,16 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 animate-in fade-in duration-300">
 
       {/* Page Title & Hero Header */}
-      <div className="relative rounded-[32px] bg-white border border-[#FCDDD4]/50 p-8 shadow-sm" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.12)' }}>
+      <div className="relative rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 p-8 shadow-sm" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.12)' }}>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
 
             {/* Avatar Circle */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-[#FFF0EC] border border-[#FCDDD4] overflow-hidden shrink-0 flex items-center justify-center relative group">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-[var(--color-surface-container-low)] border border-[#FCDDD4] overflow-hidden shrink-0 flex items-center justify-center relative group">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Foto de Perfil" className="w-full h-full object-cover" />
               ) : (
-                <User className="w-12 h-12 text-[#D9A89B]" />
+                <User className="w-12 h-12 text-[var(--color-primary)]" />
               )}
             </div>
 
@@ -159,21 +164,24 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 <h1 className="text-2xl sm:text-3xl" style={{ fontFamily: '"Libre Caslon Text", serif', color: '#3C2218', fontStyle: 'italic' }}>
                   {(nome || currentUser.nome)?.replace(/["']/g, '') || 'Usuário'} {(sobrenome || currentUser.sobrenome)?.replace(/["']/g, '') || ''}
                 </h1>
-                <span className="px-3 py-1 rounded-full bg-[#FCDDD4]/50 text-[#8C6B63] font-bold text-[10px] uppercase tracking-wider border border-[#D9A89B]/30">
-                  Membro VIP Cloudnine
-                </span>
+                {currentUser.vipLevel && currentUser.vipLevel !== 'none' && (
+                  <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 font-bold text-[10px] uppercase tracking-wider border border-amber-500/20 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    VIP {currentUser.vipLevel.replace('vip_', 'Nível ')}
+                  </span>
+                )}
               </div>
 
-              <div className="text-sm text-[#5A4A47] font-medium flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3">
+              <div className="text-sm text-[var(--color-on-surface-variant)] font-medium flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3">
                 <div className="flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#D9A89B]" />
+                  <Mail className="w-3.5 h-3.5 text-[var(--color-primary)]" />
                   <span>{currentUser.email}</span>
                 </div>
                 {telefone && (
                   <>
                     <span className="hidden sm:inline opacity-30">•</span>
                     <div className="flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-[#D9A89B]" />
+                      <Phone className="w-3.5 h-3.5 text-[var(--color-primary)]" />
                       <span>{telefone}</span>
                     </div>
                   </>
@@ -183,7 +191,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
               <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs font-bold">
                 <span className="flex items-center gap-1.5 bg-[#FFF9E6] px-3 py-1.5 rounded-full text-[#D4A017] border border-[#F2D780]/50">
                   <Award className="w-4 h-4" />
-                  480 Pontos Fidelidade
+                  {currentUser.pontosFidelidade || 0} Pontos Fidelidade
                 </span>
                 <span className="flex items-center gap-1.5 bg-[#F0FDF4] px-3 py-1.5 rounded-full text-[#166534] border border-[#BBF7D0]/50">
                   <ShoppingBag className="w-4 h-4" />
@@ -196,7 +204,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
           <button
             onClick={onNavigateToShop}
-            className="self-center md:self-auto px-6 py-3 rounded-full bg-[#3C2218] text-[#FCDDD4] font-bold text-sm hover:opacity-90 transition-all shadow-sm flex items-center space-x-2"
+            className="self-center md:self-auto px-6 py-3 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-sm hover:opacity-90 transition-all shadow-sm flex items-center space-x-2"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Ir para o Cardápio</span>
@@ -209,16 +217,16 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
         {/* Left Sidebar Navigation */}
         <div className="lg:col-span-1 space-y-2">
-          <div className="p-4 rounded-[32px] bg-white border border-[#FCDDD4]/50 space-y-1 sticky top-20" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.08)' }}>
-            <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[#8C6B63] mb-2">
+          <div className="p-4 rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-1 sticky top-20" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.08)' }}>
+            <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--color-primary)] mb-2">
               Portal do Cliente
             </p>
 
             <button
               onClick={() => setActiveSubTab('profile')}
               className={`w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all ${activeSubTab === 'profile'
-                ? 'bg-[#FFF0EC] text-[#3C2218] border border-[#FCDDD4]'
-                : 'text-[#5A4A47] hover:bg-[#FFF0EC]/50 hover:text-[#3C2218] border border-transparent'
+                ? 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border border-[#FCDDD4]'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-low)]/50 hover:text-[var(--color-on-surface)] border border-transparent'
                 }`}
             >
               <div className="flex items-center space-x-2.5">
@@ -231,8 +239,8 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
             <button
               onClick={() => setActiveSubTab('orders')}
               className={`w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all ${activeSubTab === 'orders'
-                ? 'bg-[#FFF0EC] text-[#3C2218] border border-[#FCDDD4]'
-                : 'text-[#5A4A47] hover:bg-[#FFF0EC]/50 hover:text-[#3C2218] border border-transparent'
+                ? 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border border-[#FCDDD4]'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-low)]/50 hover:text-[var(--color-on-surface)] border border-transparent'
                 }`}
             >
               <div className="flex items-center space-x-2.5">
@@ -245,8 +253,8 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
             <button
               onClick={() => setActiveSubTab('addresses')}
               className={`w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all ${activeSubTab === 'addresses'
-                ? 'bg-[#FFF0EC] text-[#3C2218] border border-[#FCDDD4]'
-                : 'text-[#5A4A47] hover:bg-[#FFF0EC]/50 hover:text-[#3C2218] border border-transparent'
+                ? 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border border-[#FCDDD4]'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-low)]/50 hover:text-[var(--color-on-surface)] border border-transparent'
                 }`}
             >
               <div className="flex items-center space-x-2.5">
@@ -259,8 +267,8 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
             <button
               onClick={() => setActiveSubTab('loyalty')}
               className={`w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all ${activeSubTab === 'loyalty'
-                ? 'bg-[#FFF0EC] text-[#3C2218] border border-[#FCDDD4]'
-                : 'text-[#5A4A47] hover:bg-[#FFF0EC]/50 hover:text-[#3C2218] border border-transparent'
+                ? 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border border-[#FCDDD4]'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-low)]/50 hover:text-[var(--color-on-surface)] border border-transparent'
                 }`}
             >
               <div className="flex items-center space-x-2.5">
@@ -273,8 +281,8 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
             <button
               onClick={() => setActiveSubTab('preferences')}
               className={`w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all ${activeSubTab === 'preferences'
-                ? 'bg-[#FFF0EC] text-[#3C2218] border border-[#FCDDD4]'
-                : 'text-[#5A4A47] hover:bg-[#FFF0EC]/50 hover:text-[#3C2218] border border-transparent'
+                ? 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border border-[#FCDDD4]'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-low)]/50 hover:text-[var(--color-on-surface)] border border-transparent'
                 }`}
             >
               <div className="flex items-center space-x-2.5">
@@ -287,8 +295,8 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
             <button
               onClick={() => setActiveSubTab('security')}
               className={`w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all ${activeSubTab === 'security'
-                ? 'bg-[#FFF0EC] text-[#3C2218] border border-[#FCDDD4]'
-                : 'text-[#5A4A47] hover:bg-[#FFF0EC]/50 hover:text-[#3C2218] border border-transparent'
+                ? 'bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] border border-[#FCDDD4]'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-low)]/50 hover:text-[var(--color-on-surface)] border border-transparent'
                 }`}
             >
               <div className="flex items-center space-x-2.5">
@@ -302,7 +310,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
               <div className="pt-4 mt-2 border-t border-(--color-outline-variant)/20">
                 <button
                   onClick={onNavigateToAdmin}
-                  className="w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all bg-[#FFF0EC] text-[#8C6B63] hover:bg-[#FCDDD4]/50 border border-[#D9A89B]/30"
+                  className="w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all bg-[var(--color-surface-container-low)] text-[var(--color-primary)] hover:bg-[#FCDDD4]/50 border border-[#D9A89B]/30"
                 >
                   <div className="flex items-center space-x-2.5">
                     <Settings2 className="w-4 h-4" />
@@ -342,13 +350,13 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
             <>
               {/* SUBTAB 1: DADOS DO PERFIL & FOTO */}
               {activeSubTab === 'profile' && (
-                <div className="p-8 rounded-[32px] bg-white border border-[#FCDDD4]/50 space-y-6" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.08)' }}>
-                  <div className="border-b border-[#FCDDD4]/50 pb-4">
+                <div className="p-8 rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-6" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.08)' }}>
+                  <div className="border-b border-[var(--color-outline-variant)]/30 pb-4">
                     <h3 className="text-2xl flex items-center gap-2" style={{ fontFamily: '"Libre Caslon Text", serif', color: '#3C2218', fontStyle: 'italic' }}>
-                      <User className="w-6 h-6 text-[#D9A89B]" />
+                      <User className="w-6 h-6 text-[var(--color-primary)]" />
                       <span>Informações Pessoais e Foto</span>
                     </h3>
-                    <p className="text-sm text-[#8C6B63] mt-1">
+                    <p className="text-sm text-[var(--color-primary)] mt-1">
                       Atualize sua foto de perfil e dados de contato para facilitar o atendimento das suas encomendas.
                     </p>
                   </div>
@@ -387,23 +395,23 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                       <div>
-                        <label className="font-bold text-[#5A4A47] block mb-1.5">Telefone / WhatsApp</label>
+                        <label className="font-bold text-[var(--color-on-surface-variant)] block mb-1.5">Telefone / WhatsApp</label>
                         <input
                           type="tel"
                           value={telefone}
                           onChange={(e) => setTelefone(e.target.value)}
                           placeholder="(11) 99999-9999"
-                          className="w-full p-3 rounded-2xl bg-[#FFF0EC]/50 border border-[#FCDDD4] text-[#3C2218] font-medium focus:outline-none focus:ring-2 focus:ring-[#D9A89B]"
+                          className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)]/50 border border-[#FCDDD4] text-[var(--color-on-surface)] font-medium focus:outline-none focus:ring-2 focus:ring-[#D9A89B]"
                         />
                       </div>
 
                       <div>
-                        <label className="font-bold text-[#5A4A47] block mb-1.5">E-mail Cadastrado</label>
+                        <label className="font-bold text-[var(--color-on-surface-variant)] block mb-1.5">E-mail Cadastrado</label>
                         <input
                           type="email"
                           value={currentUser.email}
                           disabled
-                          className="w-full p-3 rounded-2xl bg-[#FCDDD4]/30 opacity-70 border border-[#D9A89B]/20 text-[#8C6B63] font-medium cursor-not-allowed"
+                          className="w-full p-3 rounded-2xl bg-[#FCDDD4]/30 opacity-70 border border-[#D9A89B]/20 text-[var(--color-primary)] font-medium cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -425,7 +433,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
                       <button
                         type="submit"
-                        className="px-6 py-3 rounded-2xl bg-[#3C2218] text-[#FCDDD4] font-bold text-sm flex items-center space-x-2 shadow-sm hover:opacity-95 transition-all min-h-11"
+                        className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-sm flex items-center space-x-2 shadow-sm hover:opacity-95 transition-all min-h-11"
                       >
                         <Save className="w-4 h-4" />
                         <span>Salvar Dados</span>
@@ -484,6 +492,39 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                             <span className="self-start sm:self-center font-extrabold text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
                               {o.status.replace('_', ' ')}
                             </span>
+                          </div>
+
+                          {/* Order Tracking Timeline */}
+                          <div className="py-2 px-1">
+                            <div className="flex items-center justify-between relative">
+                              <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-[var(--color-outline-variant)] -translate-y-1/2 z-0 opacity-30"></div>
+                              {[
+                                { id: 'recebido', label: 'Recebido' },
+                                { id: 'em_preparo', label: 'Preparo' },
+                                { id: 'saiu_entrega', label: 'Entrega' },
+                                { id: 'entregue', label: 'Entregue' }
+                              ].map((step, stepIdx, arr) => {
+                                const currentIndex = arr.findIndex(s => s.id === o.status);
+                                const isCompleted = currentIndex >= stepIdx;
+                                const isCurrent = currentIndex === stepIdx;
+                                
+                                return (
+                                  <div key={step.id} className="relative z-10 flex flex-col items-center gap-1.5">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] transition-all
+                                      ${isCompleted ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-[var(--color-on-primary)]' : 'bg-[var(--color-surface)] border-[var(--color-outline-variant)] text-[var(--color-outline)]'}
+                                      ${isCurrent ? 'ring-2 ring-[var(--color-primary)]/30 ring-offset-1 ring-offset-[var(--color-surface)]' : ''}
+                                    `}>
+                                      {isCompleted ? <CheckCircle className="w-3.5 h-3.5" /> : (stepIdx + 1)}
+                                    </div>
+                                    <span className={`text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wide
+                                      ${isCurrent ? 'text-[var(--color-primary)]' : isCompleted ? 'text-[var(--color-on-surface)]' : 'text-[var(--color-outline)]'}
+                                    `}>
+                                      {step.label}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
 
                           {/* Item list */}
@@ -616,10 +657,10 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                         <span className="text-sm font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
                           Cartão de Fidelidade Digital
                         </span>
-                        <h4 className="text-xl font-black text-(--color-on-surface)">Saldo Atual: 480 Pontos</h4>
+                        <h4 className="text-xl font-black text-(--color-on-surface)">Saldo Atual: {currentUser.pontosFidelidade || 0} Pontos</h4>
                       </div>
-                      <span className="self-start sm:self-auto px-4 py-2 rounded-2xl bg-amber-500 text-white font-black text-xs shadow-xs">
-                        NÍVEL VIP
+                      <span className="self-start sm:self-auto px-4 py-2 rounded-2xl bg-amber-500 text-white font-black text-xs shadow-xs uppercase">
+                        {currentUser.vipLevel && currentUser.vipLevel !== 'none' ? `VIP ${currentUser.vipLevel.replace('vip_', 'Nível ')}` : 'CLUBE CLOUDNINE'}
                       </span>
                     </div>
 
@@ -627,10 +668,10 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                     <div className="space-y-1.5 pt-1">
                       <div className="flex justify-between text-xs font-extrabold">
                         <span>Próxima Recompensa: Fatia de Bolo Red Velvet (500 pts)</span>
-                        <span className="text-amber-600 dark:text-amber-400">480 / 500 (96%)</span>
+                        <span className="text-amber-600 dark:text-amber-400">{currentUser.pontosFidelidade || 0} / 500 ({Math.min(100, Math.round(((currentUser.pontosFidelidade || 0) / 500) * 100))}%)</span>
                       </div>
                       <div className="w-full h-3 rounded-full bg-amber-500/20 overflow-hidden">
-                        <div className="h-full bg-amber-500 rounded-full w-[96%] transition-all"></div>
+                        <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${Math.min(100, Math.round(((currentUser.pontosFidelidade || 0) / 500) * 100))}%` }}></div>
                       </div>
                     </div>
                   </div>

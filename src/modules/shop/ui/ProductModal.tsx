@@ -112,26 +112,45 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             sx={{ mb: 3 }}
           />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: 'surfaceContainerHighest', borderRadius: '9999px', p: 0.5, width: 'fit-content' }}>
+        </DialogContent>
+
+        <DialogActions sx={{ 
+          p: { xs: 2, md: 3 }, 
+          pt: { xs: 2, md: 3 },
+          borderTop: 1, 
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          display: 'flex',
+          gap: 2,
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 10
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            bgcolor: 'surfaceContainerHighest', 
+            borderRadius: '9999px', 
+            p: 0.5, 
+            shrink: 0 
+          }}>
             <IconButton onClick={() => setQuantity(Math.max(1, quantity - 1))} size="small">
               <Minus className="w-4 h-4" />
             </IconButton>
-            <Typography variant="body1" sx={{ fontWeight: 700, px: 3 }}>
+            <Typography variant="body2" sx={{ fontWeight: 700, px: 2, minWidth: '2ch', textAlign: 'center' }}>
               {quantity}
             </Typography>
             <IconButton onClick={() => setQuantity(quantity + 1)} size="small">
               <Plus className="w-4 h-4" />
             </IconButton>
           </Box>
-        </DialogContent>
-
-        <DialogActions sx={{ p: 3, pt: 0 }}>
           <Button 
             variant="contained" 
             fullWidth 
             size="large"
             onClick={handleAdd}
             startIcon={<ShoppingBag className="w-5 h-5" />}
+            sx={{ flexGrow: 1 }}
           >
             Adicionar R$ {(product.preco * quantity).toFixed(2).replace('.', ',')}
           </Button>

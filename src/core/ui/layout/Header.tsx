@@ -15,12 +15,16 @@ import {
   ChefHat,
   Layers,
   Moon,
-  Sun
+  Sun,
+  Bell,
+  Cake
 } from 'lucide-react';
 import { UserProfile, Order } from '@/src/core/types/index';
 import { isStaff } from '@/src/core/constants/roles';
 import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button, Switch } from '@mui/material';
 import { useAppTheme } from '@/src/core/theme/ThemeContext';
+import { useStore } from '@/src/core/store/useStore';
+import { NotificationDrawer } from '@/src/core/ui/layout/NotificationDrawer';
 
 interface HeaderProps {
   cartCount: number;
@@ -46,7 +50,10 @@ export const Header: React.FC<HeaderProps> = ({
   orders = []
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
   const { mode, toggleTheme } = useAppTheme();
+  const { notifications } = useStore();
+  const unreadCount = notifications.filter(n => !n.lida).length;
 
   const handleNavClick = (path: string) => {
     onNavigate(path);
@@ -128,20 +135,29 @@ export const Header: React.FC<HeaderProps> = ({
                 </Button>
               )}
             </Box>
-            
+
             {/* Desktop Theme Toggle */}
             <IconButton color="inherit" onClick={toggleTheme} sx={{ display: { xs: 'none', md: 'inline-flex' } }}>
               {mode === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </IconButton>
 
+            <IconButton color="inherit" onClick={() => setIsNotifDrawerOpen(true)}>
+              <Badge badgeContent={unreadCount} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}>
+                <Bell className="w-6 h-6" />
+              </Badge>
+            </IconButton>
+
             <IconButton color="inherit" onClick={onOpenCart}>
               <Badge badgeContent={cartCount} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}>
-                <ShoppingBag />
+                <ShoppingBag className="w-6 h-6" />
               </Badge>
             </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Notifications Drawer */}
+      <NotificationDrawer isOpen={isNotifDrawerOpen} onClose={() => setIsNotifDrawerOpen(false)} />
 
       {/* Mobile Drawer */}
       <Drawer
@@ -369,6 +385,35 @@ export const Header: React.FC<HeaderProps> = ({
                 );
               })()}
 
+              {/* Bolos Personalizados */}
+              {(() => {
+                const active = isTabActive('custom-cake');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => handleNavClick('/admin?tab=custom-cake')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? '#FCDDD4' : 'transparent',
+                        color: active ? '#3C2218' : '#3D3534',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Cake className="w-5 h-5 stroke-2" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                        Bolos Personalizados
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
               {/* Configurações */}
               {(() => {
                 const active = isTabActive('store-config') || isTabActive('payment-config') || isTabActive('staff');
@@ -426,7 +471,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Bottom Area: Theme Toggle & Logout */}
         <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          
+
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1, bgcolor: 'background.paper', borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: 'text.secondary' }}>
               {mode === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

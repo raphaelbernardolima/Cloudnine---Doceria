@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
-import { Box, Chip, Select, MenuItem, IconButton } from '@mui/material';
+import { Box, Chip, Select, MenuItem, IconButton, Card, CardContent, Typography, Button, ToggleButtonGroup, ToggleButton, FormControl, Divider } from '@mui/material';
 import {
   Package, ShoppingBag, Users, FileText, Printer, Sparkles,
   Plus, Edit, Trash2, CheckCircle2, Clock, AlertCircle,
@@ -171,45 +171,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto py-4">
-
-      {/* Top Header & Admin Tabs */}
-      <div className="p-8 rounded-[32px] bg-white border border-[#FCDDD4]/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.15)' }}>
-        <div>
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8C6B63] bg-[#FFF0EC] px-3 py-1.5 rounded-full">
-            Painel Administrativo Restrito
-          </span>
-          <h1 className="text-3xl mt-3" style={{ fontFamily: '"Libre Caslon Text", serif', color: '#3C2218', fontStyle: 'italic' }}>
-            Gestão Operacional Cloudnine
-          </h1>
-          <p className="text-sm text-[#5A4A47] mt-1 font-medium">
-            Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.
-          </p>
-        </div>
-        {/* Tab Selector - Wrap layout to eliminate horizontal scrolling */}
-        <div className="hidden md:flex flex-wrap items-center gap-1.5 bg-(--color-surface-container) p-2 rounded-2xl border border-(--color-outline-variant)/20 text-xs font-bold max-w-2xl justify-end">
-          {['admin', 'ADMIN'].includes(currentUser.role) && (
-            <button
+    <div className="flex flex-col md:flex-row gap-6 max-w-[1400px] mx-auto py-4 px-4 items-start">
+      
+      {/* Sidebar Navigation (Desktop Only) */}
+      <div className="hidden md:flex w-[260px] shrink-0 bg-[var(--color-surface-container-lowest)] rounded-3xl p-4 border border-[var(--color-outline-variant)]/20 shadow-sm flex-col gap-2 overflow-visible sticky top-24">
+        <h3 className="text-sm font-bold text-[var(--color-on-surface)] px-2 mb-2">Menu Administrativo</h3>
+        
+        {['admin', 'ADMIN'].includes(currentUser.role) && (
+          <button
               onClick={() => setActiveTab('dashboard')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'dashboard'
-                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'dashboard'
+                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
             >
-              <LayoutDashboard className="w-4 h-4" />
+              <LayoutDashboard className="w-5 h-5" />
               <span>Financeiro & Dashboard</span>
-            </button>
-          )}
+          </button>
+        )}
 
           {['admin', 'ADMIN', 'CAIXA', 'ATENDIMENTO', 'atendente'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('orders')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'orders'
-                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'orders'
+                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
             >
-              <ShoppingBag className="w-4 h-4" />
+              <ShoppingBag className="w-5 h-5" />
               <span>Pedidos ({orders.length})</span>
             </button>
           )}
@@ -217,24 +206,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'COZINHA'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('calendar')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'calendar'
-                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'calendar'
+                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
             >
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-5 h-5" />
               <span>Calendário de Encomendas</span>
             </button>
           )}
           {['admin', 'ADMIN', 'COZINHA'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('products')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'products'
-                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'products'
+                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
             >
-              <Package className="w-4 h-4" />
+              <Package className="w-5 h-5" />
               <span>Estoque & Catálogo</span>
             </button>
           )}
@@ -242,12 +231,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'COZINHA', 'confeiteiro'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('kitchen')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'kitchen'
-                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'kitchen'
+                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-5 h-5" />
               <span>Comanda Cozinha</span>
             </button>
           )}
@@ -255,24 +244,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {['admin', 'ADMIN', 'ATENDIMENTO'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('delivery')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'delivery'
-                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'delivery'
+                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
             >
-              <Truck className="w-4 h-4" />
+              <Truck className="w-5 h-5" />
               <span>Despacho & Logística</span>
             </button>
           )}
           {['admin', 'ADMIN'].includes(currentUser.role) && (
             <button
               onClick={() => setActiveTab('marketing')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'marketing'
-                ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'marketing'
+                ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
             >
-              <Gift className="w-4 h-4" />
+              <Gift className="w-5 h-5" />
               <span>Marketing & Fidelidade</span>
             </button>
           )}
@@ -280,64 +269,79 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <>
               <button
                 onClick={() => setActiveTab('staff')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'staff'
-                  ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'staff'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                   }`}
               >
-                <ShieldCheck className="w-4 h-4" />
+                <ShieldCheck className="w-5 h-5" />
                 <span>Equipe & Permissões</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('ai')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'ai'
-                  ? 'bg-linear-to-r from-(--color-primary) to-(--color-primary-container) text-(--color-on-primary) shadow-xs'
-                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'ai'
+                  ? 'bg-linear-to-r from-[var(--color-primary)] to-[var(--color-primary-container)] text-[var(--color-on-primary)] shadow-md font-bold'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                   }`}
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-5 h-5" />
                 <span>Marketing IA</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('store-config')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'store-config'
-                  ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'store-config'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                   }`}
               >
-                <Store className="w-4 h-4" />
+                <Store className="w-5 h-5" />
                 <span>Configurações da Loja</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('custom-cake')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'custom-cake'
-                  ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'custom-cake'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                   }`}
               >
-                <Cake className="w-4 h-4" />
+                <Cake className="w-5 h-5" />
                 <span>Bolos Personalizados</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('payment-config')}
-                className={`px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 shrink-0 ${activeTab === 'payment-config'
-                  ? 'bg-(--color-primary) text-(--color-on-primary) shadow-xs'
-                  : 'text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high)'
+                className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'payment-config'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+                  : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                   }`}
               >
-                <CreditCard className="w-4 h-4" />
+                <CreditCard className="w-5 h-5" />
                 <span>Configurações de Pagamento</span>
               </button>
             </>
           )}
         </div>
-      </div>
 
-      {/* DASHBOARD & FINANCE */}
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0 space-y-6 pb-20">
+        
+        {/* Top Header */}
+        <div className="p-8 rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 shadow-xs">
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--color-primary)] bg-[var(--color-primary-container)]/20 px-3 py-1.5 rounded-full">
+            Painel Administrativo Restrito
+          </span>
+          <h1 className="text-3xl mt-3 text-[var(--color-on-surface)]" style={{ fontFamily: '"Libre Caslon Text", serif', fontStyle: 'italic' }}>
+            Gestão Operacional Cloudnine
+          </h1>
+          <p className="text-sm text-[var(--color-on-surface-variant)] mt-1 font-medium">
+            Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.
+          </p>
+        </div>
+
+        {/* DASHBOARD & FINANCE */}
       {activeTab === 'dashboard' && (
         <AdminFinanceModule orders={orders} products={products} ingredients={ingredients} />
       )}
@@ -386,24 +390,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* TAB 1: ORDERS MANAGEMENT */}
       {activeTab === 'orders' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <h3 className="text-2xl" style={{ fontFamily: '"Libre Caslon Text", serif', color: '#3C2218', fontStyle: 'italic' }}>
+              <h3 className="text-2xl text-[var(--color-on-surface)]" style={{ fontFamily: '"Libre Caslon Text", serif', fontStyle: 'italic' }}>
                 Pedidos Recentes
               </h3>
-              <p className="text-sm text-[#8C6B63]">Acompanhe e atualize o status das entregas em tempo real.</p>
+              <p className="text-sm text-[var(--color-on-surface-variant)]">Acompanhe e atualize o status das entregas em tempo real.</p>
             </div>
           </div>
-          <Box sx={{ height: 600, width: '100%', bgcolor: '#FFFFFF', borderRadius: 6, overflow: 'hidden', boxShadow: '0 12px 40px rgba(220, 160, 145, 0.1)', border: '1px solid rgba(252, 221, 212, 0.5)' }}>
+
+          {/* Desktop Table View */}
+          <Box sx={{ display: { xs: 'none', md: 'block' }, height: 600, width: '100%', bgcolor: 'background.paper', borderRadius: 4, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', border: '1px solid var(--color-outline-variant)' }}>
             <DataGrid
               rows={orders}
               columns={[
-                { field: 'id', headerName: 'ID', width: 90 },
-                { field: 'cliente_nome', headerName: 'Cliente', width: 200 },
+                { field: 'id', headerName: 'ID', width: 70 },
+                { field: 'cliente_nome', headerName: 'Cliente', flex: 1.2, minWidth: 140 },
                 {
                   field: 'itens',
                   headerName: 'Itens',
-                  width: 300,
+                  flex: 1.8,
+                  minWidth: 180,
                   valueGetter: (value: any) => {
                     return Array.isArray(value) ? value.map((i: any) => `${i.quantidade}x ${i.nomeProduto || i.nome || 'Item'}`).join(', ') : '';
                   }
@@ -411,25 +418,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 {
                   field: 'total',
                   headerName: 'Total',
-                  width: 130,
-                  renderCell: (params) => `R$ ${Number(params.value || 0).toFixed(2).replace('.', ',')}`
+                  flex: 0.8,
+                  minWidth: 100,
+                  renderCell: (params) => (
+                    <span className="font-bold text-[var(--color-primary)]">
+                      R$ {Number(params.value || 0).toFixed(2).replace('.', ',')}
+                    </span>
+                  )
                 },
                 {
                   field: 'created_at',
                   headerName: 'Data',
-                  width: 180,
-                  renderCell: (params) => new Date(params.value).toLocaleString('pt-BR')
+                  flex: 1,
+                  minWidth: 130,
+                  renderCell: (params) => new Date(params.value).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
                 },
                 {
                   field: 'status',
                   headerName: 'Status',
-                  width: 200,
+                  flex: 1.2,
+                  minWidth: 150,
                   renderCell: (params) => (
                     <Select
                       size="small"
                       value={params.row.status}
                       onChange={(e) => onUpdateOrderStatus(params.row.id, e.target.value as any)}
-                      sx={{ width: '100%', height: 32, fontSize: '0.875rem' }}
+                      sx={{ width: '100%', height: 36, fontSize: '0.875rem', borderRadius: 2, bgcolor: 'var(--color-surface-container-lowest)' }}
                     >
                       <MenuItem value="pendente_pix">Pendente PIX</MenuItem>
                       <MenuItem value="preparo">Em Preparo</MenuItem>
@@ -441,11 +455,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 },
                 {
                   field: 'actions',
-                  headerName: 'Ações',
-                  width: 120,
+                  headerName: 'Imprimir',
+                  width: 90,
+                  align: 'center',
+                  sortable: false,
+                  filterable: false,
                   renderCell: (params) => (
-                    <IconButton size="small" onClick={() => setPrintingOrder(params.row)}>
-                      <Printer className="w-4 h-4 text-gray-500" />
+                    <IconButton size="small" onClick={() => setPrintingOrder(params.row)} sx={{ color: 'var(--color-primary)' }}>
+                      <Printer className="w-4 h-4" />
                     </IconButton>
                   )
                 }
@@ -458,9 +475,60 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               pageSizeOptions={[10, 20, 50]}
               disableRowSelectionOnClick
               slots={{ toolbar: GridToolbar }}
-              slotProps={{ toolbar: { showQuickFilter: true } }}
-              sx={{ border: 'none', '& .MuiDataGrid-cell': { borderColor: 'var(--color-outline-variant)' } }}
+              slotProps={{ toolbar: { showQuickFilter: true, sx: { p: 2, borderBottom: '1px solid var(--color-outline-variant)' } } }}
+              sx={{ 
+                border: 'none', 
+                width: '100%',
+                '& .MuiDataGrid-main': { width: '100%' },
+                '& .MuiDataGrid-cell': { borderColor: 'var(--color-outline-variant)', display: 'flex', alignItems: 'center' },
+                '& .MuiDataGrid-columnHeaders': { bgcolor: 'var(--color-surface-container-low)', borderColor: 'var(--color-outline-variant)', fontWeight: 'bold' },
+                '& .MuiDataGrid-footerContainer': { borderColor: 'var(--color-outline-variant)' }
+              }}
             />
+          </Box>
+
+          {/* Mobile Card View */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+            {orders.map((o) => (
+              <Box key={o.id} sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid var(--color-outline-variant)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-xs font-bold text-[var(--color-primary)]">PEDIDO #{o.id}</span>
+                    <h4 className="font-bold text-[var(--color-on-surface)] mt-1">{o.cliente_nome}</h4>
+                    <span className="text-xs text-[var(--color-on-surface-variant)]">{new Date(o.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                  <div className="font-bold text-[var(--color-primary)]">
+                    R$ {Number(o.total || 0).toFixed(2).replace('.', ',')}
+                  </div>
+                </div>
+                
+                <div className="text-sm text-[var(--color-on-surface)] bg-[var(--color-surface-container-lowest)] p-2 rounded-xl border border-[var(--color-outline-variant)]/50">
+                  {o.itens.map((i: any, idx: number) => (
+                    <div key={idx} className="flex justify-between py-1">
+                      <span>{i.quantidade}x {i.nomeProduto || i.nome || 'Item'}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-[var(--color-outline-variant)]/30">
+                  <Select
+                    size="small"
+                    value={o.status}
+                    onChange={(e) => onUpdateOrderStatus(o.id, e.target.value as any)}
+                    sx={{ flex: 1, height: 36, fontSize: '0.875rem', borderRadius: 2, bgcolor: 'var(--color-surface-container-lowest)' }}
+                  >
+                    <MenuItem value="pendente_pix">Pendente PIX</MenuItem>
+                    <MenuItem value="preparo">Em Preparo</MenuItem>
+                    <MenuItem value="pronto">Pronto p/ Entrega</MenuItem>
+                    <MenuItem value="rota">Em Rota</MenuItem>
+                    <MenuItem value="entregue">Entregue</MenuItem>
+                  </Select>
+                  <IconButton size="small" onClick={() => setPrintingOrder(o)} sx={{ color: 'var(--color-primary)', bgcolor: 'var(--color-primary-container)', borderRadius: 2 }}>
+                    <Printer className="w-5 h-5" />
+                  </IconButton>
+                </div>
+              </Box>
+            ))}
           </Box>
         </div>
       )}
@@ -506,213 +574,238 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* TAB 3: KITCHEN THERMAL PRINTING & POS INTEGRATION */}
       {activeTab === 'kitchen' && (
-        <div className="space-y-6">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
           {/* Thermal Printer Hardware Configuration Panel */}
-          <div className="p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 space-y-4 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-(--color-outline-variant)/20 pb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary)">
-                  <Printer className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-base text-(--color-on-surface) flex items-center gap-2">
-                    Integração com Maquininhas e Impressoras Térmicas
-                  </h3>
-                  <p className="text-xs text-(--color-outline)">
-                    Suporte nativo a protocolos ESC/POS, bobinas de 80mm/58mm e maquininhas Smart POS Android/Windows (Bematech, Elgin, Epson, Sunmi, Gertec, Daruma).
-                  </p>
-                </div>
-              </div>
+          <Card sx={{ borderRadius: 4, bgcolor: 'var(--color-surface-container-lowest)', borderColor: 'var(--color-outline-variant)', borderWidth: 1, borderStyle: 'solid', boxShadow: 'none' }}>
+            <CardContent sx={{ p: 3, '&:last-child': { pb: 3 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Header */}
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'var(--color-primary)', color: 'var(--color-on-primary)', display: 'flex' }}>
+                    <Printer className="w-5 h-5" />
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'var(--color-on-surface)', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      Integração com Maquininhas e Impressoras Térmicas
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'var(--color-outline)', fontSize: '0.75rem' }}>
+                      Suporte nativo a protocolos ESC/POS, bobinas de 80mm/58mm e maquininhas Smart POS Android/Windows.
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#10b981', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>
+                    {printerStatusMessage}
+                  </Typography>
+                </Box>
+              </Box>
 
-              <div className="flex items-center space-x-2 shrink-0">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  {printerStatusMessage}
-                </span>
-              </div>
-            </div>
+              <Divider sx={{ borderColor: 'var(--color-outline-variant)', opacity: 0.5 }} />
 
-            {/* Config Controls */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div>
-                <label className="font-bold text-(--color-on-surface) block mb-1">Largura do Papel Térmico</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaperWidth('80mm')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${paperWidth === '80mm'
-                      ? 'bg-(--color-primary) text-(--color-on-primary) border-transparent shadow-xs'
-                      : 'bg-(--color-surface-container-low) text-(--color-on-surface) border-(--color-outline-variant)/40'
-                      }`}
+              {/* Config Controls */}
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 3 }}>
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--color-on-surface)', mb: 1, fontSize: '0.75rem' }}>Largura do Papel Térmico</Typography>
+                  <ToggleButtonGroup
+                    value={paperWidth}
+                    exclusive
+                    onChange={(_, val) => val && setPaperWidth(val)}
+                    aria-label="Largura do Papel Térmico"
+                    fullWidth
+                    sx={{
+                      '& .MuiToggleButton-root': { py: 1, textTransform: 'none', fontWeight: 700, fontSize: '0.75rem', borderColor: 'var(--color-outline-variant)' },
+                      '& .Mui-selected': { bgcolor: 'var(--color-primary) !important', color: 'var(--color-on-primary) !important' }
+                    }}
                   >
-                    80mm (Padrão Cozinha)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaperWidth('58mm')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${paperWidth === '58mm'
-                      ? 'bg-(--color-primary) text-(--color-on-primary) border-transparent shadow-xs'
-                      : 'bg-(--color-surface-container-low) text-(--color-on-surface) border-(--color-outline-variant)/40'
-                      }`}
-                  >
-                    58mm (Maquininha POS)
-                  </button>
-                </div>
-              </div>
+                    <ToggleButton value="80mm" aria-label="80mm (Padrão Cozinha)">80mm (Padrão)</ToggleButton>
+                    <ToggleButton value="58mm" aria-label="58mm (Maquininha POS)">58mm (POS)</ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
 
-              <div>
-                <label className="font-bold text-(--color-on-surface) block mb-1">Via da Impressão</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setReceiptType('cozinha')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${receiptType === 'cozinha'
-                      ? 'bg-(--color-primary) text-(--color-on-primary) border-transparent shadow-xs'
-                      : 'bg-(--color-surface-container-low) text-(--color-on-surface) border-(--color-outline-variant)/40'
-                      }`}
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--color-on-surface)', mb: 1, fontSize: '0.75rem' }}>Via da Impressão</Typography>
+                  <ToggleButtonGroup
+                    value={receiptType}
+                    exclusive
+                    onChange={(_, val) => val && setReceiptType(val)}
+                    aria-label="Via da Impressão"
+                    fullWidth
+                    sx={{
+                      '& .MuiToggleButton-root': { py: 1, textTransform: 'none', fontWeight: 700, fontSize: '0.75rem', borderColor: 'var(--color-outline-variant)' },
+                      '& .Mui-selected': { bgcolor: 'var(--color-primary) !important', color: 'var(--color-on-primary) !important' }
+                    }}
                   >
-                    👨‍🍳 Via Cozinha
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setReceiptType('cliente')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all ${receiptType === 'cliente'
-                      ? 'bg-(--color-primary) text-(--color-on-primary) border-transparent shadow-xs'
-                      : 'bg-(--color-surface-container-low) text-(--color-on-surface) border-(--color-outline-variant)/40'
-                      }`}
-                  >
-                    🛍️ Via Cliente / Balcão
-                  </button>
-                </div>
-              </div>
+                    <ToggleButton value="cozinha" aria-label="Via Cozinha">👨‍🍳 Cozinha</ToggleButton>
+                    <ToggleButton value="cliente" aria-label="Via Cliente / Balcão">🛍️ Cliente/Balcão</ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
 
-              <div>
-                <label className="font-bold text-(--color-on-surface) block mb-1">Protocolo de Comunicação</label>
-                <select
-                  value={printerProtocol}
-                  onChange={(e) => {
-                    const proto = e.target.value as any;
-                    setPrinterProtocol(proto);
-                    if (proto === 'escpos') setPrinterStatusMessage('Protocolo ESC/POS ativado via Spooler local');
-                    else if (proto === 'usb') setPrinterStatusMessage('Conectado via WebUSB / Porta Serial COM');
-                    else if (proto === 'bluetooth') setPrinterStatusMessage('Conectado via Bluetooth POS');
-                    else setPrinterStatusMessage('Pronta para impressão (Driver do Sistema / Spooler)');
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--color-on-surface)', mb: 1, fontSize: '0.75rem' }}>Protocolo de Comunicação</Typography>
+                  <FormControl fullWidth size="small" sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--color-outline-variant)' } }}>
+                    <Select
+                      value={printerProtocol}
+                      onChange={(e) => {
+                        const proto = e.target.value as any;
+                        setPrinterProtocol(proto);
+                        if (proto === 'escpos') setPrinterStatusMessage('Protocolo ESC/POS ativado via Spooler local');
+                        else if (proto === 'usb') setPrinterStatusMessage('Conectado via WebUSB / Porta Serial COM');
+                        else if (proto === 'bluetooth') setPrinterStatusMessage('Conectado via Bluetooth POS');
+                        else setPrinterStatusMessage('Pronta para impressão (Driver do Sistema / Spooler)');
+                      }}
+                      sx={{ bgcolor: 'var(--color-surface-container-low)', fontWeight: 700, fontSize: '0.75rem', borderRadius: 2 }}
+                      inputProps={{ 'aria-label': 'Protocolo de Comunicação' }}
+                    >
+                      <MenuItem value="system" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>🖨️ Driver de Spooler do Sistema (Geral)</MenuItem>
+                      <MenuItem value="escpos" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>⚡ ESC/POS Direto (USB / Serial RAW)</MenuItem>
+                      <MenuItem value="bluetooth" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>📱 Bluetooth (Maquininhas Smart POS)</MenuItem>
+                      <MenuItem value="usb" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>🔌 WebUSB Direct (Porta COM / POS)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Box>
+
+              <Divider sx={{ borderColor: 'var(--color-outline-variant)', opacity: 0.5 }} />
+
+              {/* Test Printing Trigger */}
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="body2" sx={{ color: 'var(--color-outline)', fontWeight: 500, fontSize: '0.875rem' }}>
+                  💡 As comandas são impressas em mono com suporte a caracteres acentuados, separador serrilhado e corte automático ESC/POS.
+                </Typography>
+
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setPrintingOrder({
+                      id: 'TESTE-999',
+                      cliente_nome: 'TESTE DE IMPRESSORA TÉRMICA',
+                      cliente_telefone: '(11) 99999-0000',
+                      tipo_entrega: 'retirada',
+                      data_agendada: 'Hoje',
+                      horario_agendado: 'Imediato',
+                      status: 'em_preparo',
+                      itens: [
+                        { id: 9991, nomeProduto: 'Bolo de Pote Ninho com Nutella', quantidade: 2, preco_unitario: 22.0 },
+                        { id: 9992, nomeProduto: 'Caixa de Brigadeiros Gourmet (6un)', quantidade: 1, preco_unitario: 38.0 }
+                      ],
+                      total: 82.0,
+                      created_at: new Date().toISOString()
+                    } as any);
                   }}
-                  className="w-full p-2.5 rounded-xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-bold focus:outline-none"
+                  startIcon={<Printer className="w-4 h-4" />}
+                  sx={{
+                    bgcolor: 'var(--color-surface-container-high)',
+                    color: 'var(--color-on-surface)',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    borderRadius: 3,
+                    boxShadow: 'none',
+                    px: 3,
+                    py: 1,
+                    '&:hover': { bgcolor: 'var(--color-surface-container-highest)', boxShadow: 'none' },
+                    '& .MuiButton-startIcon': { color: 'var(--color-primary)' }
+                  }}
                 >
-                  <option value="system">🖨️ Driver de Spooler do Sistema (Geral)</option>
-                  <option value="escpos">⚡ ESC/POS Direto (USB / Serial RAW)</option>
-                  <option value="bluetooth">📱 Bluetooth (Maquininhas Smart POS)</option>
-                  <option value="usb">🔌 WebUSB Direct (Porta COM / POS)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Test Printing Trigger */}
-            <div className="pt-2 flex flex-wrap gap-2 items-center justify-between border-t border-(--color-outline-variant)/20">
-              <p className="text-sm text-(--color-outline) font-medium">
-                💡 As comandas são impressas em mono com suporte a caracteres acentuados, separador serrilhado e corte automático ESC/POS.
-              </p>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setPrintingOrder({
-                    id: 'TESTE-999',
-                    cliente_nome: 'TESTE DE IMPRESSORA TÉRMICA',
-                    cliente_telefone: '(11) 99999-0000',
-                    tipo_entrega: 'retirada',
-                    data_agendada: 'Hoje',
-                    horario_agendado: 'Imediato',
-                    status: 'em_preparo',
-                    itens: [
-                      { id: 9991, nomeProduto: 'Bolo de Pote Ninho com Nutella', quantidade: 2, preco_unitario: 22.0 },
-                      { id: 9992, nomeProduto: 'Caixa de Brigadeiros Gourmet (6un)', quantidade: 1, preco_unitario: 38.0 }
-                    ],
-                    total: 82.0,
-                    created_at: new Date().toISOString()
-                  } as any);
-                }}
-                className="px-4 py-2 rounded-xl bg-(--color-surface-container-high) hover:bg-(--color-surface-container-highest) font-bold text-xs flex items-center space-x-1.5 text-(--color-on-surface) transition-all min-h-9.5"
-              >
-                <Printer className="w-3.5 h-3.5 text-(--color-primary)" />
-                <span>Testar Impressão de Exemplo</span>
-              </button>
-            </div>
-          </div>
+                  Testar Impressão de Exemplo
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
 
           {/* Production Queue List */}
-          <div className="p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-base text-(--color-on-surface)">
+          <Card sx={{ borderRadius: 4, bgcolor: 'var(--color-surface-container-lowest)', borderColor: 'var(--color-outline-variant)', borderWidth: 1, borderStyle: 'solid', boxShadow: 'none' }}>
+            <CardContent sx={{ p: 3, '&:last-child': { pb: 3 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: 'var(--color-on-surface)', fontSize: '1rem' }}>
                   Fila de Produção da Confeitaria ({orders.length} pedidos)
-                </h3>
-                <p className="text-xs text-(--color-outline)">
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'var(--color-outline)', fontSize: '0.75rem' }}>
                   Selecione qualquer pedido para enviar a comanda direto para a bancada da cozinha ou balcão.
-                </p>
-              </div>
-            </div>
+                </Typography>
+              </Box>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {orders.map((o) => (
-                <div
-                  key={o.id}
-                  className="p-5 rounded-3xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/30 space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-black text-sm text-(--color-primary)">
-                      PEDIDO #{o.id}
-                    </span>
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600">
-                      {o.status.toUpperCase()}
-                    </span>
-                  </div>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+                {orders.map((o) => (
+                  <Card key={o.id} sx={{ borderRadius: 4, bgcolor: 'var(--color-surface-container-low)', borderColor: 'var(--color-outline-variant)', borderWidth: 1, borderStyle: 'solid', boxShadow: 'none' }}>
+                    <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'var(--color-primary)', fontSize: '0.875rem' }}>
+                          PEDIDO #{o.id}
+                        </Typography>
+                        <Chip
+                          label={o.status.toUpperCase()}
+                          size="small"
+                          sx={{ fontWeight: 700, fontSize: '0.7rem', bgcolor: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }}
+                        />
+                      </Box>
 
-                  <div className="text-xs space-y-1 text-(--color-on-surface)">
-                    <p><strong>Cliente:</strong> {o.cliente_nome} ({o.cliente_telefone})</p>
-                    <p><strong>Agendado:</strong> {o.data_agendada} às {o.horario_agendado}</p>
-                    <p><strong>Tipo:</strong> {o.tipo_entrega.toUpperCase()}</p>
-                  </div>
+                      <Box sx={{ fontSize: '0.75rem', color: 'var(--color-on-surface)', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}><strong>Cliente:</strong> {o.cliente_nome} ({o.cliente_telefone})</Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}><strong>Agendado:</strong> {o.data_agendada} às {o.horario_agendado}</Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}><strong>Tipo:</strong> {o.tipo_entrega.toUpperCase()}</Typography>
+                      </Box>
 
-                  <div className="p-3 bg-(--color-surface-container-lowest) rounded-2xl border border-(--color-outline-variant)/20 text-xs space-y-1 font-mono">
-                    {o.itens.map((item, idx) => (
-                      <div key={idx} className="flex justify-between">
-                        <span>{item.quantidade}x {item.nomeProduto}</span>
-                        <span>R$ {(item.preco_unitario * item.quantidade).toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
+                      <Box sx={{ p: 1.5, bgcolor: 'var(--color-surface-container-lowest)', borderRadius: 2, border: '1px solid var(--color-outline-variant)', fontSize: '0.75rem', fontFamily: 'monospace', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        {o.itens.map((item, idx) => (
+                          <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>{item.quantidade}x {item.nomeProduto}</span>
+                            <span>R$ {(item.preco_unitario * item.quantidade).toFixed(2)}</span>
+                          </Box>
+                        ))}
+                      </Box>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <button
-                      onClick={() => {
-                        setReceiptType('cozinha');
-                        setPrintingOrder(o);
-                      }}
-                      className="py-2.5 px-3 rounded-xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center justify-center space-x-1.5 shadow-xs"
-                    >
-                      <Printer className="w-3.5 h-3.5" />
-                      <span>Comanda Cozinha</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setReceiptType('cliente');
-                        setPrintingOrder(o);
-                      }}
-                      className="py-2.5 px-3 rounded-xl bg-(--color-secondary) text-(--color-on-secondary) font-bold text-xs flex items-center justify-center space-x-1.5 shadow-xs"
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>Via do Cliente</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5, mt: 1 }}>
+                        <Button
+                          variant="contained"
+                          onClick={() => {
+                            setReceiptType('cozinha');
+                            setPrintingOrder(o);
+                          }}
+                          startIcon={<Printer className="w-4 h-4" />}
+                          sx={{
+                            bgcolor: 'var(--color-primary)',
+                            color: 'var(--color-on-primary)',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderRadius: 3,
+                            boxShadow: 'none',
+                            '&:hover': { bgcolor: 'var(--color-primary)', opacity: 0.9, boxShadow: 'none' }
+                          }}
+                        >
+                          Comanda Cozinha
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={() => {
+                            setReceiptType('cliente');
+                            setPrintingOrder(o);
+                          }}
+                          startIcon={<ShoppingBag className="w-4 h-4" />}
+                          sx={{
+                            bgcolor: 'var(--color-secondary)',
+                            color: 'var(--color-on-secondary)',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderRadius: 3,
+                            boxShadow: 'none',
+                            '&:hover': { bgcolor: 'var(--color-secondary)', opacity: 0.9, boxShadow: 'none' }
+                          }}
+                        >
+                          Via do Cliente
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
 
-        </div>
+        </Box>
       )}
 
       {/* TAB 4: GEMINI MARKETING ASSISTANT */}
@@ -1043,6 +1136,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
         </div>
       )}
-    </div>
+      </div>
+    </div >
   );
 };

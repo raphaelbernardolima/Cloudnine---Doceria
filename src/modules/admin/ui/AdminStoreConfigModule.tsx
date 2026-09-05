@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Store, Save, Phone, Mail, Globe, MapPin, DollarSign, Clock, CheckCircle2, AlertCircle, Loader2, Power } from 'lucide-react';
+import { Store, Save, Phone, Mail, Globe, MapPin, DollarSign, Clock, CheckCircle2, AlertCircle, Loader2, Power, BookOpen, Image as ImageIcon } from 'lucide-react';
 import { getStoreConfig, updateStoreConfig } from '@/src/core/services/supabase';
+import { useStore } from '@/src/core/store/useStore';
 
 interface AdminStoreConfigModuleProps {
   showToast: (msg: string) => void;
@@ -8,10 +9,13 @@ interface AdminStoreConfigModuleProps {
 }
 
 export const AdminStoreConfigModule: React.FC<AdminStoreConfigModuleProps> = ({ showToast, onStoreConfigUpdated }) => {
+  const { storeInfo, setStoreInfo } = useStore();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [nomeLoja, setNomeLoja] = useState('Cloudnine Doceria');
+  const [historiaLoja, setHistoriaLoja] = useState(storeInfo.historia_loja);
+  const [fotosLoja, setFotosLoja] = useState(storeInfo.fotos_loja.join(', '));
   const [logoUrl, setLogoUrl] = useState('https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=200');
   const [telefone, setTelefone] = useState('(13) 98874-7014');
   const [email, setEmail] = useState('contato@cloudninedoceria.com.br');
@@ -63,6 +67,13 @@ export const AdminStoreConfigModule: React.FC<AdminStoreConfigModuleProps> = ({ 
     };
 
     const res = await updateStoreConfig(payload);
+    
+    // Also update Zustand store info
+    setStoreInfo({
+      historia_loja: historiaLoja,
+      fotos_loja: fotosLoja.split(',').map(s => s.trim()).filter(Boolean)
+    });
+
     setSaving(false);
 
     if (res.success) {
@@ -234,6 +245,40 @@ export const AdminStoreConfigModule: React.FC<AdminStoreConfigModuleProps> = ({ 
                 />
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Nossa Historia Card */}
+        <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-5 shadow-xs">
+          <h4 className="font-extrabold text-base text-[var(--color-on-surface)] pb-2 border-b border-[var(--color-outline-variant)]/20 flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-[var(--color-primary)]" />
+            Nossa História e Imagens
+          </h4>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-[var(--color-on-surface)] mb-1">A História da Doceria</label>
+              <textarea
+                rows={4}
+                value={historiaLoja}
+                onChange={(e) => setHistoriaLoja(e.target.value)}
+                placeholder="Conte sobre como a loja começou, a missão, etc..."
+                className="w-full p-3.5 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 focus:ring-2 focus:ring-[var(--color-primary)] text-sm font-medium resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[var(--color-on-surface)] mb-1 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" /> Imagens da Loja (URLs separadas por vírgula)
+              </label>
+              <textarea
+                rows={3}
+                value={fotosLoja}
+                onChange={(e) => setFotosLoja(e.target.value)}
+                placeholder="https://imagem1.jpg, https://imagem2.jpg"
+                className="w-full p-3.5 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 focus:ring-2 focus:ring-[var(--color-primary)] text-sm font-medium resize-none"
+              />
+            </div>
           </div>
         </div>
 

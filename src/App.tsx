@@ -4,9 +4,11 @@ import { Header } from '@/src/core/ui/layout/Header';
 import { SplashScreen } from '@/src/core/ui/components/SplashScreen';
 import { MobileBottomNav } from '@/src/core/ui/layout/MobileBottomNav';
 import { ShopView } from '@/src/modules/shop/ui/ShopView';
+import { AboutUsView } from '@/src/modules/shop/ui/AboutUsView';
 import { ProductModal } from '@/src/modules/shop/ui/ProductModal';
 import { CustomCakeModal } from '@/src/modules/shop/ui/CustomCakeModal';
 import { CartDrawer } from '@/src/modules/shop/ui/CartDrawer';
+import { CheckoutView } from '@/src/modules/shop/ui/CheckoutView';
 import { LoyaltyView } from '@/src/modules/profile/ui/LoyaltyView';
 import { AuthModal } from '@/src/modules/auth/ui/AuthModal';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS, INITIAL_INGREDIENTS, INITIAL_DRIVERS, INITIAL_COUPONS, INITIAL_LOYALTY_SETTINGS } from './data/doceriaData';
@@ -19,6 +21,7 @@ import { usePaymentHandler } from '@/src/core/hooks/usePaymentHandler';
 import { useCouponLogic } from '@/src/core/hooks/useCouponLogic';
 import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';
 import { isStaff } from '@/src/core/constants/roles';
+import { useAppTheme } from '@/src/core/theme/ThemeContext';
 import { Sparkles, ShieldAlert, LogIn, User } from 'lucide-react';
 
 // Lazy-loaded heavy modules (code splitting)
@@ -35,9 +38,10 @@ export function App() {
   usePaymentHandler();
   const { handleApplyCoupon } = useCouponLogic();
 
+  const { mode } = useAppTheme();
+
   // Global State (Zustand)
   const {
-    themeMode, setThemeMode,
     currentUser, setCurrentUser,
     isAuthModalOpen, setIsAuthModalOpen, authRequiredNotice,
     toastMessage, showToast,
@@ -64,10 +68,8 @@ export function App() {
   // Synchronize theme attribute on body
   useEffect(() => {
     document.documentElement.classList.remove('dark', 'light-high-contrast', 'dark-high-contrast');
-    if (themeMode === 'dark') document.documentElement.classList.add('dark');
-    else if (themeMode === 'light-high-contrast') document.documentElement.classList.add('light-high-contrast');
-    else if (themeMode === 'dark-high-contrast') document.documentElement.classList.add('dark', 'dark-high-contrast');
-  }, [themeMode]);
+    if (mode === 'dark') document.documentElement.classList.add('dark');
+  }, [mode]);
 
   // Handle Auth open
   const handleOpenAuthModal = (notice?: string) => {
@@ -134,6 +136,12 @@ export function App() {
     if (client) {
       const pedidoDB = {
         cliente_id: fullOrder.cliente_id !== 'usr-guest' ? fullOrder.cliente_id : null,
+        cliente_nome: fullOrder.cliente_nome,
+        cliente_telefone: fullOrder.cliente_telefone,
+        metodo_pagamento: fullOrder.metodo_pagamento,
+        tipo_entrega: fullOrder.tipo_entrega,
+        data_agendada: fullOrder.data_agendada || null,
+        horario_agendado: fullOrder.horario_agendado || null,
         total: fullOrder.total,
         status: fullOrder.status,
         endereco_entreg: fullOrder.endereco_entreg
@@ -149,9 +157,31 @@ export function App() {
             pedido_id: fullOrder.id,
             produto_id: typeof item.produto_id === 'number' ? item.produto_id : null,
             quantidade: item.quantidade,
-            preco_unitario: item.preco_unitario
+            preco_unitario: item.preco_unitario,
+            nome_produto: item.nomeProduto || item.nome,
+            detalhes_customizados: item.detalhesCustomizados
           }));
           await client.from('itens_pedidos').insert(itensDB);
+        }
+
+        // Generate Loyalty Points
+        if (fullOrder.cliente_id !== 'usr-guest') {
+          const pontosGanhos = Math.floor(fullOrder.total * (loyaltySettings?.pontosPorReal || 1));
+          if (pontosGanhos > 0) {
+            await client.from('historico_fidelidade').insert([{
+              cliente_id: fullOrder.cliente_id,
+              tipo: 'ganho',
+              pontos: pontosGanhos,
+              descricao: 'Compra na loja',
+              pedido_id: fullOrder.id
+            }]);
+            
+            if (currentUser) {
+              const novosPontos = (currentUser.pontosFidelidade || 0) + pontosGanhos;
+              await client.from('Perfis').update({ pontos_fidelidade: novosPontos }).eq('id', currentUser.id);
+              setCurrentUser({ ...currentUser, pontosFidelidade: novosPontos });
+            }
+          }
         }
       } else {
         console.error("Erro ao inserir pedido", error);
@@ -284,15 +314,37 @@ export function App() {
             />
           } />
 
+          {/* CHECKOUT VIEW */}
+          <Route path="/checkout" element={<CheckoutView onPlaceOrder={handlePlaceOrder} />} />
+
+          {/* SOBRE NÓS VIEW */}
+          <Route path="/sobre" element={<AboutUsView />} />
+
           {/* CUSTOMER LOYALTY VIEW */}
           <Route path="/loyalty" element={
             <LoyaltyView
               currentUser={currentUser}
               orders={orders}
               onOpenAuthModal={(msg) => handleOpenAuthModal(msg)}
-              onApplyRewardCoupon={(code) => {
-                handleApplyCoupon(code);
-                setIsCartOpen(true);
+              onApplyRewardCoupon={async (code, amount) => {
+                if (currentUser && (currentUser.pontosFidelidade || 0) >= amount) {
+                  const client = getSupabaseClient();
+                  if (client) {
+                    const novosPontos = (currentUser.pontosFidelidade || 0) - amount;
+                    await client.from('historico_fidelidade').insert([{
+                      cliente_id: currentUser.id,
+                      tipo: 'resgate',
+                      pontos: amount, // Keeping it positive in DB, or negative depending on preference, let's keep it positive for amount, 'resgate' denotes the subtraction
+                      descricao: `Resgate do cupom ${code}`
+                    }]);
+                    await client.from('Perfis').update({ pontos_fidelidade: novosPontos }).eq('id', currentUser.id);
+                    setCurrentUser({ ...currentUser, pontosFidelidade: novosPontos });
+                    
+                    handleApplyCoupon(code);
+                    setIsCartOpen(true);
+                    if (showToast) showToast(`Cupom ${code} resgatado com sucesso!`);
+                  }
+                }
               }}
             />
           } />

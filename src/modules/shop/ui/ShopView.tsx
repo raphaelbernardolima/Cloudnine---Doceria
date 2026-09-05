@@ -3,6 +3,8 @@ import { ProductCard, ProductSkeleton } from './ProductCard';
 import { Sparkles, Cake, Gift, Search, SlidersHorizontal } from 'lucide-react';
 import { Product } from '@/src/core/types/index';
 import { Box, Typography, Button, TextField, InputAdornment, Grid, Chip, Stack, IconButton, alpha } from '@mui/material';
+import { useStore } from '@/src/core/store/useStore';
+import { useNavigate } from 'react-router-dom';
 
 interface ShopViewProps {
   categories: string[];
@@ -31,8 +33,115 @@ export function ShopView({
   onAddToCart,
   onOpenQuickView
 }: ShopViewProps) {
+  const { banners } = useStore();
+  const navigate = useNavigate();
+  const activeBanners = banners.filter(b => b.ativo);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>
+
+      {/* Banners Carousel */}
+      {activeBanners.length > 0 && (
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            overflowX: 'auto', 
+            pb: 1,
+            mx: -2,
+            px: 2,
+            scrollSnapType: 'x mandatory',
+            '&::-webkit-scrollbar': { display: 'none' }
+          }}
+        >
+          {activeBanners.map(banner => (
+            <Box 
+              key={banner.id}
+              onClick={() => banner.link ? navigate(banner.link) : null}
+              sx={{ 
+                minWidth: { xs: '85vw', sm: '400px' },
+                height: { xs: '160px', sm: '220px' },
+                borderRadius: 4,
+                overflow: 'hidden',
+                scrollSnapAlign: 'center',
+                flexShrink: 0,
+                cursor: banner.link ? 'pointer' : 'default',
+                boxShadow: 2,
+                position: 'relative',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 6,
+                  '& .banner-overlay': {
+                    opacity: 0.7
+                  },
+                  '& .cta-btn': {
+                    transform: 'scale(1.05)'
+                  }
+                }
+              }}
+            >
+              <img src={banner.image_url} alt="Promoção" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              
+              {banner.cta_text && (
+                <>
+                  {/* Dark gradient overlay */}
+                  <Box 
+                    className="banner-overlay"
+                    sx={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 100%)',
+                      opacity: 0.5,
+                      transition: 'opacity 0.3s ease'
+                    }} 
+                  />
+                  {/* CTA Button placed at bottom left */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 16,
+                      left: 16,
+                      right: 16,
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'flex-start'
+                    }}
+                  >
+                    <Button
+                      className="cta-btn"
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText',
+                        fontWeight: 'bold',
+                        borderRadius: 3,
+                        px: 3,
+                        py: 1,
+                        textTransform: 'none',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+                        '&:hover': {
+                          bgcolor: 'primary.dark'
+                        }
+                      }}
+                      onClick={(e) => {
+                        if (banner.link) {
+                          e.stopPropagation();
+                          navigate(banner.link);
+                        }
+                      }}
+                    >
+                      {banner.cta_text}
+                    </Button>
+                  </Box>
+                </>
+              )}
+            </Box>
+          ))}
+        </Box>
+      )}
 
       {/* Categories (Pills) - Horizontal Scroll */}
       <Box

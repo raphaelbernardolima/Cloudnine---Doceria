@@ -91,19 +91,7 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
             />
           </label>
 
-          {previewUrl && (
-            <div className="flex items-center space-x-2 text-sm text-[var(--color-outline)]">
-              <span className="truncate max-w-[180px] font-mono">{previewUrl}</span>
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="p-1 rounded bg-[var(--color-surface-container-high)] hover:bg-[var(--color-surface-container-highest)] text-[var(--color-on-surface)] flex items-center gap-1 font-bold shrink-0"
-              >
-                {copied ? <CheckCircle className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                <span>{copied ? 'Copiado' : 'Copiar URL'}</span>
-              </button>
-            </div>
-          )}
+
 
           {statusMessage && (
             <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">

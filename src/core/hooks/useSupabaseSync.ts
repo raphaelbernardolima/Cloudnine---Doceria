@@ -10,7 +10,10 @@ export function useSupabaseSync() {
     setProducts, 
     setIsLoadingProducts, 
     setOrders,
-    setCustomCakeConfig
+    setCustomCakeConfig,
+    setBanners,
+    setStoreInfo,
+    setLoyaltySettings
   } = useStore();
 
   // Load User Session
@@ -35,10 +38,29 @@ export function useSupabaseSync() {
         if (config.custom_cake_config) {
           setCustomCakeConfig(config.custom_cake_config);
         }
+        if (config.banners) {
+          setBanners(config.banners);
+        }
+
+        if (config.pontos_por_real !== undefined && config.valor_resgate_por_ponto !== undefined) {
+          setLoyaltySettings({
+            pontosPorReal: Number(config.pontos_por_real),
+            valorResgatePorPonto: Number(config.valor_resgate_por_ponto)
+          });
+        }
+        
+        setStoreInfo({
+          historia_loja: config.historia_loja || '',
+          fotos_loja: config.fotos_loja || [],
+          pix_chave: config.pix_chave,
+          pix_tipo: config.pix_tipo,
+          pix_beneficiario: config.pix_beneficiario,
+          pix_cidade: config.pix_cidade
+        });
       }
     }
     loadStoreConfig();
-  }, [setStorePhone, setCustomCakeConfig]);
+  }, [setStorePhone, setCustomCakeConfig, setBanners, setStoreInfo]);
 
   // Fetch real data from Supabase
   useEffect(() => {

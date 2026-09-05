@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Product, CartItem, CustomCakeBuilder, UserProfile, ThemeMode, Order, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types';
+import { Product, CartItem, CustomCakeBuilder, UserProfile, ThemeMode, Order, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig, Banner, StoreInfo, NotificationItem } from '@/src/core/types';
 import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';
 
 interface StoreState {
@@ -47,6 +47,14 @@ interface StoreState {
   setStorePhone: (phone: string) => void;
   customCakeConfig: CustomCakeConfig;
   setCustomCakeConfig: (config: CustomCakeConfig) => void;
+
+  banners: Banner[];
+  setBanners: (banners: Banner[]) => void;
+  storeInfo: StoreInfo;
+  setStoreInfo: (info: StoreInfo) => void;
+  notifications: NotificationItem[];
+  setNotifications: (notifs: NotificationItem[]) => void;
+  markNotificationAsRead: (id: string | number) => void;
 
   // Shop state
   appliedDiscount: number;
@@ -124,6 +132,26 @@ export const useStore = create<StoreState>((set) => ({
   setStorePhone: (phone) => set({ storePhone: phone }),
   customCakeConfig: { tamanhos: [], massas: [], recheios: [], coberturas: [] },
   setCustomCakeConfig: (config) => set({ customCakeConfig: config }),
+
+  banners: [
+    { id: '1', image_url: 'https://images.unsplash.com/photo-1557925923-33b251dc3296?auto=format&fit=crop&q=80&w=1200&h=400', ativo: true, link: '/?tab=kits' },
+    { id: '2', image_url: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=1200&h=400', ativo: true }
+  ],
+  setBanners: (banners) => set({ banners }),
+  
+  storeInfo: {
+    historia_loja: 'Fundada com muito amor, a Cloudnine Doceria traz os melhores doces artesanais...',
+    fotos_loja: ['https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=600']
+  },
+  setStoreInfo: (info) => set({ storeInfo: info }),
+
+  notifications: [
+    { id: '1', created_at: new Date().toISOString(), titulo: 'Bem-vindo à Cloudnine!', mensagem: 'Aproveite nossas delícias.', lida: false }
+  ],
+  setNotifications: (notifs) => set({ notifications: notifs }),
+  markNotificationAsRead: (id) => set((state) => ({
+    notifications: state.notifications.map(n => n.id === id ? { ...n, lida: true } : n)
+  })),
 
   appliedDiscount: 0,
   setAppliedDiscount: (discount) => set({ appliedDiscount: discount }),
