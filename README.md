@@ -37,12 +37,53 @@ Este projeto foi construído utilizando uma stack moderna de desenvolvimento web
 
 ---
 
+## 📸 Screenshots
+
+*(Adicione imagens do projeto aqui para seu portfólio)*
+- **Cardápio/E-commerce**: `![Shop](/assets/screenshot-shop.png)`
+- **Admin BI**: `![Admin](/assets/screenshot-admin.png)`
+
+---
+
 ## 🔒 Arquitetura e Segurança
 
 * **Controle de Acesso Baseado em Funções (RBAC):** Sistema hierárquico com separação estrita entre `super_admin`, `admin`, `escritor` e `leitor`.
-* **Segurança de Dados:** Políticas de segurança a nível de linha (*Row Level Security - RLS*) aplicadas diretamente no PostgreSQL para garantir que rotas sensíveis e operações de banco sejam rigidamente protegidas.
+* **Segurança de Dados:** Políticas de segurança a nível de linha (*Row Level Security - RLS*) aplicadas diretamente no PostgreSQL.
+* **PWA & SEO:** Configuração completa de Progressive Web App (PWA) instalável e Otimização para Motores de Busca (SEO) com React Helmet.
+* **Inteligência Artificial:** IA Generativa (Google Gemini) integrada ao painel administrativo para automação de copywriting de marketing.
+* **Pagamentos:** Integração backend (server.ts) com a API do Mercado Pago.
 
 ---
+
+## 🚀 Como Rodar Localmente
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/raphaelbernardolima/cloudnine-doceria.git
+cd cloudnine-doceria
+```
+
+2. Instale as dependências:
+```bash
+npm install
+```
+
+3. Configure as variáveis de ambiente:
+Crie um arquivo `.env` na raiz baseado no `.env.example`:
+```env
+VITE_SUPABASE_URL=sua_url_aqui
+VITE_SUPABASE_ANON_KEY=sua_key_aqui
+VITE_GEMINI_API_KEY=sua_gemini_key_aqui
+VITE_CLOUDINARY_API_KEY=sua_cloudinary_key_aqui
+VITE_CLOUDINARY_CLOUD_NAME=sua_cloudinary_cloud_aqui
+VITE_CLOUDINARY_UPLOAD_PRESET=sua_cloudinary_preset_aqui
+MERCADOPAGO_ACCESS_TOKEN=seu_mp_token_aqui
+```
+
+4. Rode o servidor de desenvolvimento:
+```bash
+npm run dev
+```
 
 ## 👨‍💻 Autor
 

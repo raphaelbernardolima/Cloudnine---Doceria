@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://seusite.com.br/sitemap.xml
+Sitemap: https://cloudninedoceria.com/sitemap.xml
