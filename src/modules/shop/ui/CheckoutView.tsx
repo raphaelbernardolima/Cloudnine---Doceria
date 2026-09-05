@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SEO } from '@/src/core/ui/shared/SEO';
 import {
   ShoppingBag,
   CheckCircle,
@@ -125,6 +126,10 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
 
   return (
     <div className="min-h-screen bg-(--color-surface-container-lowest) animate-in fade-in pb-20">
+      <SEO 
+        title="Finalizar Pedido" 
+        description="Conclua sua encomenda na Cloudnine Doceria com segurança." 
+      />
       {/* Checkout Header */}
       <div className="sticky top-0 z-30 bg-(--color-surface-container-lowest)/90 backdrop-blur-md border-b border-(--color-outline-variant)/30 shadow-xs">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">

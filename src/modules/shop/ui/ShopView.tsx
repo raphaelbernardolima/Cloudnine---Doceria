@@ -1,4 +1,5 @@
 import React from 'react';
+import { SEO } from '@/src/core/ui/shared/SEO';
 import { ProductCard, ProductSkeleton } from './ProductCard';
 import { Sparkles, Cake, Gift, Search, SlidersHorizontal } from 'lucide-react';
 import { Product } from '@/src/core/types/index';
@@ -39,6 +40,10 @@ export function ShopView({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>
+      <SEO 
+        title="Cardápio Oficial | Cloudnine Doceria" 
+        description="Navegue pelo nosso cardápio e encomende os melhores bolos personalizados e doces de luxo." 
+      />
 
       {/* Banners Carousel */}
       {activeBanners.length > 0 && (

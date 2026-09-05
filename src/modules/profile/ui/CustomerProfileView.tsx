@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SEO } from '@/src/core/ui/shared/SEO';
 import {
   User, MapPin, Heart, ShoppingBag, Award, Camera,
   Save, CheckCircle, Clock, ChevronRight, Phone, Mail, Shield, AlertCircle,
@@ -144,6 +145,10 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 animate-in fade-in duration-300">
+      <SEO 
+        title="Meu Perfil" 
+        description="Acompanhe seus pedidos, acumule pontos de fidelidade e gerencie seu perfil na Cloudnine." 
+      />
 
       {/* Page Title & Hero Header */}
       <div className="relative rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 p-8 shadow-sm" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.12)' }}>

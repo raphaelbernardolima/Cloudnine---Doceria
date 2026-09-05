@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SEO } from '@/src/core/ui/shared/SEO';
 import { useSearchParams } from 'react-router-dom';
 import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { Box, Chip, Select, MenuItem, IconButton, Card, CardContent, Typography, Button, ToggleButtonGroup, ToggleButton, FormControl, Divider } from '@mui/material';
@@ -172,6 +173,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   return (
     <div className="flex flex-col md:flex-row gap-6 max-w-[1400px] mx-auto py-4 px-4 items-start">
+      <SEO 
+        title="Painel Administrativo" 
+        description="Área restrita de gestão da Cloudnine Doceria." 
+      />
       
       {/* Sidebar Navigation (Desktop Only) */}
       <div className="hidden md:flex w-[260px] shrink-0 bg-[var(--color-surface-container-lowest)] rounded-3xl p-4 border border-[var(--color-outline-variant)]/20 shadow-sm flex-col gap-2 overflow-visible sticky top-24">
