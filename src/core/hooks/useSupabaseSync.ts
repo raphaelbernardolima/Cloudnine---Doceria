@@ -86,7 +86,14 @@ export function useSupabaseSync() {
         // Fetch orders
         const { data: ordData, error: ordErr } = await client.from('pedidos').select('*, itens_pedidos(*)');
         if (!ordErr && ordData && ordData.length > 0) {
-          setOrders(ordData as any);
+          const mappedOrders = ordData.map((o: any) => ({
+            ...o,
+            itens: (o.itens_pedidos || []).map((i: any) => ({
+              ...i,
+              nomeProduto: i.nome_produto || i.nome
+            }))
+          }));
+          setOrders(mappedOrders as any);
         } else {
           setOrders([]);
         }
