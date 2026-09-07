@@ -1,16 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { act } from 'react';
 import { useCouponLogic } from '../hooks/useCouponLogic';
+import { useCartStore } from '../store/useCartStore';
+import { useUIStore } from '../store/useUIStore';
 
-// Mocking useStore
-vi.mock('@/src/core/store/useStore', () => ({
-  useStore: () => ({
-    cartItems: [
-      { unitPrice: 50, quantity: 2 }, // Subtotal: 100
-    ],
-    setAppliedDiscount: vi.fn(),
-    showToast: vi.fn(),
-  }),
+// Mocking Stores
+vi.mock('../store/useCartStore', () => ({
+  useCartStore: vi.fn(),
+}));
+
+vi.mock('../store/useUIStore', () => ({
+  useUIStore: vi.fn(),
 }));
 
 // Mocking Supabase Client
@@ -23,12 +24,11 @@ const mockSupabaseClient = {
     data: {
       codigo: 'BEMVINDO',
       tipo_desconto: 'fixo',
-      valor: 20,
+      valor: 10,
       ativo: true,
-      minimo_compra: 50,
-      data_expiracao: '2030-12-31'
+      data_expiracao: new Date(Date.now() + 86400000).toISOString(),
     },
-    error: null
+    error: null,
   }),
 };
 
@@ -37,8 +37,30 @@ vi.mock('@/src/core/services/supabase', () => ({
 }));
 
 describe('useCouponLogic', () => {
-  it('should be defined', () => {
+  it('should validate and apply a valid coupon', async () => {
+    const setAppliedDiscountMock = vi.fn();
+    const showToastMock = vi.fn();
+
+    // @ts-ignore
+    useCartStore.mockReturnValue({
+      cartItems: [
+        { unitPrice: 50, quantity: 2 }, // Subtotal: 100
+      ],
+      setAppliedDiscount: setAppliedDiscountMock,
+    });
+
+    // @ts-ignore
+    useUIStore.mockReturnValue({
+      showToast: showToastMock,
+    });
+
     const { result } = renderHook(() => useCouponLogic());
-    expect(result.current.handleApplyCoupon).toBeDefined();
+
+    await act(async () => {
+      await result.current.handleApplyCoupon('BEMVINDO');
+    });
+
+    expect(setAppliedDiscountMock).toHaveBeenCalledWith(10);
+    expect(showToastMock).toHaveBeenCalledWith('Cupom BEMVINDO de R$ 10.00 OFF aplicado!');
   });
 });
