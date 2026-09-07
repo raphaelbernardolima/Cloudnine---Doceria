@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Gift, Ticket, Save, AlertCircle, Image as ImageIcon, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { updateStoreConfig } from '@/src/core/services/supabase';
 import { Coupon, LoyaltySettings, Banner } from '@/src/core/types/index';
-import { useStore } from '@/src/core/store/useStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
 
 interface AdminMarketingModuleProps {
   coupons: Coupon[];
@@ -13,7 +13,7 @@ interface AdminMarketingModuleProps {
 }
 
 export const AdminMarketingModule: React.FC<AdminMarketingModuleProps> = ({ coupons, loyaltySettings, onUpdateLoyalty, onAddCoupon, onToggleCoupon }) => {
-  const { banners, setBanners } = useStore();
+  const { banners, setBanners } = useDataStore();
   const [pontosReal, setPontosReal] = useState(loyaltySettings.pontosPorReal.toString());
   const [valorResgate, setValorResgate] = useState(loyaltySettings.valorResgatePorPonto.toString());
   const [isSaving, setIsSaving] = useState(false);

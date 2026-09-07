@@ -2,10 +2,10 @@ import React from 'react';
 import { SEO } from '@/src/core/ui/shared/SEO';
 import { Store, MapPin, Phone, Clock, Mail } from 'lucide-react';
 import { Box, Typography } from '@mui/material';
-import { useStore } from '@/src/core/store/useStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
 
 export function AboutUsView() {
-  const { storeInfo, storePhone } = useStore();
+  const { storeInfo, storePhone } = useDataStore();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>

@@ -1,15 +1,42 @@
 import React from 'react';
 import { Award, Gift, Star, Sparkles, Check, AlertCircle } from 'lucide-react';
-import { UserProfile, Order } from '@/src/core/types';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
+import { useCouponLogic } from '@/src/core/hooks/useCouponLogic';
+import { getSupabaseClient } from '@/src/core/services/supabase';
 
 interface LoyaltyViewProps {
-  currentUser: UserProfile | null;
-  orders: Order[];
-  onApplyRewardCoupon: (code: string, amount: number) => void;
   onOpenAuthModal: (msg?: string) => void;
 }
 
-export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ currentUser, orders, onApplyRewardCoupon, onOpenAuthModal }) => {
+export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onOpenAuthModal }) => {
+  const { currentUser, setCurrentUser, orders } = useDataStore();
+  const { setIsCartOpen } = useCartStore();
+  const { showToast } = useUIStore();
+  const { handleApplyCoupon } = useCouponLogic();
+
+  const onApplyRewardCoupon = async (code: string, amount: number) => {
+    if (currentUser && (currentUser.pontosFidelidade || 0) >= amount) {
+      const client = getSupabaseClient();
+      if (client) {
+        const novosPontos = (currentUser.pontosFidelidade || 0) - amount;
+        await client.from('historico_fidelidade').insert([{
+          cliente_id: currentUser.id,
+          tipo: 'resgate',
+          pontos: amount,
+          descricao: `Resgate do cupom ${code}`
+        }]);
+        await client.from('Perfis').update({ pontos_fidelidade: novosPontos }).eq('id', currentUser.id);
+        setCurrentUser({ ...currentUser, pontosFidelidade: novosPontos });
+        
+        handleApplyCoupon(code);
+        setIsCartOpen(true);
+        if (showToast) showToast(`Cupom ${code} resgatado com sucesso!`);
+      }
+    }
+  };
+
   const userOrders = currentUser
     ? orders.filter(o => (currentUser.email && (o as any).clienteEmail?.toLowerCase() === currentUser.email.toLowerCase()) || (currentUser.telefone && (o as any).telefone === currentUser.telefone))
     : [];

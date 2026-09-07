@@ -1,42 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SEO } from '@/src/core/ui/shared/SEO';
 import { ProductCard, ProductSkeleton } from './ProductCard';
 import { Sparkles, Cake, Gift, Search, SlidersHorizontal } from 'lucide-react';
 import { Product } from '@/src/core/types/index';
 import { Box, Typography, Button, TextField, InputAdornment, Grid, Chip, Stack, IconButton, alpha } from '@mui/material';
-import { useStore } from '@/src/core/store/useStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
 import { useNavigate } from 'react-router-dom';
 
 interface ShopViewProps {
-  categories: string[];
-  selectedCategory: string;
-  setSelectedCategory: (c: string) => void;
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
   isLoadingProducts: boolean;
-  filteredProducts: Product[];
   onOpenCustomCake: () => void;
   onNavigateLoyalty: () => void;
-  onAddToCart: (p: Product, qty: number) => void;
   onOpenQuickView: (p: Product) => void;
 }
 
 export function ShopView({
-  categories,
-  selectedCategory,
-  setSelectedCategory,
-  searchQuery,
-  setSearchQuery,
   isLoadingProducts,
-  filteredProducts,
   onOpenCustomCake,
   onNavigateLoyalty,
-  onAddToCart,
   onOpenQuickView
 }: ShopViewProps) {
-  const { banners } = useStore();
+  const { banners, products } = useDataStore();
+  const { addToCart } = useCartStore();
   const navigate = useNavigate();
+  
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const categories = ['Todos', 'Brigadeiros', 'Bolos de Pote', 'Macarons', 'Tortas & Mousse', 'Kits & Presentes'];
   const activeBanners = banners.filter(b => b.ativo);
+
+  const filteredProducts = products.filter(p => {
+    const matchesCat = selectedCategory === 'Todos' || p.categoria === selectedCategory;
+    const matchesSearch = p.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.descricao.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
+
+  const onAddToCart = (product: Product, quantity = 1) => {
+    addToCart({ product, quantity, customNote: undefined, unitPrice: product.preco });
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>

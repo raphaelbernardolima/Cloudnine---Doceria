@@ -1,9 +1,11 @@
 import { useCallback } from 'react';
-import { useStore } from '@/src/core/store/useStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 import { getSupabaseClient } from '@/src/core/services/supabase';
 
 export function useCouponLogic() {
-  const { cartItems, setAppliedDiscount, showToast } = useStore();
+  const { cartItems, setAppliedDiscount } = useCartStore();
+  const { showToast } = useUIStore();
 
   const handleApplyCoupon = useCallback(async (code: string) => {
     const upperCode = code.toUpperCase();

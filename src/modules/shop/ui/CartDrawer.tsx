@@ -9,32 +9,26 @@ import {
 } from 'lucide-react';
 import { CartItem, Order } from '@/src/core/types/index';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '@/src/core/store/useStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useCouponLogic } from '@/src/core/hooks/useCouponLogic';
 
-interface CartDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  items: CartItem[];
-  onUpdateQuantity: (id: string, newQty: number) => void;
-  onRemoveItem: (id: string) => void;
-  onClearCart: () => void;
-  onPlaceOrder: (order: Partial<Order>) => void; // Keep for interface compatibility if needed elsewhere
-  appliedDiscount: number;
-  onApplyCoupon: (code: string) => void;
-}
+export const CartDrawer: React.FC = () => {
+  const { 
+    isCartOpen: isOpen, 
+    setIsCartOpen, 
+    cartItems: items, 
+    updateQuantity: onUpdateQuantity,
+    removeFromCart: onRemoveItem,
+    clearCart: onClearCart,
+    appliedDiscount
+  } = useCartStore();
+  const { coupons } = useDataStore();
+  const { handleApplyCoupon: onApplyCoupon } = useCouponLogic();
 
-export const CartDrawer: React.FC<CartDrawerProps> = ({
-  isOpen,
-  onClose,
-  items,
-  onUpdateQuantity,
-  onRemoveItem,
-  onClearCart,
-  appliedDiscount,
-  onApplyCoupon
-}) => {
+  const onClose = () => setIsCartOpen(false);
+
   const navigate = useNavigate();
-  const { coupons } = useStore();
   const activeCoupons = coupons.filter(c => c.ativo);
 
   // Close on Escape key

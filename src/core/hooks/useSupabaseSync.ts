@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { useStore } from '@/src/core/store/useStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 import { getCurrentSupabaseUser, getSupabaseClient, getStoreConfig } from '@/src/core/services/supabase';
 import { INITIAL_PRODUCTS } from '@/src/data/doceriaData';
 
 export function useSupabaseSync() {
   const { 
-    setCurrentUser, 
+    setCurrentUser,
     setStorePhone, 
     setProducts, 
     setIsLoadingProducts, 
@@ -14,7 +15,8 @@ export function useSupabaseSync() {
     setBanners,
     setStoreInfo,
     setLoyaltySettings
-  } = useStore();
+  } = useDataStore();
+  const { setNotifications } = useUIStore();
 
   // Load User Session
   useEffect(() => {

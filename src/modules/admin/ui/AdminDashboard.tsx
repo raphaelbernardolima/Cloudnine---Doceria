@@ -22,63 +22,33 @@ import { AdminAuditLogsModule } from './AdminAuditLogsModule';
 import { AdminAddProductModal } from './AdminAddProductModal';
 import { AdminPrintModal } from './AdminPrintModal';
 
-interface AdminDashboardProps {
-  products: Product[];
-  orders: Order[];
-  staff: UserProfile[];
-  auditLogs: AuditLog[];
-  currentUser: UserProfile;
-  onAddProduct: (product: Omit<Product, 'id'>) => void;
-  onUpdateStock: (id: number | string, newStock: number) => void;
-  onDeleteProduct: (id: number | string) => void;
-  onUpdateOrderStatus: (orderId: number | string, newStatus: Order['status']) => void;
-  onUpdateRole: (userId: string, newRole: UserProfile['role']) => void;
-  ingredients: Ingredient[];
-  drivers: Driver[];
-  coupons: Coupon[];
-  loyaltySettings: LoyaltySettings;
-  onUpdateLoyalty: (settings: LoyaltySettings) => void;
-  customCakeConfig: CustomCakeConfig;
-  onUpdateCustomCakeConfig: (config: CustomCakeConfig) => void;
-  setCustomCakeConfig?: (config: CustomCakeConfig) => void;
-  onAddIngredient: (ing: Omit<Ingredient, 'id'>) => void;
-  onUpdateIngredientStock: (id: string, newStock: number) => void;
-  onDeleteIngredient: (id: string) => void;
-  onAddCoupon: (c: Omit<Coupon, 'id'>) => void;
-  onToggleCoupon: (id: string, ativo: boolean) => void;
-  onAssignDriver: (orderId: string | number, driverId: string) => void;
-  showToast?: (msg: string) => void;
-  storePhone?: string;
-  setStorePhone?: (phone: string) => void;
-}
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
+import { useProductMutations } from '@/src/core/hooks/useProductMutations';
+import { useOrderMutations } from '@/src/core/hooks/useOrderMutations';
+import { useUserMutations } from '@/src/core/hooks/useUserMutations';
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  products,
-  orders,
-  staff,
-  auditLogs,
-  currentUser,
-  onAddProduct,
-  onUpdateStock,
-  onDeleteProduct,
-  onUpdateOrderStatus,
-  onUpdateRole,
-  ingredients,
-  drivers,
-  coupons,
-  loyaltySettings,
-  onUpdateLoyalty,
-  customCakeConfig,
-  setCustomCakeConfig,
-  onAddIngredient,
-  onUpdateIngredientStock,
-  onDeleteIngredient,
-  onAddCoupon,
-  onToggleCoupon,
-  onAssignDriver,
-  showToast,
-  setStorePhone
-}) => {
+export const AdminDashboard: React.FC = () => {
+  const {
+    products, orders, staff, auditLogs, currentUser,
+    ingredients, setIngredients, drivers, coupons, setCoupons,
+    loyaltySettings, setLoyaltySettings, customCakeConfig, setCustomCakeConfig,
+    storePhone, setStorePhone
+  } = useDataStore();
+  const { showToast } = useUIStore();
+  
+  const { handleAddProduct, handleUpdateStock, handleDeleteProduct } = useProductMutations();
+  const { handleUpdateOrderStatus, handleAssignDriver } = useOrderMutations();
+  const { handleUpdateRole } = useUserMutations();
+
+  const onAddIngredient = (ing: Omit<Ingredient, 'id'>) => setIngredients([...ingredients, { ...ing, id: Math.random().toString() }]);
+  const onUpdateIngredientStock = (id: string, newStock: number) => setIngredients(ingredients.map(i => i.id === id ? { ...i, estoqueAtual: newStock } : i));
+  const onDeleteIngredient = (id: string) => setIngredients(ingredients.filter(i => i.id !== id));
+  
+  const onAddCoupon = (c: Omit<Coupon, 'id'>) => setCoupons([...coupons, { ...c, id: Math.random().toString() }]);
+  const onToggleCoupon = (id: string, ativo: boolean) => setCoupons(coupons.map(c => c.id === id ? { ...c, ativo } : c));
+  const onUpdateLoyalty = setLoyaltySettings;
+
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'dashboard';
   const setActiveTab = (tab: string) => setSearchParams({ tab });
@@ -326,13 +296,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         )}
 
         {activeTab === 'staff' && (
-          <AdminStaffModule staffList={staff} onUpdateRole={onUpdateRole} />
+          <AdminStaffModule staffList={staff} onUpdateRole={handleUpdateRole} />
         )}
 
         {activeTab === 'orders' && (
           <AdminOrdersModule 
             orders={orders} 
-            onUpdateOrderStatus={onUpdateOrderStatus} 
+            onUpdateOrderStatus={handleUpdateOrderStatus} 
             onPrintOrder={setPrintingOrder} 
           />
         )}
@@ -345,8 +315,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <AdminInventoryModule
             products={products}
             onAddProduct={() => setShowAddProductModal(true)}
-            onUpdateStock={onUpdateStock}
-            onDeleteProduct={onDeleteProduct}
+            onUpdateStock={handleUpdateStock}
+            onDeleteProduct={handleDeleteProduct}
             ingredients={ingredients}
             onAddIngredient={onAddIngredient}
             onUpdateIngredientStock={onUpdateIngredientStock}
@@ -358,8 +328,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <AdminDeliveryModule
             orders={orders}
             drivers={drivers}
-            onAssignDriver={onAssignDriver}
-            onUpdateOrderStatus={onUpdateOrderStatus}
+            onAssignDriver={handleAssignDriver}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
           />
         )}
 
@@ -407,7 +377,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         {showAddProductModal && (
           <AdminAddProductModal
             onAddProduct={(p) => {
-              onAddProduct(p);
+              handleAddProduct(p);
               setShowAddProductModal(false);
             }}
             onClose={() => setShowAddProductModal(false)}

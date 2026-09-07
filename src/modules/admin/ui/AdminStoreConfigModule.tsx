@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Store, Save, Phone, Mail, Globe, MapPin, DollarSign, Clock, CheckCircle2, AlertCircle, Loader2, Power, BookOpen, Image as ImageIcon } from 'lucide-react';
 import { getStoreConfig, updateStoreConfig } from '@/src/core/services/supabase';
-import { useStore } from '@/src/core/store/useStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
 
 interface AdminStoreConfigModuleProps {
   showToast: (msg: string) => void;
@@ -9,7 +9,7 @@ interface AdminStoreConfigModuleProps {
 }
 
 export const AdminStoreConfigModule: React.FC<AdminStoreConfigModuleProps> = ({ showToast, onStoreConfigUpdated }) => {
-  const { storeInfo, setStoreInfo } = useStore();
+  const { storeInfo, setStoreInfo } = useDataStore();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Drawer, Box, Typography, IconButton, List, ListItem, ListItemText, ListItemIcon, Divider } from '@mui/material';
 import { X, Bell, CheckCircle2, Circle } from 'lucide-react';
-import { useStore } from '@/src/core/store/useStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 
 interface NotificationDrawerProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface NotificationDrawerProps {
 }
 
 export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose }) => {
-  const { notifications, markNotificationAsRead } = useStore();
+  const { notifications, markNotificationAsRead } = useUIStore();
 
   return (
     <Drawer

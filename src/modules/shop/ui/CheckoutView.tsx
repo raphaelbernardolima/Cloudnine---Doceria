@@ -11,22 +11,23 @@ import {
   QrCode,
   Copy,
   Check,
-  Send
+  Send,
+  AlertCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '@/src/core/store/useStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useOrderMutations } from '@/src/core/hooks/useOrderMutations';
 import { AddressLookupForm } from '@/src/modules/profile/ui/AddressLookupForm';
 import { AddressResult } from '@/src/core/services/addressService';
 import { Order } from '@/src/core/types/index';
 
-interface CheckoutViewProps {
-  onPlaceOrder?: (order: Partial<Order>) => void;
-}
-
-export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
+export const CheckoutView: React.FC = () => {
   const navigate = useNavigate();
-  const { cartItems, appliedDiscount, currentUser, storeInfo, clearCart } = useStore();
-  
+  const { cartItems, appliedDiscount, clearCart } = useCartStore();
+  const { currentUser, storeInfo } = useDataStore();
+  const { handlePlaceOrder: onPlaceOrder } = useOrderMutations();
+
   const [step, setStep] = useState<'checkout' | 'confirmation'>('checkout');
   const [copiedPix, setCopiedPix] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -36,8 +37,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
   const [telefoneCliente, setTelefoneCliente] = useState(currentUser?.telefone || '');
   const [tipoEntrega, setTipoEntrega] = useState<'entrega' | 'retirada'>('entrega');
   const [endereco, setEndereco] = useState(
-    currentUser?.endereco_rua 
-      ? `${currentUser.endereco_rua}, ${currentUser.endereco_numero} - ${currentUser.endereco_bairro}, ${currentUser.endereco_cidade}` 
+    currentUser?.endereco_rua
+      ? `${currentUser.endereco_rua}, ${currentUser.endereco_numero} - ${currentUser.endereco_bairro}, ${currentUser.endereco_cidade}`
       : ''
   );
   const [dataAgendada, setDataAgendada] = useState(new Date().toISOString().split('T')[0]);
@@ -126,9 +127,9 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
 
   return (
     <div className="min-h-screen bg-(--color-surface-container-lowest) animate-in fade-in pb-20">
-      <SEO 
-        title="Finalizar Pedido" 
-        description="Conclua sua encomenda na Cloudnine Doceria com segurança." 
+      <SEO
+        title="Finalizar Pedido"
+        description="Conclua sua encomenda na Cloudnine Doceria com segurança."
       />
       {/* Checkout Header */}
       <div className="sticky top-0 z-30 bg-(--color-surface-container-lowest)/90 backdrop-blur-md border-b border-(--color-outline-variant)/30 shadow-xs">
@@ -153,10 +154,10 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {step === 'checkout' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
+
             {/* Left Column: Form */}
             <div className="lg:col-span-7 space-y-8">
-              
+
               {/* Seção: Seus Dados */}
               <section className="bg-white dark:bg-(--color-surface-container-low) rounded-3xl p-6 shadow-sm border border-(--color-outline-variant)/20">
                 <h2 className="text-lg font-extrabold mb-4 text-(--color-on-surface) flex items-center gap-2">
@@ -211,11 +212,10 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
                   <button
                     type="button"
                     onClick={() => setTipoEntrega('entrega')}
-                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${
-                      tipoEntrega === 'entrega'
+                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${tipoEntrega === 'entrega'
                         ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
                         : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
-                    }`}
+                      }`}
                   >
                     <Truck className="w-6 h-6" />
                     <span>Entrega (R$ 12,00)</span>
@@ -223,11 +223,10 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
                   <button
                     type="button"
                     onClick={() => setTipoEntrega('retirada')}
-                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${
-                      tipoEntrega === 'retirada'
+                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${tipoEntrega === 'retirada'
                         ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
                         : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
-                    }`}
+                      }`}
                   >
                     <Store className="w-6 h-6" />
                     <span>Retirada Grátis</span>
@@ -298,11 +297,10 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
                   <button
                     type="button"
                     onClick={() => setMetodoPagamento('pix')}
-                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${
-                      metodoPagamento === 'pix'
+                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${metodoPagamento === 'pix'
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-500 dark:bg-emerald-950 dark:text-emerald-300'
                         : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-emerald-500/50'
-                    }`}
+                      }`}
                   >
                     <QrCode className="w-6 h-6" />
                     <span>Pix (Rápido)</span>
@@ -310,11 +308,10 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
                   <button
                     type="button"
                     onClick={() => setMetodoPagamento('cartao_credito')}
-                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${
-                      metodoPagamento === 'cartao_credito'
+                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${metodoPagamento === 'cartao_credito'
                         ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
                         : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
-                    }`}
+                      }`}
                   >
                     <CreditCard className="w-6 h-6" />
                     <span>Cartão na Entrega</span>
@@ -339,7 +336,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
                   <ShoppingBag className="w-5 h-5 text-(--color-primary)" />
                   Resumo do Pedido
                 </h3>
-                
+
                 <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 mb-4">
                   {cartItems.map((item) => (
                     <div key={item.id} className="flex justify-between items-start gap-4">
@@ -408,7 +405,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
             <div className="w-24 h-24 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-inner">
               <CheckCircle className="w-14 h-14" />
             </div>
-            
+
             <div className="space-y-2">
               <h2 className="text-3xl font-black text-(--color-on-surface)">Pedido Confirmado!</h2>
               <p className="text-base text-(--color-on-surface-variant)">
@@ -441,7 +438,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({ onPlaceOrder }) => {
 
             <div className="p-6 rounded-3xl bg-white dark:bg-(--color-surface-container-low) shadow-sm border border-(--color-outline-variant)/20 text-left space-y-4">
               <h3 className="font-extrabold text-lg border-b border-(--color-outline-variant)/20 pb-2">Detalhes</h3>
-              
+
               <div className="flex justify-between items-center text-sm">
                 <span className="text-(--color-on-surface-variant)">Nome:</span>
                 <span className="font-bold">{nomeCliente}</span>

@@ -23,36 +23,35 @@ import { UserProfile, Order } from '@/src/core/types/index';
 import { isStaff } from '@/src/core/constants/roles';
 import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button, Switch } from '@mui/material';
 import { useAppTheme } from '@/src/core/theme/ThemeContext';
-import { useStore } from '@/src/core/store/useStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 import { NotificationDrawer } from '@/src/core/ui/layout/NotificationDrawer';
 
 interface HeaderProps {
-  cartCount: number;
   onOpenCart: () => void;
-  currentUser: UserProfile | null;
   onOpenAuthModal: (msg?: string) => void;
   onLogout: () => void;
   currentPath: string;
   onNavigate: (path: string) => void;
   onOpenCustomCakeModal: () => void;
-  orders?: Order[];
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  cartCount,
   onOpenCart,
-  currentUser,
   onOpenAuthModal,
   onLogout,
   currentPath,
   onNavigate,
-  onOpenCustomCakeModal,
-  orders = []
+  onOpenCustomCakeModal
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
   const { mode, toggleTheme } = useAppTheme();
-  const { notifications } = useStore();
+  const { currentUser, orders = [] } = useDataStore();
+  const { cartItems } = useCartStore();
+  const { notifications } = useUIStore();
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const unreadCount = notifications.filter(n => !n.lida).length;
 
   const handleNavClick = (path: string) => {
