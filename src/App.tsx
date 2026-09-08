@@ -4,22 +4,26 @@ import { Header } from '@/src/core/ui/layout/Header';
 import { SplashScreen } from '@/src/core/ui/components/SplashScreen';
 import { MobileBottomNav } from '@/src/core/ui/layout/MobileBottomNav';
 import { ShopView } from '@/src/modules/shop/ui/ShopView';
+import { AboutUsView } from '@/src/modules/shop/ui/AboutUsView';
 import { ProductModal } from '@/src/modules/shop/ui/ProductModal';
 import { CustomCakeModal } from '@/src/modules/shop/ui/CustomCakeModal';
 import { CartDrawer } from '@/src/modules/shop/ui/CartDrawer';
+import { CheckoutView } from '@/src/modules/shop/ui/CheckoutView';
 import { LoyaltyView } from '@/src/modules/profile/ui/LoyaltyView';
 import { AuthModal } from '@/src/modules/auth/ui/AuthModal';
-import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_STAFF, INITIAL_AUDIT_LOGS, INITIAL_INGREDIENTS, INITIAL_DRIVERS, INITIAL_COUPONS, INITIAL_LOYALTY_SETTINGS } from './data/doceriaData';
-import { Product, CartItem, Order, CustomCakeBuilder, ThemeMode, AuditLog, UserProfile, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types/index';
-import { getCurrentSupabaseUser, signOutSupabase, updateUserProfileInDB, getSupabaseClient, getStoreConfig } from '@/src/core/services/supabase';
-import { sendOrderStatusNotification, requestNotificationPermission } from '@/src/core/services/notificationService';
-import { useStore } from '@/src/core/store/useStore';
+import { Product } from '@/src/core/types';
+
 import { useSupabaseSync } from '@/src/core/hooks/useSupabaseSync';
 import { usePaymentHandler } from '@/src/core/hooks/usePaymentHandler';
-import { useCouponLogic } from '@/src/core/hooks/useCouponLogic';
-import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';
-import { isStaff } from '@/src/core/constants/roles';
+import { useAppTheme } from '@/src/core/theme/ThemeContext';
 import { Sparkles, ShieldAlert, LogIn, User } from 'lucide-react';
+
+// New Stores
+import { useUIStore } from '@/src/core/store/useUIStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
+import { signOutSupabase } from '@/src/core/services/supabase';
+import { isStaff } from '@/src/core/constants/roles';
 
 // Lazy-loaded heavy modules (code splitting)
 const AdminDashboard = lazy(() => import('@/src/modules/admin/ui/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
@@ -30,46 +34,25 @@ export function App() {
   const location = useLocation();
   const [showSplash, setShowSplash] = useState(true);
 
-  // Custom Hooks for Logic Separation
   useSupabaseSync();
   usePaymentHandler();
-  const { handleApplyCoupon } = useCouponLogic();
+  
+  const { mode } = useAppTheme();
+  
+  // Stores
+  const { currentUser, setCurrentUser, isLoadingProducts, orders } = useDataStore();
+  const { isAuthModalOpen, setIsAuthModalOpen, authRequiredNotice, toastMessage } = useUIStore();
+  const { isCartOpen, setIsCartOpen, addToCart } = useCartStore();
 
-  // Global State (Zustand)
-  const {
-    themeMode, setThemeMode,
-    currentUser, setCurrentUser,
-    isAuthModalOpen, setIsAuthModalOpen, authRequiredNotice,
-    toastMessage, showToast,
-    products, setProducts, isLoadingProducts,
-    orders, setOrders,
-    staff, setStaff,
-    auditLogs, setAuditLogs,
-    ingredients, setIngredients,
-    drivers, setDrivers,
-    coupons, setCoupons,
-    loyaltySettings, setLoyaltySettings,
-    storePhone, setStorePhone,
-    customCakeConfig, setCustomCakeConfig,
-    appliedDiscount, setAppliedDiscount,
-    cartItems, isCartOpen, setIsCartOpen, addToCart, updateQuantity, removeFromCart, clearCart
-  } = useStore();
-
-  // Local UI State (Modals & Filters)
   const [isCustomCakeOpen, setIsCustomCakeOpen] = useState(false);
   const [selectedQuickProduct, setSelectedQuickProduct] = useState<Product | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
-  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Synchronize theme attribute on body
   useEffect(() => {
     document.documentElement.classList.remove('dark', 'light-high-contrast', 'dark-high-contrast');
-    if (themeMode === 'dark') document.documentElement.classList.add('dark');
-    else if (themeMode === 'light-high-contrast') document.documentElement.classList.add('light-high-contrast');
-    else if (themeMode === 'dark-high-contrast') document.documentElement.classList.add('dark', 'dark-high-contrast');
-  }, [themeMode]);
+    if (mode === 'dark') document.documentElement.classList.add('dark');
+  }, [mode]);
 
-  // Handle Auth open
   const handleOpenAuthModal = (notice?: string) => {
     setIsAuthModalOpen(true, notice);
   };
@@ -80,233 +63,72 @@ export function App() {
     navigate('/');
   };
 
-  const handleLoginSuccess = (user: UserProfile) => {
+  const handleLoginSuccess = (user: any) => {
     setCurrentUser(user);
     if (isStaff(user)) {
       navigate('/admin');
     }
   };
 
-  const handleUpdateUser = async (updated: UserProfile) => {
-    setCurrentUser(updated);
-    if (updated.id) {
-      const { error } = await updateUserProfileInDB(updated.id, updated);
-      if (error) {
-        console.error('Failed to update profile:', error);
-      }
-    }
+  const isUserAdminOrStaff = isStaff(currentUser);
+
+  const handleAddToCart = (product: Product, quantity: number, observacoes?: string) => {
+    addToCart({
+      product: product,
+      quantity: quantity,
+      unitPrice: product.preco,
+      customNote: observacoes || ''
+    });
+    setSelectedQuickProduct(null);
+    setIsCartOpen(true);
   };
 
-  // Handle Add Standard Product to Cart
-  const handleAddToCart = (product: Product, quantity = 1, customNote?: string) => {
-    addToCart({ product, quantity, customNote, unitPrice: product.preco });
-  };
-
-  // Handle Add Custom Cake to Cart
-  const handleAddCustomCakeToCart = (cake: CustomCakeBuilder) => {
+  const handleAddCustomCake = (cake: any) => {
     addToCart({
       customCake: cake,
       quantity: 1,
-      customNote: `Frase no bolo: ${cake.mensagemBolo || 'Nenhuma'} | Obs: ${cake.observacoes || 'Nenhuma'}`,
-      unitPrice: cake.precoCalculado
+      unitPrice: cake.preco_total,
+      customNote: `Bolo Personalizado: ${cake.tamanho}, ${cake.massa}, Recheios: ${cake.recheio1} e ${cake.recheio2}, Cobertura: ${cake.cobertura}. Obs: ${cake.observacoes}`
     });
+    setIsCustomCakeOpen(false);
+    setIsCartOpen(true);
   };
-
-  const handlePlaceOrder = async (newOrderData: Partial<Order>) => {
-    requestNotificationPermission().catch(() => { });
-    const fullOrder: Order = {
-      id: newOrderData.id || Math.floor(1000 + Math.random() * 9000),
-      created_at: new Date().toISOString(),
-      cliente_id: currentUser?.id || 'usr-guest',
-      cliente_nome: newOrderData.cliente_nome || currentUser?.nome || 'Cliente Cloudnine',
-      cliente_telefone: newOrderData.cliente_telefone || currentUser?.telefone || '',
-      total: newOrderData.total || 0,
-      status: newOrderData.status || 'em_preparo',
-      metodo_pagamento: newOrderData.metodo_pagamento || 'pix',
-      tipo_entrega: newOrderData.tipo_entrega || 'entrega',
-      data_agendada: newOrderData.data_agendada,
-      horario_agendado: newOrderData.horario_agendado,
-      endereco_entreg: newOrderData.endereco_entreg || '',
-      itens: newOrderData.itens || []
-    };
-
-    const client = getSupabaseClient();
-    if (client) {
-      const pedidoDB = {
-        cliente_id: fullOrder.cliente_id !== 'usr-guest' ? fullOrder.cliente_id : null,
-        total: fullOrder.total,
-        status: fullOrder.status,
-        endereco_entreg: fullOrder.endereco_entreg
-      };
-
-      const { data, error } = await client.from('pedidos').insert([pedidoDB]).select();
-      if (!error && data && data.length > 0) {
-        fullOrder.id = data[0].id; // Replace ID with DB serial ID
-
-        // Insert order items
-        if (fullOrder.itens.length > 0) {
-          const itensDB = fullOrder.itens.map(item => ({
-            pedido_id: fullOrder.id,
-            produto_id: typeof item.produto_id === 'number' ? item.produto_id : null,
-            quantidade: item.quantidade,
-            preco_unitario: item.preco_unitario
-          }));
-          await client.from('itens_pedidos').insert(itensDB);
-        }
-      } else {
-        console.error("Erro ao inserir pedido", error);
-      }
-    }
-
-    setOrders([fullOrder, ...orders]);
-    clearCart();
-    setAppliedDiscount(0);
-
-    // Audit log entry
-    const novoLog: AuditLog = {
-      id: Date.now(),
-      created_at: new Date().toISOString(),
-      admin_id: currentUser?.id || 'system',
-      admin_nome: currentUser?.nome || 'Cliente',
-      acao: 'NOVO_PEDIDO',
-      detalhes: `Novo pedido #${fullOrder.id} realizado por ${fullOrder.cliente_nome} no valor de R$ ${fullOrder.total.toFixed(2)}`
-    };
-
-    if (client) {
-      await client.from('logs_auditoria').insert([{
-        acao: novoLog.acao,
-        detalhes: novoLog.detalhes,
-        admin_id: currentUser?.id || null
-      }]);
-    }
-
-    setAuditLogs([novoLog, ...auditLogs]);
-  };
-
-  // Product Admin handlers
-  const handleAddProduct = async (newProd: Omit<Product, 'id'>) => {
-    const client = getSupabaseClient();
-    if (client) {
-      const { data, error } = await client.from('produtos').insert([newProd]).select();
-      if (!error && data) {
-        setProducts([data[0], ...products]);
-        return;
-      }
-    }
-    // Fallback if no client or error
-    const created: Product = { ...newProd, id: Date.now() };
-    setProducts([created, ...products]);
-  };
-
-  const handleUpdateStock = async (id: number | string, newStock: number) => {
-    const client = getSupabaseClient();
-    if (client) {
-      await client.from('produtos').update({ estoque: newStock }).eq('id', id);
-    }
-    setProducts(products.map(p => p.id === id ? { ...p, estoque: newStock } : p));
-  };
-
-  const handleDeleteProduct = async (id: number | string) => {
-    const client = getSupabaseClient();
-    if (client) {
-      await client.from('produtos').delete().eq('id', id);
-    }
-    setProducts(products.filter(p => p.id !== id));
-  };
-
-  const handleUpdateOrderStatus = async (orderId: number | string, newStatus: Order['status']) => {
-    const targetOrder = orders.find(o => o.id === orderId);
-    const client = getSupabaseClient();
-    if (client) {
-      await client.from('pedidos').update({ status: newStatus }).eq('id', orderId);
-    }
-    setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-
-    if (newStatus === 'saiu_entrega' || newStatus === 'entregue') {
-      sendOrderStatusNotification(orderId, newStatus, targetOrder?.cliente_nome);
-    }
-  };
-
-  const handleUpdateRole = (userId: string, newRole: UserProfile['role']) => {
-    setStaff(staff.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    if (currentUser?.id === userId) {
-      setCurrentUser({ ...currentUser, role: newRole });
-    }
-  };
-
-  // Filter products by category and search
-  const categories = ['Todos', 'Brigadeiros', 'Bolos de Pote', 'Macarons', 'Tortas & Mousse', 'Kits & Presentes'];
-  const filteredProducts = products.filter(p => {
-    const matchesCat = selectedCategory === 'Todos' || p.categoria === selectedCategory;
-    const matchesSearch = p.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.descricao.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCat && matchesSearch;
-  });
-
-  const cartTotalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
-  const isUserAdminOrStaff = isStaff(currentUser);
 
   return (
     <div className="min-h-screen bg-(--color-surface) text-(--color-on-surface) transition-colors font-sans flex flex-col">
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-      {/* Header */}
       <Header
-        cartCount={cartTotalCount}
         onOpenCart={() => setIsCartOpen(!isCartOpen)}
         onOpenCustomCakeModal={() => setIsCustomCakeOpen(true)}
-        themeMode={themeMode}
-        toggleTheme={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}
         currentPath={location.pathname}
         onNavigate={(path) => navigate(path)}
-        currentUser={currentUser}
         onOpenAuthModal={(notice) => handleOpenAuthModal(notice)}
         onLogout={handleLogout}
-        orders={orders}
       />
 
-      {/* Main Body View */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 md:pb-6">
         <Routes>
-          {/* CUSTOMER SHOP VIEW */}
           <Route path="/" element={
             <ShopView
-              categories={categories}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
               isLoadingProducts={isLoadingProducts}
-              filteredProducts={filteredProducts}
               onOpenCustomCake={() => setIsCustomCakeOpen(true)}
               onNavigateLoyalty={() => navigate('/loyalty')}
-              onAddToCart={handleAddToCart}
               onOpenQuickView={setSelectedQuickProduct}
             />
           } />
 
-          {/* CUSTOMER LOYALTY VIEW */}
-          <Route path="/loyalty" element={
-            <LoyaltyView
-              currentUser={currentUser}
-              orders={orders}
-              onOpenAuthModal={(msg) => handleOpenAuthModal(msg)}
-              onApplyRewardCoupon={(code) => {
-                handleApplyCoupon(code);
-                setIsCartOpen(true);
-              }}
-            />
-          } />
+          <Route path="/checkout" element={<CheckoutView />} />
+          <Route path="/sobre" element={<AboutUsView />} />
+          <Route path="/loyalty" element={<LoyaltyView onOpenAuthModal={(msg) => handleOpenAuthModal(msg)} />} />
 
-          {/* CUSTOMER PORTAL / PROFILE VIEW */}
           <Route path="/profile" element={
             currentUser ? (
               <Suspense fallback={<div className="py-20 text-center text-(--color-outline)">Carregando perfil...</div>}>
                 <CustomerProfileView
                   currentUser={currentUser}
-                  onUpdateUser={handleUpdateUser}
                   orders={orders}
+                  onUpdateUser={(updated) => setCurrentUser(updated)}
                   onNavigateToShop={() => navigate('/')}
                   onNavigateToAdmin={() => navigate('/admin')}
                 />
@@ -331,37 +153,10 @@ export function App() {
             )
           } />
 
-          {/* ADMIN DASHBOARD VIEW (Protected) */}
           <Route path="/admin" element={
             isUserAdminOrStaff ? (
               <Suspense fallback={<div className="py-20 text-center text-(--color-outline)">Carregando painel...</div>}>
-                <AdminDashboard
-                  products={products}
-                  orders={orders}
-                  staff={staff}
-                  auditLogs={auditLogs}
-                  ingredients={ingredients}
-                  drivers={drivers}
-                  coupons={coupons}
-                  loyaltySettings={loyaltySettings}
-                  onUpdateLoyalty={setLoyaltySettings}
-                  onAddIngredient={(ing) => setIngredients([...ingredients, { ...ing, id: Math.random().toString() }])}
-                  onUpdateIngredientStock={(id, stock) => setIngredients(ingredients.map(i => i.id === id ? { ...i, estoqueAtual: stock } : i))}
-                  onDeleteIngredient={(id) => setIngredients(ingredients.filter(i => i.id !== id))}
-                  onAddCoupon={(c) => setCoupons([...coupons, { ...c, id: Math.random().toString() }])}
-                  onToggleCoupon={(id, ativo) => setCoupons(coupons.map(c => c.id === id ? { ...c, ativo } : c))}
-                  onAssignDriver={(orderId, driverId) => setOrders(orders.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o))}
-                  currentUser={currentUser!}
-                  onAddProduct={handleAddProduct}
-                  onUpdateStock={handleUpdateStock}
-                  onDeleteProduct={handleDeleteProduct}
-                  onUpdateOrderStatus={handleUpdateOrderStatus}
-                  onUpdateRole={handleUpdateRole}
-                  showToast={showToast}
-                  storePhone={storePhone}
-                  setStorePhone={setStorePhone}
-                  customCakeConfig={customCakeConfig}
-                  onUpdateCustomCakeConfig={setCustomCakeConfig} />
+                <AdminDashboard />
               </Suspense>
             ) : (
               <div className="py-20 text-center max-w-md mx-auto space-y-4">
@@ -385,14 +180,12 @@ export function App() {
         </Routes>
       </main>
 
-      {/* Mobile Bottom Navigation */}
       <MobileBottomNav
         onOpenCustomCakeModal={() => setIsCustomCakeOpen(true)}
         onOpenAuthModal={handleOpenAuthModal}
         isAuthenticated={!!currentUser}
       />
 
-      {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
@@ -400,36 +193,23 @@ export function App() {
         requiredRoleMessage={authRequiredNotice}
       />
 
-      {/* Quick View Modal */}
-      <ProductModal
-        product={selectedQuickProduct}
-        isOpen={!!selectedQuickProduct}
-        onClose={() => setSelectedQuickProduct(null)}
-        onAddToCart={(p, qty, note) => handleAddToCart(p, qty, note)}
-      />
+      {selectedQuickProduct && (
+        <ProductModal
+          product={selectedQuickProduct}
+          isOpen={!!selectedQuickProduct}
+          onClose={() => setSelectedQuickProduct(null)}
+          onAddToCart={handleAddToCart}
+        />
+      )}
 
-      {/* Custom Cake Builder Modal */}
       <CustomCakeModal
         isOpen={isCustomCakeOpen}
         onClose={() => setIsCustomCakeOpen(false)}
-        onAddCustomCake={handleAddCustomCakeToCart}
-        config={customCakeConfig}
+        onAddCustomCake={handleAddCustomCake}
       />
 
-      {/* Cart & Checkout Drawer */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onUpdateQuantity={updateQuantity}
-        onRemoveItem={removeFromCart}
-        onClearCart={clearCart}
-        onPlaceOrder={handlePlaceOrder}
-        appliedDiscount={appliedDiscount}
-        onApplyCoupon={handleApplyCoupon}
-      />
+      <CartDrawer />
 
-      {/* Global Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-999 bg-(--color-on-surface) text-(--color-surface) px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 text-sm font-bold">
           <Sparkles className="w-4 h-4 text-emerald-400" />
@@ -439,6 +219,7 @@ export function App() {
 
       {/* Floating WhatsApp Support Button */}
       {!isStaff(currentUser) && (() => {
+        const { storePhone } = useDataStore.getState();
         const cleanPhone = storePhone ? storePhone.replace(/\D/g, '') : '5513988747014';
         const finalPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
         const whatsappUrl = `https://wa.me/${finalPhone}?text=Olá!%20Gostaria%20de%20suporte%20com%20meu%20pedido%20na%20Cloudnine.`;
@@ -455,7 +236,7 @@ export function App() {
               <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
             </svg>
             <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out font-bold text-sm tracking-wide pl-0 group-hover:pl-2">
-              Suporte WhatsApp
+              Ajuda?
             </span>
           </a>
         );

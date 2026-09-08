@@ -65,6 +65,8 @@ export interface CartItem {
   unitPrice: number;
 }
 
+export type VipLevel = 'none' | 'vip_1' | 'vip_2' | 'vip_3';
+
 export interface UserProfile {
   id: string;
   created_at?: string;
@@ -74,6 +76,7 @@ export interface UserProfile {
   nome: string;
   sobrenome: string;
   email: string;
+  vipLevel?: VipLevel;
   pontosFidelidade?: number;
   avatar_url?: string;
   endereco_rua?: string;
@@ -84,6 +87,10 @@ export interface UserProfile {
   endereco_cep?: string;
   endereco_complemento?: string;
   endereco_referencia?: string;
+  restricao_zero_lactose?: boolean;
+  restricao_sem_gluten?: boolean;
+  restricao_zero_acucar?: boolean;
+  restricao_alergia_nozes?: boolean;
 }
 
 export interface OrderItem {
@@ -180,4 +187,21 @@ export interface Coupon {
 export interface LoyaltySettings {
   pontosPorReal: number;
   valorResgatePorPonto: number;
+}
+
+export interface Banner {
+  id: string;
+  image_url: string;
+  link?: string;
+  cta_text?: string;
+  ativo: boolean;
+}
+
+export interface StoreInfo {
+  historia_loja: string;
+  fotos_loja: string[];
+  pix_chave?: string;
+  pix_tipo?: string;
+  pix_beneficiario?: string;
+  pix_cidade?: string;
 }

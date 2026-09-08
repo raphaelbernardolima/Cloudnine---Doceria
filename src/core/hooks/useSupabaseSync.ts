@@ -1,17 +1,22 @@
 import { useEffect } from 'react';
-import { useStore } from '@/src/core/store/useStore';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 import { getCurrentSupabaseUser, getSupabaseClient, getStoreConfig } from '@/src/core/services/supabase';
 import { INITIAL_PRODUCTS } from '@/src/data/doceriaData';
 
 export function useSupabaseSync() {
   const { 
-    setCurrentUser, 
+    setCurrentUser,
     setStorePhone, 
     setProducts, 
     setIsLoadingProducts, 
     setOrders,
-    setCustomCakeConfig
-  } = useStore();
+    setCustomCakeConfig,
+    setBanners,
+    setStoreInfo,
+    setLoyaltySettings
+  } = useDataStore();
+  const { setNotifications } = useUIStore();
 
   // Load User Session
   useEffect(() => {
@@ -35,10 +40,29 @@ export function useSupabaseSync() {
         if (config.custom_cake_config) {
           setCustomCakeConfig(config.custom_cake_config);
         }
+        if (config.banners) {
+          setBanners(config.banners);
+        }
+
+        if (config.pontos_por_real !== undefined && config.valor_resgate_por_ponto !== undefined) {
+          setLoyaltySettings({
+            pontosPorReal: Number(config.pontos_por_real),
+            valorResgatePorPonto: Number(config.valor_resgate_por_ponto)
+          });
+        }
+        
+        setStoreInfo({
+          historia_loja: config.historia_loja || '',
+          fotos_loja: config.fotos_loja || [],
+          pix_chave: config.pix_chave,
+          pix_tipo: config.pix_tipo,
+          pix_beneficiario: config.pix_beneficiario,
+          pix_cidade: config.pix_cidade
+        });
       }
     }
     loadStoreConfig();
-  }, [setStorePhone, setCustomCakeConfig]);
+  }, [setStorePhone, setCustomCakeConfig, setBanners, setStoreInfo]);
 
   // Fetch real data from Supabase
   useEffect(() => {
@@ -64,7 +88,14 @@ export function useSupabaseSync() {
         // Fetch orders
         const { data: ordData, error: ordErr } = await client.from('pedidos').select('*, itens_pedidos(*)');
         if (!ordErr && ordData && ordData.length > 0) {
-          setOrders(ordData as any);
+          const mappedOrders = ordData.map((o: any) => ({
+            ...o,
+            itens: (o.itens_pedidos || []).map((i: any) => ({
+              ...i,
+              nomeProduto: i.nome_produto || i.nome
+            }))
+          }));
+          setOrders(mappedOrders as any);
         } else {
           setOrders([]);
         }

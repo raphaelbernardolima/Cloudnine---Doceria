@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
-import { useStore } from '@/src/core/store/useStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 
 export function usePaymentHandler() {
-  const { showToast } = useStore();
+  const { clearCart } = useCartStore();
+  const { showToast } = useUIStore();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

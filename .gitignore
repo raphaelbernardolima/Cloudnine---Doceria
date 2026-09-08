@@ -23,3 +23,10 @@ metadata.json
 .idea/
 *.swp
 Thumbs.db
+
+# Antigravity & UI Pro CLI Agent Skills
+.agent/
+.agents/
+.gemini/
+ui-pro.config.*
+.claude

@@ -1,39 +1,157 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { SEO } from '@/src/core/ui/shared/SEO';
 import { ProductCard, ProductSkeleton } from './ProductCard';
 import { Sparkles, Cake, Gift, Search, SlidersHorizontal } from 'lucide-react';
 import { Product } from '@/src/core/types/index';
 import { Box, Typography, Button, TextField, InputAdornment, Grid, Chip, Stack, IconButton, alpha } from '@mui/material';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useCartStore } from '@/src/core/store/useCartStore';
+import { useNavigate } from 'react-router-dom';
 
 interface ShopViewProps {
-  categories: string[];
-  selectedCategory: string;
-  setSelectedCategory: (c: string) => void;
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
   isLoadingProducts: boolean;
-  filteredProducts: Product[];
   onOpenCustomCake: () => void;
   onNavigateLoyalty: () => void;
-  onAddToCart: (p: Product, qty: number) => void;
   onOpenQuickView: (p: Product) => void;
 }
 
 export function ShopView({
-  categories,
-  selectedCategory,
-  setSelectedCategory,
-  searchQuery,
-  setSearchQuery,
   isLoadingProducts,
-  filteredProducts,
   onOpenCustomCake,
   onNavigateLoyalty,
-  onAddToCart,
   onOpenQuickView
 }: ShopViewProps) {
+  const { banners, products } = useDataStore();
+  const { addToCart } = useCartStore();
+  const navigate = useNavigate();
+  
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const categories = ['Todos', 'Brigadeiros', 'Bolos de Pote', 'Macarons', 'Tortas & Mousse', 'Kits & Presentes'];
+  const activeBanners = banners.filter(b => b.ativo);
+
+  const filteredProducts = products.filter(p => {
+    const matchesCat = selectedCategory === 'Todos' || p.categoria === selectedCategory;
+    const matchesSearch = p.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.descricao.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
+
+  const onAddToCart = (product: Product, quantity = 1) => {
+    addToCart({ product, quantity, customNote: undefined, unitPrice: product.preco });
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>
-      
+      <SEO 
+        title="Cardápio Oficial | Cloudnine Doceria" 
+        description="Navegue pelo nosso cardápio e encomende os melhores bolos personalizados e doces de luxo." 
+      />
+
+      {/* Banners Carousel */}
+      {activeBanners.length > 0 && (
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            overflowX: 'auto', 
+            pb: 1,
+            mx: -2,
+            px: 2,
+            scrollSnapType: 'x mandatory',
+            '&::-webkit-scrollbar': { display: 'none' }
+          }}
+        >
+          {activeBanners.map(banner => (
+            <Box 
+              key={banner.id}
+              onClick={() => banner.link ? navigate(banner.link) : null}
+              sx={{ 
+                minWidth: { xs: '85vw', sm: '400px' },
+                height: { xs: '160px', sm: '220px' },
+                borderRadius: 4,
+                overflow: 'hidden',
+                scrollSnapAlign: 'center',
+                flexShrink: 0,
+                cursor: banner.link ? 'pointer' : 'default',
+                boxShadow: 2,
+                position: 'relative',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 6,
+                  '& .banner-overlay': {
+                    opacity: 0.7
+                  },
+                  '& .cta-btn': {
+                    transform: 'scale(1.05)'
+                  }
+                }
+              }}
+            >
+              <img src={banner.image_url} alt="Promoção" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              
+              {banner.cta_text && (
+                <>
+                  {/* Dark gradient overlay */}
+                  <Box 
+                    className="banner-overlay"
+                    sx={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 100%)',
+                      opacity: 0.5,
+                      transition: 'opacity 0.3s ease'
+                    }} 
+                  />
+                  {/* CTA Button placed at bottom left */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 16,
+                      left: 16,
+                      right: 16,
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'flex-start'
+                    }}
+                  >
+                    <Button
+                      className="cta-btn"
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText',
+                        fontWeight: 'bold',
+                        borderRadius: 3,
+                        px: 3,
+                        py: 1,
+                        textTransform: 'none',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+                        '&:hover': {
+                          bgcolor: 'primary.dark'
+                        }
+                      }}
+                      onClick={(e) => {
+                        if (banner.link) {
+                          e.stopPropagation();
+                          navigate(banner.link);
+                        }
+                      }}
+                    >
+                      {banner.cta_text}
+                    </Button>
+                  </Box>
+                </>
+              )}
+            </Box>
+          ))}
+        </Box>
+      )}
+
       {/* Categories (Pills) - Horizontal Scroll */}
       <Box
         id="shop-categories-filter-bar"
@@ -94,7 +212,7 @@ export function ShopView({
             placeholder="Descubra novos sabores..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ 
+            sx={{
               flexGrow: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: '9999px',
@@ -108,16 +226,16 @@ export function ShopView({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search className="w-5 h-5 text-[var(--color-outline)]" />
+                    <Search className="w-5 h-5 text-(--color-outline)" />
                   </InputAdornment>
                 ),
               }
             }}
           />
-          <IconButton 
-            sx={{ 
-              border: '1px solid', 
-              borderColor: 'outlineVariant', 
+          <IconButton
+            sx={{
+              border: '1px solid',
+              borderColor: 'outlineVariant',
               p: 1.5,
               display: { xs: 'none', sm: 'flex' }
             }}
@@ -169,9 +287,9 @@ export function ShopView({
       )}
 
       {/* Hero Brand Banner moved to bottom or removed to match screenshots better, but let's keep it as an extra action block at the bottom */}
-      <Box sx={{ 
-        p: { xs: 4, sm: 6 }, 
-        borderRadius: 4, 
+      <Box sx={{
+        p: { xs: 4, sm: 6 },
+        borderRadius: 4,
         background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light} 0%, rgba(254, 240, 245, 0.8) 100%)`,
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
@@ -195,8 +313,8 @@ export function ShopView({
             </Button>
           </Stack>
         </Box>
-        <Box 
-          component="img" 
+        <Box
+          component="img"
           src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800"
           alt="Doces Cloudnine"
           sx={{ width: { xs: '100%', md: 300 }, height: 200, objectFit: 'cover', borderRadius: 3, transform: 'rotate(2deg)', boxShadow: 3 }}
