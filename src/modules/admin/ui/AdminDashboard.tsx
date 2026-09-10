@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
 import { SEO } from '@/src/core/ui/shared/SEO';
 import { useSearchParams } from 'react-router-dom';
-import { ShoppingBag, Calendar, Package, Printer, Truck, Gift, ShieldCheck, Sparkles, Store, Cake, LayoutDashboard, CreditCard } from 'lucide-react';
+import { Tote, Calendar, Package, Printer, Truck, Gift, ShieldCheck, Sparkle, Storefront, Cake, SquaresFour, CreditCard, Users, Monitor } from '@phosphor-icons/react';
 import { Product, Order, UserProfile, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types/index';
 import { updateStoreConfig } from '@/src/core/services/supabase';
 
-// Modules
-import { AdminFinanceModule } from './AdminFinanceModule';
+import { AdminHomeDashboard } from './AdminHomeDashboard';
+import { AdminCashFlowModule } from './AdminCashFlowModule';
 import { AdminStoreConfigModule } from './AdminStoreConfigModule';
 import { AdminPaymentConfigModule } from './AdminPaymentConfigModule';
 import { AdminCustomCakeModule } from './AdminCustomCakeModule';
-import { AdminStaffModule } from './AdminStaffModule';
 import { AdminCalendarModule } from './AdminCalendarModule';
 import { AdminInventoryModule } from './AdminInventoryModule';
 import { AdminDeliveryModule } from './AdminDeliveryModule';
 import { AdminMarketingModule } from './AdminMarketingModule';
 import { AdminOrdersModule } from './AdminOrdersModule';
 import { AdminKitchenModule } from './AdminKitchenModule';
-import { AdminAIModule } from './AdminAIModule';
+import { AdminTeamModule } from './AdminTeamModule';
 import { AdminAuditLogsModule } from './AdminAuditLogsModule';
 import { AdminAddProductModal } from './AdminAddProductModal';
 import { AdminPrintModal } from './AdminPrintModal';
+import { AdminTablesModule } from './AdminTablesModule';
+import { AdminCRMModule } from './AdminCRMModule';
 
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { useUIStore } from '@/src/core/store/useUIStore';
@@ -33,7 +34,7 @@ export const AdminDashboard: React.FC = () => {
     products, orders, staff, auditLogs, currentUser,
     ingredients, setIngredients, drivers, coupons, setCoupons,
     loyaltySettings, setLoyaltySettings, customCakeConfig, setCustomCakeConfig,
-    storePhone, setStorePhone
+    storePhone, setStorePhone, expenses, setExpenses
   } = useDataStore();
   const { showToast } = useUIStore();
   
@@ -77,7 +78,7 @@ export const AdminDashboard: React.FC = () => {
   const [showAddProductModal, setShowAddProductModal] = useState(false);
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 max-w-[1400px] mx-auto py-4 px-4 items-start">
+    <div className="flex flex-col md:flex-row gap-6 w-full min-w-0 max-w-[1400px] mx-auto py-4 px-4 items-start">
       <SEO 
         title="Painel Administrativo" 
         description="Área restrita de gestão da Cloudnine Doceria." 
@@ -89,14 +90,14 @@ export const AdminDashboard: React.FC = () => {
         
         {['admin', 'ADMIN'].includes(currentUser.role) && (
           <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'dashboard'
+            onClick={() => setActiveTab('finance')}
+            className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'finance'
               ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
               : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
               }`}
           >
-            <LayoutDashboard className="w-5 h-5" />
-            <span>Financeiro & Dashboard</span>
+            <SquaresFour className="w-5 h-5" />
+            <span>Financeiro & DRE</span>
           </button>
         )}
 
@@ -108,7 +109,7 @@ export const AdminDashboard: React.FC = () => {
               : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
               }`}
           >
-            <ShoppingBag className="w-5 h-5" />
+            <Tote className="w-5 h-5" />
             <span>Pedidos ({orders.length})</span>
           </button>
         )}
@@ -178,10 +179,36 @@ export const AdminDashboard: React.FC = () => {
         )}
         
         {['admin', 'ADMIN'].includes(currentUser.role) && (
+          <button
+            onClick={() => setActiveTab('crm')}
+            className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'crm'
+              ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+              : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
+              }`}
+          >
+            <Users className="w-5 h-5" />
+            <span>Clientes & CRM</span>
+          </button>
+        )}
+        
+        {['admin', 'ADMIN', 'ATENDIMENTO'].includes(currentUser.role) && (
+          <button
+            onClick={() => setActiveTab('tables')}
+            className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'tables'
+              ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
+              : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
+              }`}
+          >
+            <Monitor className="w-5 h-5" />
+            <span>Gestão de Mesas</span>
+          </button>
+        )}
+
+        {['admin', 'ADMIN'].includes(currentUser.role) && (
           <>
             <button
-              onClick={() => setActiveTab('staff')}
-              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'staff'
+              onClick={() => setActiveTab('team')}
+              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'team'
                 ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md font-bold'
                 : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
@@ -190,16 +217,7 @@ export const AdminDashboard: React.FC = () => {
               <span>Equipe & Permissões</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab('ai')}
-              className={`w-full px-3.5 py-3 rounded-2xl transition-all flex items-center space-x-3 shrink-0 text-left ${activeTab === 'ai'
-                ? 'bg-linear-to-r from-[var(--color-primary)] to-[var(--color-primary-container)] text-[var(--color-on-primary)] shadow-md font-bold'
-                : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
-                }`}
-            >
-              <Sparkles className="w-5 h-5" />
-              <span>Marketing IA</span>
-            </button>
+
 
             <button
               onClick={() => setActiveTab('store-config')}
@@ -208,7 +226,7 @@ export const AdminDashboard: React.FC = () => {
                 : 'text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] font-medium'
                 }`}
             >
-              <Store className="w-5 h-5" />
+              <Storefront className="w-5 h-5" />
               <span>Configurações da Loja</span>
             </button>
 
@@ -265,8 +283,14 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* TAB RENDERING */}
-        {activeTab === 'dashboard' && (
-          <AdminFinanceModule orders={orders} products={products} ingredients={ingredients} />
+        {activeTab === 'finance' && (
+          <AdminCashFlowModule 
+            orders={orders}
+            expenses={expenses}
+            onAddExpense={(exp) => setExpenses([...expenses, { ...exp, id: Date.now().toString(), created_at: new Date().toISOString() }])}
+            onUpdateExpense={(id, updates) => setExpenses(expenses.map(e => e.id === id ? { ...e, ...updates } : e))}
+            onDeleteExpense={(id) => setExpenses(expenses.filter(e => e.id !== id))}
+          />
         )}
 
         {activeTab === 'store-config' && (
@@ -295,10 +319,6 @@ export const AdminDashboard: React.FC = () => {
           />
         )}
 
-        {activeTab === 'staff' && (
-          <AdminStaffModule staffList={staff} onUpdateRole={handleUpdateRole} />
-        )}
-
         {activeTab === 'orders' && (
           <AdminOrdersModule 
             orders={orders} 
@@ -310,6 +330,8 @@ export const AdminDashboard: React.FC = () => {
         {activeTab === 'calendar' && (
           <AdminCalendarModule orders={orders} />
         )}
+
+        {activeTab === 'team' && <AdminTeamModule />}
 
         {activeTab === 'products' && (
           <AdminInventoryModule
@@ -358,9 +380,10 @@ export const AdminDashboard: React.FC = () => {
           />
         )}
 
-        {activeTab === 'ai' && <AdminAIModule />}
 
         {activeTab === 'database' && <AdminAuditLogsModule auditLogs={auditLogs} />}
+        {activeTab === 'tables' && <AdminTablesModule />}
+        {activeTab === 'crm' && <AdminCRMModule />}
 
         {/* MODALS */}
         {printingOrder && (
@@ -388,7 +411,7 @@ export const AdminDashboard: React.FC = () => {
         {toastMessage && (
           <div className="fixed bottom-4 right-4 z-9999 bg-(--color-primary) text-(--color-on-primary) px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <ShoppingBag className="w-5 h-5 text-white" />
+              <Tote className="w-5 h-5 text-white" />
             </div>
             <div>
               <p className="font-bold text-sm">Atenção Equipe!</p>

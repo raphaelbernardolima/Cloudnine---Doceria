@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '@/src/core/ui/layout/Header';
 import { SplashScreen } from '@/src/core/ui/components/SplashScreen';
+import { NetworkStatusOverlay } from '@/src/core/ui/shared/NetworkStatusOverlay';
 import { MobileBottomNav } from '@/src/core/ui/layout/MobileBottomNav';
 import { ShopView } from '@/src/modules/shop/ui/ShopView';
 import { AboutUsView } from '@/src/modules/shop/ui/AboutUsView';
@@ -9,6 +10,8 @@ import { ProductModal } from '@/src/modules/shop/ui/ProductModal';
 import { CustomCakeModal } from '@/src/modules/shop/ui/CustomCakeModal';
 import { CartDrawer } from '@/src/modules/shop/ui/CartDrawer';
 import { CheckoutView } from '@/src/modules/shop/ui/CheckoutView';
+import { OrderTrackingView } from '@/src/modules/shop/ui/OrderTrackingView';
+import { NotFoundView } from '@/src/modules/shop/ui/NotFoundView';
 import { LoyaltyView } from '@/src/modules/profile/ui/LoyaltyView';
 import { AuthModal } from '@/src/modules/auth/ui/AuthModal';
 import { Product } from '@/src/core/types';
@@ -16,7 +19,7 @@ import { Product } from '@/src/core/types';
 import { useSupabaseSync } from '@/src/core/hooks/useSupabaseSync';
 import { usePaymentHandler } from '@/src/core/hooks/usePaymentHandler';
 import { useAppTheme } from '@/src/core/theme/ThemeContext';
-import { Sparkles, ShieldAlert, LogIn, User } from 'lucide-react';
+import { Sparkle, ShieldWarning, SignIn, User } from '@phosphor-icons/react';
 
 // New Stores
 import { useUIStore } from '@/src/core/store/useUIStore';
@@ -40,7 +43,7 @@ export function App() {
   const { mode } = useAppTheme();
   
   // Stores
-  const { currentUser, setCurrentUser, isLoadingProducts, orders } = useDataStore();
+  const { currentUser, setCurrentUser, isLoadingProducts, orders, customCakeConfig } = useDataStore();
   const { isAuthModalOpen, setIsAuthModalOpen, authRequiredNotice, toastMessage } = useUIStore();
   const { isCartOpen, setIsCartOpen, addToCart } = useCartStore();
 
@@ -95,7 +98,8 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-(--color-surface) text-(--color-on-surface) transition-colors font-sans flex flex-col">
+    <div className="min-h-screen bg-(--color-surface) text-(--color-on-surface) transition-colors font-sans flex flex-col overflow-x-hidden w-full max-w-[100vw]">
+      <NetworkStatusOverlay />
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
       <Header
@@ -107,7 +111,7 @@ export function App() {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 md:pb-6">
+      <main className="flex-1 min-w-0 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-28 md:pb-6">
         <Routes>
           <Route path="/" element={
             <ShopView
@@ -146,7 +150,7 @@ export function App() {
                   onClick={() => handleOpenAuthModal('Acesse sua conta para ver seus pedidos e pontos do clube de fidelidade.')}
                   className="px-6 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
                 >
-                  <LogIn className="w-4 h-4" />
+                  <SignIn className="w-4 h-4" />
                   <span>Entrar ou Criar Conta</span>
                 </button>
               </div>
@@ -161,7 +165,7 @@ export function App() {
             ) : (
               <div className="py-20 text-center max-w-md mx-auto space-y-4">
                 <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto">
-                  <ShieldAlert className="w-8 h-8" />
+                  <ShieldWarning className="w-8 h-8" />
                 </div>
                 <h2 className="text-xl font-black">Área Restrita do Sistema</h2>
                 <p className="text-xs text-(--color-outline)">
@@ -171,12 +175,16 @@ export function App() {
                   onClick={() => handleOpenAuthModal('Acesso Administrativo: Por favor, entre com sua conta de colaborador para acessar o painel de gestão.')}
                   className="px-6 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-bold text-xs flex items-center justify-center space-x-2 mx-auto shadow-md"
                 >
-                  <LogIn className="w-4 h-4" />
+                  <SignIn className="w-4 h-4" />
                   <span>Acessar Conta Autorizada</span>
                 </button>
               </div>
             )
           } />
+          
+          <Route path="/pedido/:id" element={<OrderTrackingView />} />
+
+          <Route path="*" element={<NotFoundView />} />
         </Routes>
       </main>
 
@@ -206,13 +214,14 @@ export function App() {
         isOpen={isCustomCakeOpen}
         onClose={() => setIsCustomCakeOpen(false)}
         onAddCustomCake={handleAddCustomCake}
+        config={customCakeConfig}
       />
 
       <CartDrawer />
 
       {toastMessage && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-999 bg-(--color-on-surface) text-(--color-surface) px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 text-sm font-bold">
-          <Sparkles className="w-4 h-4 text-emerald-400" />
+          <Sparkle className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
