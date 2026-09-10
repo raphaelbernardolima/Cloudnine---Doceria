@@ -99,8 +99,11 @@ export function useSupabaseSync() {
         } else {
           setOrders([]);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching from Supabase", err);
+        if (navigator.onLine) {
+          useUIStore.getState().showToast(`Erro de comunicação com o servidor: ${err.message || 'Falha ao carregar dados iniciais'}.`);
+        }
       } finally {
         setIsLoadingProducts(false);
       }

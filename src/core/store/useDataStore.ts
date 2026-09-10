@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Product, UserProfile, Order, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig, Banner, StoreInfo } from '@/src/core/types';
+import { Product, UserProfile, Order, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig, Banner, StoreInfo, Expense, Table } from '@/src/core/types';
 
 interface DataStoreState {
   currentUser: UserProfile | null;
@@ -10,6 +10,8 @@ interface DataStoreState {
   setIsLoadingProducts: (loading: boolean) => void;
   orders: Order[];
   setOrders: (orders: Order[]) => void;
+  users: UserProfile[];
+  setUsers: (users: UserProfile[]) => void;
   staff: UserProfile[];
   setStaff: (staff: UserProfile[]) => void;
   auditLogs: AuditLog[];
@@ -30,6 +32,12 @@ interface DataStoreState {
   setBanners: (banners: Banner[]) => void;
   storeInfo: StoreInfo;
   setStoreInfo: (info: StoreInfo) => void;
+  categories: string[];
+  setCategories: (categories: string[]) => void;
+  expenses: Expense[];
+  setExpenses: (expenses: Expense[]) => void;
+  tables: Table[];
+  setTables: (tables: Table[]) => void;
 }
 
 export const useDataStore = create<DataStoreState>((set) => ({
@@ -41,6 +49,8 @@ export const useDataStore = create<DataStoreState>((set) => ({
   setIsLoadingProducts: (loading) => set({ isLoadingProducts: loading }),
   orders: [],
   setOrders: (orders) => set({ orders }),
+  users: [],
+  setUsers: (users) => set({ users }),
   staff: [],
   setStaff: (staff) => set({ staff }),
   auditLogs: [],
@@ -57,14 +67,22 @@ export const useDataStore = create<DataStoreState>((set) => ({
   setStorePhone: (phone) => set({ storePhone: phone }),
   customCakeConfig: { tamanhos: [], massas: [], recheios: [], coberturas: [] },
   setCustomCakeConfig: (config) => set({ customCakeConfig: config }),
-  banners: [
-    { id: '1', image_url: 'https://images.unsplash.com/photo-1557925923-33b251dc3296?auto=format&fit=crop&q=80&w=1200&h=400', ativo: true, link: '/?tab=kits' },
-    { id: '2', image_url: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=1200&h=400', ativo: true }
-  ],
+  banners: [],
   setBanners: (banners) => set({ banners }),
   storeInfo: {
     historia_loja: 'Fundada com muito amor, a Cloudnine Doceria traz os melhores doces artesanais...',
     fotos_loja: ['https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=600']
   },
   setStoreInfo: (info) => set({ storeInfo: info }),
+  categories: ['Todos', 'Brigadeiros', 'Bolos de Pote', 'Macarons', 'Tortas & Mousse', 'Kits & Presentes'],
+  setCategories: (categories) => set({ categories }),
+  expenses: [],
+  setExpenses: (expenses) => set({ expenses }),
+  tables: Array.from({ length: 15 }, (_, i) => ({
+    id: String(i + 1),
+    numero: String(i + 1).padStart(2, '0'),
+    status: 'livre',
+    seats: 4
+  })),
+  setTables: (tables) => set({ tables })
 }));

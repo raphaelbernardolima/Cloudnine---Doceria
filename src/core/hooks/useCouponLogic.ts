@@ -37,7 +37,7 @@ export function useCouponLogic() {
 
     const minimoCompra = Number(matchedCoupon.minimo_compra) || 0;
     if (subtotal < minimoCompra) {
-      showToast(`Pedido mínimo de R$ ${minimoCompra.toFixed(2)} para este cupom.`);
+      showToast(`Pedido mínimo de ${formatCurrency(minimoCompra)} para este cupom.`);
       return;
     }
 
@@ -47,7 +47,7 @@ export function useCouponLogic() {
       showToast(`Cupom ${matchedCoupon.codigo} de ${valor}% aplicado!`);
     } else if (matchedCoupon.tipo_desconto === 'fixo') {
       setAppliedDiscount(valor);
-      showToast(`Cupom ${matchedCoupon.codigo} de R$ ${valor.toFixed(2)} OFF aplicado!`);
+      showToast(`Cupom ${matchedCoupon.codigo} de ${formatCurrency(valor)} OFF aplicado!`);
     } else if (matchedCoupon.tipo_desconto === 'frete_gratis') {
       // Logic for free shipping (could set discount as the shipping fee)
       showToast(`Frete grátis aplicado com o cupom ${matchedCoupon.codigo}!`);

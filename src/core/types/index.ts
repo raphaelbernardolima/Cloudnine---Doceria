@@ -26,6 +26,7 @@ export interface Product {
   target_margin?: number;
   current_cost?: number;
   suggested_price?: number;
+  ativo?: boolean;
 }
 
 export interface CustomCakeOption {
@@ -78,6 +79,7 @@ export interface UserProfile {
   email: string;
   vipLevel?: VipLevel;
   pontosFidelidade?: number;
+  walletBalance?: number;
   avatar_url?: string;
   endereco_rua?: string;
   endereco_numero?: string;
@@ -195,6 +197,7 @@ export interface Banner {
   link?: string;
   cta_text?: string;
   ativo: boolean;
+  layout_type?: 'classic' | 'clean' | 'glassmorphism' | string;
 }
 
 export interface StoreInfo {
@@ -204,4 +207,22 @@ export interface StoreInfo {
   pix_tipo?: string;
   pix_beneficiario?: string;
   pix_cidade?: string;
+}
+
+export interface Expense {
+  id: string;
+  descricao: string;
+  valor: number;
+  categoria: string;
+  data: string;
+  created_at?: string;
+  data_vencimento?: string;
+  pago?: boolean;
+}
+
+export interface Table {
+  id: string;
+  numero: string | number;
+  status: 'livre' | 'ocupada' | 'reservada' | 'aguardando_pagamento';
+  seats?: number;
 }

@@ -12,12 +12,16 @@ interface CartStoreState {
   clearCart: () => void;
   appliedDiscount: number;
   setAppliedDiscount: (discount: number) => void;
+  activeTable: string | null;
+  setActiveTable: (table: string | null) => void;
 }
 
 export const useCartStore = create<CartStoreState>((set) => ({
   cartItems: [],
   isCartOpen: false,
   setIsCartOpen: (open) => set({ isCartOpen: open }),
+  activeTable: null,
+  setActiveTable: (table) => set({ activeTable: table }),
   
   addToCart: (item) => set((state) => {
     const id = Math.random().toString(36).substring(2, 9);
