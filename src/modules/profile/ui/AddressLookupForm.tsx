@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  MapPin, Search, Navigation, Check, AlertCircle, Loader2,
-  Map, Sparkles, Building, Settings, Compass, Info
-} from 'lucide-react';
+import { MapPin, MagnifyingGlass, NavigationArrow, Check, WarningCircle, Spinner, MapTrifold, Sparkle, Buildings, Gear, Compass, Info } from '@phosphor-icons/react';
 import { fetchAddressByCep, formatCep, reverseGeocodeLatLng, AddressResult } from '@/src/core/services/addressService';
 
 interface AddressLookupFormProps {
@@ -181,9 +178,9 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
             className="w-full px-4 py-3 rounded-2xl bg-(--color-primary) text-(--color-on-primary) font-black text-xs sm:text-sm shadow-xs flex items-center justify-center space-x-2.5 transition-all hover:opacity-90 min-h-12 disabled:opacity-60 cursor-pointer"
           >
             {loadingGeo ? (
-              <Loader2 className="w-5 h-5 animate-spin shrink-0" />
+              <Spinner className="w-5 h-5 animate-spin shrink-0" />
             ) : (
-              <Navigation className="w-5 h-5 shrink-0" />
+              <NavigationArrow className="w-5 h-5 shrink-0" />
             )}
             <span>{loadingGeo ? 'Buscando...' : 'Usar minha localização atual'}</span>
           </button>
@@ -193,14 +190,14 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
       {/* Notifications */}
       {loadingCep && (
         <div className="p-3.5 rounded-2xl bg-(--color-primary)/10 text-(--color-primary) font-extrabold text-xs flex items-center space-x-2.5 border border-(--color-primary)/30">
-          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+          <Spinner className="w-4 h-4 animate-spin shrink-0" />
           <span>Buscando endereço pelo CEP nas bases oficiais da API de CEP...</span>
         </div>
       )}
 
       {errorMessage && (
         <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 font-bold text-xs flex items-center space-x-2.5">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+          <WarningCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
@@ -216,7 +213,7 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
       <div className={compact ? 'space-y-4 pt-1' : 'p-4 sm:p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 space-y-4 shadow-xs'}>
         <div className="border-b border-(--color-outline-variant)/20 pb-3 flex flex-wrap items-center justify-between gap-2">
           <h4 className="font-extrabold text-sm text-(--color-on-surface) flex items-center gap-2">
-            <Building className="w-4 h-4 text-(--color-primary)" />
+            <Buildings className="w-4 h-4 text-(--color-primary)" />
             <span>Dados do Endereço</span>
           </h4>
           {geoCoords && (
@@ -245,9 +242,9 @@ export const AddressLookupForm: React.FC<AddressLookupFormProps> = ({
                 className="w-full p-3 pr-10 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-black text-sm tracking-wide focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all min-h-11.5"
               />
               {loadingCep ? (
-                <Loader2 className="w-5 h-5 animate-spin text-(--color-primary) absolute right-3 top-3" />
+                <Spinner className="w-5 h-5 animate-spin text-(--color-primary) absolute right-3 top-3" />
               ) : (
-                <Search className="w-5 h-5 text-(--color-outline) absolute right-3 top-3" />
+                <MagnifyingGlass className="w-5 h-5 text-(--color-outline) absolute right-3 top-3" />
               )}
             </div>
             <span className="text-sm text-(--color-outline) block">

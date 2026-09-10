@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, Gift, Star, Sparkles, Check, AlertCircle } from 'lucide-react';
+import { Medal, Gift, Star, Sparkle, Check, WarningCircle } from '@phosphor-icons/react';
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { useUIStore } from '@/src/core/store/useUIStore';
 import { useCartStore } from '@/src/core/store/useCartStore';
@@ -94,7 +94,7 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onOpenAuthModal }) => 
       {!currentUser && (
         <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+            <WarningCircle className="w-5 h-5 text-amber-600 shrink-0" />
             <p className="text-xs font-bold text-center sm:text-left">Faça login para acumular pontos reais a cada pedido e resgatar recompensas exclusivas no Cloudnine Club!</p>
           </div>
           <button
@@ -110,7 +110,7 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onOpenAuthModal }) => 
       <div className="relative rounded-3xl p-8 bg-linear-gradient-primary-to-secondary text-on-primary shadow-md overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="space-y-2 text-center sm:text-left z-10">
           <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-extrabold backdrop-blur-xs">
-            <Sparkles className="w-3.5 h-3.5 fill-current" />
+            <Sparkle className="w-3.5 h-3.5 fill-current" />
             <span>Programa Cloudnine Club</span>
           </span>
           <h2 className="text-2xl sm:text-3xl font-black">
@@ -138,7 +138,7 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onOpenAuthModal }) => 
         </div>
         <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 text-center">
           <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">Total Gasto em Pedidos</span>
-          <span className="text-2xl font-black text-on-surface mt-1 block">R$ {totalSpent.toFixed(2).replace('.', ',')}</span>
+          <span className="text-2xl font-black text-on-surface mt-1 block">{formatCurrency(totalSpent)}</span>
         </div>
         <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 text-center">
           <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">Recompensas Resgatadas</span>

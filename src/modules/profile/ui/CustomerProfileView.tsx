@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SEO } from '@/src/core/ui/shared/SEO';
-import {
-  User, MapPin, Heart, ShoppingBag, Award, Camera,
-  Save, CheckCircle, Clock, ChevronRight, Phone, Mail, Shield, AlertCircle,
-  Copy, RefreshCw, Bell, Sparkles, Star, Gift, Truck, FileText, Settings2
-} from 'lucide-react';
+import { User, MapPin, Heart, Tote, Medal, Camera, FloppyDisk, CheckCircle, Clock, CaretRight, Phone, Envelope, Shield, WarningCircle, Copy, ArrowsClockwise, Bell, Sparkle, Star, Gift, Truck, FileText, Sliders } from '@phosphor-icons/react';
 import { UserProfile, Order } from '@/src/core/types/index';
 import { CloudinaryUploader } from '@/src/core/ui/shared/CloudinaryUploader';
 import { AddressLookupForm } from './AddressLookupForm';
@@ -144,7 +140,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 animate-in fade-in duration-300">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:pt-8 space-y-6 animate-in fade-in duration-300">
       <SEO 
         title="Meu Perfil" 
         description="Acompanhe seus pedidos, acumule pontos de fidelidade e gerencie seu perfil na Cloudnine." 
@@ -166,12 +162,12 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
             <div className="text-center sm:text-left space-y-2 mt-2">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                <h1 className="text-2xl sm:text-3xl" style={{ fontFamily: '"Libre Caslon Text", serif', color: '#3C2218', fontStyle: 'italic' }}>
+                <h1 className="text-2xl sm:text-3xl text-[var(--color-on-surface)]" style={{ fontFamily: '"Libre Caslon Text", serif', fontStyle: 'italic' }}>
                   {(nome || currentUser.nome)?.replace(/["']/g, '') || 'Usuário'} {(sobrenome || currentUser.sobrenome)?.replace(/["']/g, '') || ''}
                 </h1>
                 {currentUser.vipLevel && currentUser.vipLevel !== 'none' && (
                   <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 font-bold text-[10px] uppercase tracking-wider border border-amber-500/20 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
+                    <Sparkle className="w-3 h-3" />
                     VIP {currentUser.vipLevel.replace('vip_', 'Nível ')}
                   </span>
                 )}
@@ -179,7 +175,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
               <div className="text-sm text-[var(--color-on-surface-variant)] font-medium flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3">
                 <div className="flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                  <Envelope className="w-3.5 h-3.5 text-[var(--color-primary)]" />
                   <span>{currentUser.email}</span>
                 </div>
                 {telefone && (
@@ -195,11 +191,11 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
               <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs font-bold">
                 <span className="flex items-center gap-1.5 bg-[#FFF9E6] px-3 py-1.5 rounded-full text-[#D4A017] border border-[#F2D780]/50">
-                  <Award className="w-4 h-4" />
+                  <Medal className="w-4 h-4" />
                   {currentUser.pontosFidelidade || 0} Pontos Fidelidade
                 </span>
                 <span className="flex items-center gap-1.5 bg-[#F0FDF4] px-3 py-1.5 rounded-full text-[#166534] border border-[#BBF7D0]/50">
-                  <ShoppingBag className="w-4 h-4" />
+                  <Tote className="w-4 h-4" />
                   {userOrders.length} {userOrders.length === 1 ? 'Pedido Feito' : 'Pedidos Feitos'}
                 </span>
               </div>
@@ -211,7 +207,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
             onClick={onNavigateToShop}
             className="self-center md:self-auto px-6 py-3 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-sm hover:opacity-90 transition-all shadow-sm flex items-center space-x-2"
           >
-            <ShoppingBag className="w-4 h-4" />
+            <Tote className="w-4 h-4" />
             <span>Ir para o Cardápio</span>
           </button>
         </div>
@@ -238,7 +234,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 <User className="w-4 h-4" />
                 <span>Dados do Perfil</span>
               </div>
-              <ChevronRight className="w-4 h-4 opacity-70" />
+              <CaretRight className="w-4 h-4 opacity-70" />
             </button>
 
             <button
@@ -249,10 +245,10 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 }`}
             >
               <div className="flex items-center space-x-2.5">
-                <ShoppingBag className="w-4 h-4" />
+                <Tote className="w-4 h-4" />
                 <span>Meus Pedidos ({userOrders.length})</span>
               </div>
-              <ChevronRight className="w-4 h-4 opacity-70" />
+              <CaretRight className="w-4 h-4 opacity-70" />
             </button>
 
             <button
@@ -266,7 +262,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 <MapPin className="w-4 h-4" />
                 <span>Endereços de Entrega</span>
               </div>
-              <ChevronRight className="w-4 h-4 opacity-70" />
+              <CaretRight className="w-4 h-4 opacity-70" />
             </button>
 
             <button
@@ -277,10 +273,10 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 }`}
             >
               <div className="flex items-center space-x-2.5">
-                <Award className="w-4 h-4" />
+                <Medal className="w-4 h-4" />
                 <span>Clube de Fidelidade</span>
               </div>
-              <ChevronRight className="w-4 h-4 opacity-70" />
+              <CaretRight className="w-4 h-4 opacity-70" />
             </button>
 
             <button
@@ -294,7 +290,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 <Heart className="w-4 h-4" />
                 <span>Preferências Dietéticas</span>
               </div>
-              <ChevronRight className="w-4 h-4 opacity-70" />
+              <CaretRight className="w-4 h-4 opacity-70" />
             </button>
 
             <button
@@ -308,7 +304,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 <Shield className="w-4 h-4" />
                 <span>Segurança e Avisos</span>
               </div>
-              <ChevronRight className="w-4 h-4 opacity-70" />
+              <CaretRight className="w-4 h-4 opacity-70" />
             </button>
 
             {(currentUser.role === 'admin' || currentUser.role === 'confeiteiro' || currentUser.role === 'atendente') && (
@@ -318,10 +314,10 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                   className="w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all bg-[var(--color-surface-container-low)] text-[var(--color-primary)] hover:bg-[#FCDDD4]/50 border border-[#D9A89B]/30"
                 >
                   <div className="flex items-center space-x-2.5">
-                    <Settings2 className="w-4 h-4" />
+                    <Sliders className="w-4 h-4" />
                     <span>Acessar Painel de Gestão</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 opacity-70" />
+                  <CaretRight className="w-4 h-4 opacity-70" />
                 </button>
               </div>
             )}
@@ -357,11 +353,11 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
               {activeSubTab === 'profile' && (
                 <div className="p-8 rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-6" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.08)' }}>
                   <div className="border-b border-[var(--color-outline-variant)]/30 pb-4">
-                    <h3 className="text-2xl flex items-center gap-2" style={{ fontFamily: '"Libre Caslon Text", serif', color: '#3C2218', fontStyle: 'italic' }}>
+                    <h3 className="text-2xl flex items-center gap-2 text-[var(--color-on-surface)]" style={{ fontFamily: '"Libre Caslon Text", serif', fontStyle: 'italic' }}>
                       <User className="w-6 h-6 text-[var(--color-primary)]" />
                       <span>Informações Pessoais e Foto</span>
                     </h3>
-                    <p className="text-sm text-[var(--color-primary)] mt-1">
+                    <p className="text-sm text-[var(--color-on-surface-variant)] mt-1">
                       Atualize sua foto de perfil e dados de contato para facilitar o atendimento das suas encomendas.
                     </p>
                   </div>
@@ -400,23 +396,23 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                       <div>
-                        <label className="font-bold text-[var(--color-on-surface-variant)] block mb-1.5">Telefone / WhatsApp</label>
+                        <label className="font-bold text-[var(--color-on-surface)] block mb-1.5">Telefone / WhatsApp</label>
                         <input
                           type="tel"
                           value={telefone}
                           onChange={(e) => setTelefone(e.target.value)}
                           placeholder="(11) 99999-9999"
-                          className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-low)]/50 border border-[#FCDDD4] text-[var(--color-on-surface)] font-medium focus:outline-none focus:ring-2 focus:ring-[#D9A89B]"
+                          className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-medium focus:outline-none focus:ring-2 focus:ring-(--color-primary)"
                         />
                       </div>
 
                       <div>
-                        <label className="font-bold text-[var(--color-on-surface-variant)] block mb-1.5">E-mail Cadastrado</label>
+                        <label className="font-bold text-[var(--color-on-surface)] block mb-1.5">E-mail Cadastrado</label>
                         <input
                           type="email"
                           value={currentUser.email}
                           disabled
-                          className="w-full p-3 rounded-2xl bg-[#FCDDD4]/30 opacity-70 border border-[#D9A89B]/20 text-[var(--color-primary)] font-medium cursor-not-allowed"
+                          className="w-full p-3 rounded-2xl bg-[var(--color-surface-container-highest)]/50 opacity-70 border border-(--color-outline-variant)/20 text-[var(--color-on-surface-variant)] font-medium cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -424,7 +420,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                     <div className="pt-4 border-t border-(--color-outline-variant)/20 flex items-center justify-between">
                       {isAutoSaving ? (
                         <span className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 animate-pulse">
-                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <ArrowsClockwise className="w-4 h-4 animate-spin" />
                           <span>Salvando automaticamente...</span>
                         </span>
                       ) : isSaved ? (
@@ -440,7 +436,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                         type="submit"
                         className="px-6 py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-sm flex items-center space-x-2 shadow-sm hover:opacity-95 transition-all min-h-11"
                       >
-                        <Save className="w-4 h-4" />
+                        <FloppyDisk className="w-4 h-4" />
                         <span>Salvar Dados</span>
                       </button>
                     </div>
@@ -454,7 +450,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                   <div className="border-b border-(--color-outline-variant)/20 pb-4 flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-extrabold text-(--color-on-surface) flex items-center gap-2">
-                        <ShoppingBag className="w-5 h-5 text-(--color-primary)" />
+                        <Tote className="w-5 h-5 text-(--color-primary)" />
                         <span>Histórico de Pedidos ({userOrders.length})</span>
                       </h3>
                       <p className="text-xs text-(--color-outline)">
@@ -465,7 +461,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
                   {userOrders.length === 0 ? (
                     <div className="p-10 text-center space-y-3 rounded-3xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/30">
-                      <ShoppingBag className="w-12 h-12 text-(--color-outline) mx-auto opacity-40" />
+                      <Tote className="w-12 h-12 text-(--color-outline) mx-auto opacity-40" />
                       <p className="font-extrabold text-base">Sua conta ainda não possui pedidos.</p>
                       <p className="text-xs text-(--color-outline) max-w-md mx-auto">
                         Nossos chefs e confeiteiros estão prontos para preparar bolos de luxo e doces gourmets excepcionais para você!
@@ -544,14 +540,14 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
 
                           <div className="flex items-center justify-between pt-1">
                             <span className="text-xs font-bold text-(--color-outline)">
-                              Total Pago: <strong className="text-sm text-(--color-on-surface)">R$ {o.total.toFixed(2)}</strong>
+                              Total Pago: <strong className="text-sm text-(--color-on-surface)">{formatCurrency(o.total)}</strong>
                             </span>
 
                             <button
                               onClick={onNavigateToShop}
                               className="px-4 py-2 rounded-xl bg-(--color-surface-container-high) hover:bg-(--color-surface-container-highest) font-extrabold text-xs text-(--color-on-surface) flex items-center space-x-1.5 transition-colors"
                             >
-                              <RefreshCw className="w-3.5 h-3.5 text-(--color-primary)" />
+                              <ArrowsClockwise className="w-3.5 h-3.5 text-(--color-primary)" />
                               <span>Repetir Pedido</span>
                             </button>
                           </div>
@@ -647,7 +643,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                 <div className="p-6 rounded-3xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/30 space-y-6 shadow-xs">
                   <div className="border-b border-(--color-outline-variant)/20 pb-4">
                     <h3 className="text-lg font-extrabold text-(--color-on-surface) flex items-center gap-2">
-                      <Award className="w-5 h-5 text-amber-500" />
+                      <Medal className="w-5 h-5 text-amber-500" />
                       <span>Clube Cloudnine VIP & Recompensas</span>
                     </h3>
                     <p className="text-xs text-(--color-outline)">
