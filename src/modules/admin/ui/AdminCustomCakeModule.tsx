@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CustomCakeConfig } from '@/src/core/types/index';
 import { Box, Typography, Button, TextField, IconButton, Grid, Paper, Divider } from '@mui/material';
-import { Plus, Trash2, Save, Cake, Sparkles } from 'lucide-react';
+import { Plus, Trash, FloppyDisk, Cake, Sparkle } from '@phosphor-icons/react';
 
 interface AdminCustomCakeModuleProps {
   config: CustomCakeConfig;
@@ -69,7 +69,7 @@ export function AdminCustomCakeModule({ config, onUpdateConfig }: AdminCustomCak
               sx={{ width: 120, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
             <IconButton size="small" color="error" onClick={() => handleRemoveItem(category, index)} sx={{ bgcolor: 'error.light', '&:hover': { bgcolor: 'error.main', color: 'white' } }}>
-              <Trash2 className="w-4 h-4" />
+              <Trash className="w-4 h-4" />
             </IconButton>
           </Box>
         ))}
@@ -87,7 +87,7 @@ export function AdminCustomCakeModule({ config, onUpdateConfig }: AdminCustomCak
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 'black', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Sparkles className="w-6 h-6 text-(--color-primary)" />
+            <Sparkle className="w-6 h-6 text-(--color-primary)" />
             Configurador de Bolos
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 600 }}>
@@ -97,7 +97,7 @@ export function AdminCustomCakeModule({ config, onUpdateConfig }: AdminCustomCak
         <Button
           variant="contained"
           onClick={handleSave}
-          startIcon={<Save className="w-4 h-4" />}
+          startIcon={<FloppyDisk className="w-4 h-4" />}
           sx={{ borderRadius: 3, fontWeight: 'bold', px: 4, py: 1.5, boxShadow: 'none' }}
         >
           Salvar Alterações

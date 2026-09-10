@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, QrCode, Shield, Save, Loader2, CheckCircle2, Key, Lock, Zap } from 'lucide-react';
+import { CreditCard, QrCode, Shield, FloppyDisk, Spinner, CheckCircle, Key, Lock, Lightning } from '@phosphor-icons/react';
 import { getStoreConfig, updateStoreConfig } from '@/src/core/services/supabase';
 
 interface AdminPaymentConfigModuleProps {
@@ -64,7 +64,7 @@ export const AdminPaymentConfigModule: React.FC<AdminPaymentConfigModuleProps> =
   if (loading) {
     return (
       <div className="flex justify-center items-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+        <Spinner className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
       </div>
     );
   }
@@ -157,7 +157,7 @@ export const AdminPaymentConfigModule: React.FC<AdminPaymentConfigModuleProps> =
         <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-5 shadow-xs">
           <div className="flex items-center justify-between pb-2 border-b border-[var(--color-outline-variant)]/20">
             <h4 className="font-extrabold text-base text-[var(--color-on-surface)] flex items-center gap-2">
-              <Zap className="w-5 h-5 text-sky-600" />
+              <Lightning className="w-5 h-5 text-sky-600" />
               Credenciais Mercado Pago (Cartão & Pix Automático)
             </h4>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -167,7 +167,7 @@ export const AdminPaymentConfigModule: React.FC<AdminPaymentConfigModuleProps> =
                 onChange={(e) => setMpAtivo(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-surface-container-lowest)] after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
               <span className="ml-3 text-xs font-extrabold text-[var(--color-on-surface)]">
                 {mpAtivo ? 'Ativo' : 'Inativo'}
               </span>
@@ -219,7 +219,7 @@ export const AdminPaymentConfigModule: React.FC<AdminPaymentConfigModuleProps> =
             disabled={saving}
             className="px-8 py-4 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-black text-sm shadow-md hover:opacity-90 flex items-center gap-2.5 min-h-[52px] cursor-pointer disabled:opacity-60"
           >
-            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+            {saving ? <Spinner className="w-5 h-5 animate-spin" /> : <FloppyDisk className="w-5 h-5" />}
             <span>Salvar Configurações de Pagamento</span>
           </button>
         </div>

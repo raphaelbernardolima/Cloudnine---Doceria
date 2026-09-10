@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Modal, IconButton, TextField, Button, InputAdornment, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import { X, Save, DollarSign, TrendingUp } from 'lucide-react';
+import { X, FloppyDisk, CurrencyDollar, TrendUp } from '@phosphor-icons/react';
 import { Ingredient } from '@/src/core/types/index';
 
 interface AdminQuickPriceModalProps {
@@ -85,7 +85,7 @@ export const AdminQuickPriceModal: React.FC<AdminQuickPriceModalProps> = ({
         <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'outlineVariant', display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'surfaceContainerLow' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, bgcolor: 'secondary.main', borderRadius: 2, color: 'secondary.contrastText' }}>
-              <TrendingUp className="w-5 h-5" />
+              <TrendUp className="w-5 h-5" />
             </Box>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Atualização Rápida de Preços</Typography>
@@ -147,7 +147,7 @@ export const AdminQuickPriceModal: React.FC<AdminQuickPriceModalProps> = ({
                           onChange={e => handlePriceChange(ing.id, 'preco_embalagem', e.target.value)}
                           slotProps={{
                             input: {
-                              startAdornment: <InputAdornment position="start"><DollarSign className="w-3 h-3"/></InputAdornment>,
+                              startAdornment: <InputAdornment position="start"><CurrencyDollar className="w-3 h-3"/></InputAdornment>,
                             }
                           }}
                           sx={{ width: 120, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
@@ -155,7 +155,7 @@ export const AdminQuickPriceModal: React.FC<AdminQuickPriceModalProps> = ({
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 'black', color: 'primary.main' }}>
-                          R$ {currentUnitCost.toFixed(4)} / {ing.unidadeMedida}
+                          {formatCurrency(currentUnitCost)} / {ing.unidadeMedida}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -171,7 +171,7 @@ export const AdminQuickPriceModal: React.FC<AdminQuickPriceModalProps> = ({
           <Button variant="outlined" onClick={onClose} sx={{ borderRadius: 2, fontWeight: 'bold', px: 4 }}>
             Cancelar
           </Button>
-          <Button variant="contained" color="secondary" onClick={handleSave} startIcon={<Save className="w-4 h-4" />} sx={{ borderRadius: 2, fontWeight: 'bold', px: 4, boxShadow: 'none' }}>
+          <Button variant="contained" color="secondary" onClick={handleSave} startIcon={<FloppyDisk className="w-4 h-4" />} sx={{ borderRadius: 2, fontWeight: 'bold', px: 4, boxShadow: 'none' }}>
             Atualizar Custos
           </Button>
         </Box>
