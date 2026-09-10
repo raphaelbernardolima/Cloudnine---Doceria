@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Truck, MapPin, DollarSign, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Truck, MapPin, CurrencyDollar, CheckCircle, CaretDown } from '@phosphor-icons/react';
 import { Order, Driver } from '@/src/core/types/index';
 
 interface AdminDeliveryModuleProps {
@@ -51,7 +51,7 @@ export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders
                   >
                     <option value="">Atribuir Motoboy...</option>
                     {drivers.filter(d => d.status !== 'indisponivel').map(d => (
-                      <option key={d.id} value={d.id}>{d.nome} (R$ {d.taxaPorEntrega.toFixed(2)})</option>
+                      <option key={d.id} value={d.id}>{d.nome} ({formatCurrency(d.taxaPorEntrega)})</option>
                     ))}
                   </select>
 
@@ -68,7 +68,7 @@ export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders
                       onClick={() => onUpdateOrderStatus(o.id, 'entregue')}
                       className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold text-xs hover:bg-emerald-700 transition-colors flex items-center gap-1"
                     >
-                      <CheckCircle2 className="w-4 h-4" /> Concluir
+                      <CheckCircle className="w-4 h-4" /> Concluir
                     </button>
                   )}
                 </div>
@@ -94,7 +94,7 @@ export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders
                 </div>
                 <div className="flex justify-between text-xs text-(--color-outline)">
                   <span>{d.pedidosEntregues} entregas hj</span>
-                  <span className="font-black text-emerald-600 flex items-center gap-0.5"><DollarSign className="w-3 h-3" /> {d.totalGanhos.toFixed(2)}</span>
+                  <span className="font-black text-emerald-600 flex items-center gap-0.5"><CurrencyDollar className="w-3 h-3" /> {d.totalGanhos.toFixed(2)}</span>
                 </div>
               </div>
             ))}

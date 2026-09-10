@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  TrendingUp, TrendingDown, DollarSign, Download, PieChart, Activity, AlertCircle, Package, ArrowUpRight, BarChart3, Calculator, Calendar
-} from 'lucide-react';
+import { TrendUp, TrendDown, CurrencyDollar, DownloadSimple, ChartPieSlice, ChartLineUp, WarningCircle, Package, ArrowUpRight, ChartBar, Calculator, Calendar } from '@phosphor-icons/react';
 import { Product, Order, Ingredient } from '@/src/core/types/index';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -201,7 +199,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--color-surface-container-lowest)] p-5 rounded-3xl border border-[var(--color-outline-variant)]/30">
         <div>
           <h2 className="font-black text-2xl text-[var(--color-on-surface)] flex items-center gap-2">
-            <BarChart3 className="w-7 h-7 text-[var(--color-primary)]" />
+            <ChartBar className="w-7 h-7 text-[var(--color-primary)]" />
             Business Intelligence
           </h2>
           <p className="text-sm text-[var(--color-outline)] mt-1">Análise de rentabilidade, CMV e projeções financeiras.</p>
@@ -221,7 +219,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
             onClick={handleExportExcel}
             className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-on-primary)] rounded-xl font-bold text-sm flex items-center gap-2 hover:opacity-90 shadow-lg shadow-[var(--color-primary)]/20 transition-all"
           >
-            <Download className="w-4 h-4" />
+            <DownloadSimple className="w-4 h-4" />
             <span className="hidden sm:inline">Exportar Excel</span>
           </button>
         </div>
@@ -235,7 +233,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
             <span className="text-xs uppercase font-extrabold text-[var(--color-outline)] tracking-wider block mb-1">Receita Líquida (Pós Taxas)</span>
             <span className="text-3xl font-black text-[var(--color-on-surface)]">{formatBRL(financeData.netRevenue)}</span>
             <span className="text-xs font-semibold flex items-center gap-1 text-emerald-500 pt-2">
-              <TrendingUp className="w-3.5 h-3.5" /> Faturamento Realizado
+              <TrendUp className="w-3.5 h-3.5" /> Faturamento Realizado
             </span>
           </div>
         </div>
@@ -269,7 +267,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
             <span className="text-3xl font-black">{financeData.breakEvenProgress.toFixed(1)}%</span>
             
             <div className="w-full bg-black/20 rounded-full h-1.5 mt-3 mb-1">
-              <div className="bg-white h-1.5 rounded-full" style={{ width: `${financeData.breakEvenProgress}%` }}></div>
+              <div className="bg-[var(--color-surface-container-lowest)] h-1.5 rounded-full" style={{ width: `${financeData.breakEvenProgress}%` }}></div>
             </div>
             
             <span className="text-[10px] font-semibold text-white/80">
@@ -283,7 +281,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
         {/* Curva ABC (Gráfico Bolhas) */}
         <div className="bg-[var(--color-surface-container-lowest)] p-6 rounded-3xl border border-[var(--color-outline-variant)]/30 shadow-sm flex flex-col h-[400px]">
           <h3 className="font-bold text-base text-[var(--color-on-surface)] flex items-center gap-2 mb-4">
-            <Activity className="w-5 h-5 text-purple-500" />
+            <ChartLineUp className="w-5 h-5 text-purple-500" />
             Matriz BCG (Volume vs Margem)
           </h3>
           <div className="flex-1 min-h-[250px]">
@@ -320,7 +318,7 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
         {/* Fluxo de Caixa (Gráfico de Área) */}
         <div className="bg-[var(--color-surface-container-lowest)] p-6 rounded-3xl border border-[var(--color-outline-variant)]/30 shadow-sm flex flex-col h-[400px]">
           <h3 className="font-bold text-base text-[var(--color-on-surface)] flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-emerald-500" />
+            <TrendUp className="w-5 h-5 text-emerald-500" />
             Fluxo de Receita Diário
           </h3>
           <div className="flex-1 min-h-[250px]">
@@ -352,36 +350,36 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
             <Package className="w-5 h-5 text-[var(--color-primary)]" />
             DRE Simplificado (Demonstração do Resultado)
          </h3>
-         <div className="overflow-x-auto">
-           <table className="w-full text-left text-sm">
-             <tbody className="divide-y divide-[var(--color-outline-variant)]/20">
-               <tr className="hover:bg-[var(--color-surface-container-low)] transition-colors">
-                 <td className="py-3 px-4 font-bold text-[var(--color-on-surface)]">Faturamento Bruto (Total Pedidos)</td>
-                 <td className="py-3 px-4 text-right font-bold text-[var(--color-primary)]">{formatBRL(financeData.rawRevenue)}</td>
+         <div className="rounded-2xl sm:border border-[var(--color-outline-variant)]/20">
+           <table className="w-full text-left text-sm block sm:table">
+             <tbody className="block sm:table-row-group divide-y divide-[var(--color-outline-variant)]/20">
+               <tr className="block sm:table-row hover:bg-[var(--color-surface-container-low)] transition-colors p-4 sm:p-0">
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 font-bold text-[var(--color-on-surface)]">Faturamento Bruto (Total Pedidos)</td>
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 text-left sm:text-right font-bold text-[var(--color-primary)]">{formatBRL(financeData.rawRevenue)}</td>
                </tr>
-               <tr className="hover:bg-[var(--color-surface-container-low)] transition-colors text-rose-500">
-                 <td className="py-3 px-4 pl-8">(-) Taxas de Pagamento (PIX, Crédito, Débito)</td>
-                 <td className="py-3 px-4 text-right">- {formatBRL(financeData.rawRevenue - financeData.netRevenue)}</td>
+               <tr className="block sm:table-row hover:bg-[var(--color-surface-container-low)] transition-colors text-rose-500 p-4 sm:p-0">
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 sm:pl-8">(-) Taxas de Pagamento (PIX, Crédito, Débito)</td>
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 text-left sm:text-right">- {formatBRL(financeData.rawRevenue - financeData.netRevenue)}</td>
                </tr>
-               <tr className="hover:bg-[var(--color-surface-container-low)] transition-colors bg-[var(--color-surface-container-high)]/30">
-                 <td className="py-3 px-4 font-black text-[var(--color-on-surface)]">Receita Líquida</td>
-                 <td className="py-3 px-4 text-right font-black">{formatBRL(financeData.netRevenue)}</td>
+               <tr className="block sm:table-row hover:bg-[var(--color-surface-container-low)] transition-colors bg-[var(--color-surface-container-high)]/30 p-4 sm:p-0">
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 font-black text-[var(--color-on-surface)]">Receita Líquida</td>
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 text-left sm:text-right font-black">{formatBRL(financeData.netRevenue)}</td>
                </tr>
-               <tr className="hover:bg-[var(--color-surface-container-low)] transition-colors text-rose-500">
-                 <td className="py-3 px-4 pl-8">(-) CMV (Custo das Fichas Técnicas dos Insumos)</td>
-                 <td className="py-3 px-4 text-right">- {formatBRL(financeData.totalCMV)}</td>
+               <tr className="block sm:table-row hover:bg-[var(--color-surface-container-low)] transition-colors text-rose-500 p-4 sm:p-0">
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 sm:pl-8">(-) CMV (Custo das Fichas Técnicas dos Insumos)</td>
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 text-left sm:text-right">- {formatBRL(financeData.totalCMV)}</td>
                </tr>
-               <tr className="hover:bg-[var(--color-surface-container-low)] transition-colors bg-[var(--color-surface-container-high)]/30">
-                 <td className="py-3 px-4 font-black text-[var(--color-on-surface)]">Margem de Contribuição (Lucro Bruto)</td>
-                 <td className="py-3 px-4 text-right font-black text-emerald-500">{formatBRL(financeData.grossMargin)} ({financeData.grossMarginPercent.toFixed(1)}%)</td>
+               <tr className="block sm:table-row hover:bg-[var(--color-surface-container-low)] transition-colors bg-[var(--color-surface-container-high)]/30 p-4 sm:p-0">
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 font-black text-[var(--color-on-surface)]">Margem de Contribuição (Lucro Bruto)</td>
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 text-left sm:text-right font-black text-emerald-500">{formatBRL(financeData.grossMargin)} ({financeData.grossMarginPercent.toFixed(1)}%)</td>
                </tr>
-               <tr className="hover:bg-[var(--color-surface-container-low)] transition-colors text-rose-500">
-                 <td className="py-3 px-4 pl-8">(-) Custos Fixos (Estimado Mês)</td>
-                 <td className="py-3 px-4 text-right">- {formatBRL(FIXED_COSTS)}</td>
+               <tr className="block sm:table-row hover:bg-[var(--color-surface-container-low)] transition-colors text-rose-500 p-4 sm:p-0">
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 sm:pl-8">(-) Custos Fixos (Estimado Mês)</td>
+                 <td className="block sm:table-cell py-1 sm:py-3 px-0 sm:px-4 text-left sm:text-right">- {formatBRL(FIXED_COSTS)}</td>
                </tr>
-               <tr className="hover:bg-[var(--color-primary)]/10 transition-colors bg-[var(--color-primary)]/5">
-                 <td className="py-4 px-4 font-black text-lg text-[var(--color-on-surface)]">Resultado Operacional (EBITDA)</td>
-                 <td className={`py-4 px-4 text-right font-black text-lg ${financeData.ebitda >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+               <tr className="block sm:table-row hover:bg-[var(--color-primary)]/10 transition-colors bg-[var(--color-primary)]/5 p-4 sm:p-0">
+                 <td className="block sm:table-cell py-2 sm:py-4 px-0 sm:px-4 font-black text-lg text-[var(--color-on-surface)]">Resultado Operacional (EBITDA)</td>
+                 <td className={`block sm:table-cell py-1 sm:py-4 px-0 sm:px-4 text-left sm:text-right font-black text-lg ${financeData.ebitda >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                    {formatBRL(financeData.ebitda)}
                  </td>
                </tr>
