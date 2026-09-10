@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Typography } from '@mui/material';
-import { Cake } from 'lucide-react';
+import { Cake } from '@phosphor-icons/react';
 
 interface SplashScreenProps {
   onFinish?: () => void;

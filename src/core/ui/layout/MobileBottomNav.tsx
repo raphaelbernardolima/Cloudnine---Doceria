@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, BottomNavigation, BottomNavigationAction } from '@mui/material';
-import { ShoppingBag, User, Sparkles, Store } from 'lucide-react';
+import { Tote, User, Sparkle, Storefront } from '@phosphor-icons/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MobileBottomNavProps {
@@ -46,6 +46,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         }}
         sx={{
           bgcolor: 'surfaceContainerLow',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          height: 'calc(56px + env(safe-area-inset-bottom))',
           '& .MuiBottomNavigationAction-root': {
             color: 'text.secondary',
             '&.Mui-selected': {
@@ -54,10 +56,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           }
         }}
       >
-        <BottomNavigationAction label="Cardápio" icon={<ShoppingBag className="w-5 h-5" />} />
-        <BottomNavigationAction label="Montar Bolo" icon={<Sparkles className="w-5 h-5" />} />
+        <BottomNavigationAction label="Cardápio" icon={<Tote className="w-5 h-5" />} />
+        <BottomNavigationAction label="Montar Bolo" icon={<Sparkle className="w-5 h-5" />} />
         <BottomNavigationAction label="Meu Perfil" icon={<User className="w-5 h-5" />} />
-        <BottomNavigationAction label="Sobre Nós" icon={<Store className="w-5 h-5" />} />
+        <BottomNavigationAction label="Sobre Nós" icon={<Storefront className="w-5 h-5" />} />
       </BottomNavigation>
     </Paper>
   );
