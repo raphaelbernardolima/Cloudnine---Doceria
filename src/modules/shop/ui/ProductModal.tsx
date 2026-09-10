@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Product } from '@/src/core/types/index';
 import { Box, Typography, Button, IconButton, TextField, Dialog, DialogContent, DialogTitle, DialogActions, Stack, Chip, Divider, alpha } from '@mui/material';
-import { X, Plus, Minus, ShoppingBag, Flame } from 'lucide-react';
+import { X, Plus, Minus, Tote, Fire } from '@phosphor-icons/react';
 
 interface ProductModalProps {
   product: Product;
@@ -73,7 +73,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               {product.nome}
             </Typography>
           </Box>
-          <IconButton onClick={onClose} sx={{ display: { xs: 'none', md: 'flex' } }}>
+          <IconButton aria-label="Fechar modal" onClick={onClose} sx={{ display: { xs: 'none', md: 'flex' } }}>
             <X className="w-5 h-5" />
           </IconButton>
         </DialogTitle>
@@ -81,7 +81,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
         <DialogContent sx={{ flexGrow: 1 }}>
           <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
             {product.is_best_seller && (
-              <Chip icon={<Flame className="w-4 h-4" />} label="Bestseller" size="small" color="warning" variant="outlined" />
+              <Chip icon={<Fire className="w-4 h-4" />} label="Bestseller" size="small" color="warning" variant="outlined" />
             )}
             {product.is_gluten_free && (
               <Chip label="Sem Glúten" size="small" color="success" variant="outlined" />
@@ -93,7 +93,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
           </Typography>
 
           <Typography variant="h4" color="primary.main" sx={{ fontWeight: 700, mb: 4 }}>
-            R$ {product.preco.toFixed(2).replace('.', ',')}
+            {formatCurrency(product.preco)}
           </Typography>
 
           <Divider sx={{ mb: 4 }} />
@@ -107,8 +107,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             fullWidth
             placeholder="Ex: Sem granulado, enviar para presente..."
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(e) => setNote(e.target.value.slice(0, 200))}
             variant="outlined"
+            slotProps={{ htmlInput: { maxLength: 200 } }}
+            helperText={`${note.length}/200 caracteres`}
             sx={{ mb: 3 }}
           />
 
@@ -134,13 +136,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             p: 0.5, 
             shrink: 0 
           }}>
-            <IconButton onClick={() => setQuantity(Math.max(1, quantity - 1))} size="small">
+            <IconButton aria-label="Diminuir quantidade" onClick={() => setQuantity(Math.max(1, quantity - 1))} size="small">
               <Minus className="w-4 h-4" />
             </IconButton>
             <Typography variant="body2" sx={{ fontWeight: 700, px: 2, minWidth: '2ch', textAlign: 'center' }}>
               {quantity}
             </Typography>
-            <IconButton onClick={() => setQuantity(quantity + 1)} size="small">
+            <IconButton aria-label="Aumentar quantidade" onClick={() => setQuantity(quantity + 1)} size="small">
               <Plus className="w-4 h-4" />
             </IconButton>
           </Box>
@@ -149,10 +151,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             fullWidth 
             size="large"
             onClick={handleAdd}
-            startIcon={<ShoppingBag className="w-5 h-5" />}
+            startIcon={<Tote className="w-5 h-5" />}
             sx={{ flexGrow: 1 }}
           >
-            Adicionar R$ {(product.preco * quantity).toFixed(2).replace('.', ',')}
+            Adicionar {formatCurrency(product.preco * quantity)}
           </Button>
         </DialogActions>
       </Box>

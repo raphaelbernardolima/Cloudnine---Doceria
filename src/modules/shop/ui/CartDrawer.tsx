@@ -1,12 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-  X,
-  Trash2,
-  ShoppingBag,
-  ChevronRight,
-  Cake,
-  Tag
-} from 'lucide-react';
+import { X, Trash, Tote, CaretRight, Cake, Tag } from '@phosphor-icons/react';
 import { CartItem, Order } from '@/src/core/types/index';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/src/core/store/useCartStore';
@@ -68,10 +61,10 @@ export const CartDrawer: React.FC = () => {
         <div className="px-5 py-4 bg-[#FDF2F0] dark:bg-[#2A201F] border-b border-rose-100 dark:border-neutral-800 flex items-center justify-between shadow-xs">
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-full bg-rose-200/60 dark:bg-rose-900/40 flex items-center justify-center text-rose-800 dark:text-rose-200">
-              <ShoppingBag className="w-4 h-4" />
+              <Tote className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-bold text-base text-[#3C2218] dark:text-rose-100 leading-tight">
+              <h2 className="font-bold text-base text-[var(--color-on-surface)] dark:text-rose-100 leading-tight">
                 Sua Sacola
               </h2>
               {items.length > 0 && (
@@ -84,7 +77,7 @@ export const CartDrawer: React.FC = () => {
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-rose-100/70 hover:bg-rose-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-[#3C2218] dark:text-[#E8DFDC] flex items-center justify-center transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full bg-rose-100/70 hover:bg-rose-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-[var(--color-on-surface)] dark:text-[#E8DFDC] flex items-center justify-center transition-all cursor-pointer"
             aria-label="Fechar sacola"
             title="Fechar sacola"
           >
@@ -97,10 +90,10 @@ export const CartDrawer: React.FC = () => {
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 my-10 px-4">
               <div className="w-20 h-20 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 flex items-center justify-center shadow-inner">
-                <ShoppingBag className="w-10 h-10 stroke-[1.5]" />
+                <Tote className="w-10 h-10 stroke-[1.5]" />
               </div>
               <div className="space-y-1">
-                <p className="font-bold text-lg text-[#3C2218] dark:text-rose-100">Sua sacola está vazia</p>
+                <p className="font-bold text-lg text-[var(--color-on-surface)] dark:text-rose-100">Sua sacola está vazia</p>
                 <p className="text-xs text-[#7A6C68] dark:text-[#B5A5A2] max-w-xs mx-auto leading-relaxed">
                   Escolha alguns dos nossos deliciosos brigadeiros, macarons e bolos artesanais no cardápio!
                 </p>
@@ -126,11 +119,15 @@ export const CartDrawer: React.FC = () => {
                       <img
                         src={item.product?.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=200'}
                         alt="Item"
+                        onError={(e: any) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=200';
+                        }}
                         className="w-14 h-14 rounded-xl object-cover border border-rose-100 dark:border-neutral-700 shrink-0"
                         referrerPolicy="no-referrer"
                       />
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-sm text-[#3C2218] dark:text-rose-100 truncate">
+                        <h4 className="font-bold text-sm text-[var(--color-on-surface)] dark:text-rose-100 truncate">
                           {item.product?.nome || (item.customCake ? `Bolo ${item.customCake.tamanho}` : 'Doce Especial')}
                         </h4>
                         {item.customCake && (
@@ -144,7 +141,7 @@ export const CartDrawer: React.FC = () => {
                           </p>
                         )}
                         <span className="font-extrabold text-sm text-[#9E2A2B] dark:text-rose-300 block mt-1">
-                          R$ {(item.unitPrice * item.quantity).toFixed(2).replace('.', ',')}
+                          {formatCurrency(item.unitPrice * item.quantity)}
                         </span>
                       </div>
                     </div>
@@ -159,7 +156,7 @@ export const CartDrawer: React.FC = () => {
                         >
                           -
                         </button>
-                        <span className="font-bold text-sm px-1.5 min-w-5 text-center text-[#3C2218] dark:text-rose-100">
+                        <span className="font-bold text-sm px-1.5 min-w-5 text-center text-[var(--color-on-surface)] dark:text-rose-100">
                           {item.quantity}
                         </span>
                         <button
@@ -172,12 +169,16 @@ export const CartDrawer: React.FC = () => {
                       </div>
 
                       <button
-                        onClick={() => onRemoveItem(item.id)}
+                        onClick={() => {
+                          if (window.confirm('Tem certeza que deseja remover este item da sacola?')) {
+                            onRemoveItem(item.id);
+                          }
+                        }}
                         className="p-1.5 rounded-xl text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors"
                         title="Remover da sacola"
                         aria-label="Remover item"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -213,24 +214,24 @@ export const CartDrawer: React.FC = () => {
 
         {/* Footer Summary & Action Button */}
         {items.length > 0 && (
-          <div className="p-5 bg-[#FDF2F0] dark:bg-[#261D1C] border-t border-rose-100 dark:border-neutral-800 space-y-3 shadow-lg">
+          <div className="p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] bg-[#FDF2F0] dark:bg-[#261D1C] border-t border-rose-100 dark:border-neutral-800 space-y-3 shadow-lg">
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between text-[#7A6C68] dark:text-[#B5A5A2]">
                 <span>Subtotal ({totalQuantity} {totalQuantity === 1 ? 'item' : 'itens'})</span>
-                <span className="font-semibold">R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                <span className="font-semibold">{formatCurrency(subtotal)}</span>
               </div>
 
               {appliedDiscount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-bold">
                   <span>Desconto de Cupom</span>
-                  <span>- R$ {appliedDiscount.toFixed(2).replace('.', ',')}</span>
+                  <span>- {formatCurrency(appliedDiscount)}</span>
                 </div>
               )}
 
-              <div className="flex justify-between items-baseline font-black text-base text-[#3C2218] dark:text-rose-100 pt-2 border-t border-rose-200/50 dark:border-neutral-700">
+              <div className="flex justify-between items-baseline font-black text-base text-[var(--color-on-surface)] dark:text-rose-100 pt-2 border-t border-rose-200/50 dark:border-neutral-700">
                 <span>Total Final</span>
                 <span className="text-xl text-[#9E2A2B] dark:text-rose-300 font-extrabold">
-                  R$ {totalFinal.toFixed(2).replace('.', ',')}
+                  {formatCurrency(totalFinal)}
                 </span>
               </div>
             </div>
@@ -241,7 +242,7 @@ export const CartDrawer: React.FC = () => {
               className="w-full py-3.5 px-5 rounded-full font-bold text-sm flex items-center justify-center space-x-2 shadow-md bg-[#9E2A2B] hover:bg-[#831F20] text-white transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
             >
               <span>Avançar para Identificação</span>
-              <ChevronRight className="w-5 h-5" />
+              <CaretRight className="w-5 h-5" />
             </button>
           </div>
         )}

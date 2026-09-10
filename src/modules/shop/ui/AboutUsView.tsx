@@ -1,6 +1,6 @@
 import React from 'react';
 import { SEO } from '@/src/core/ui/shared/SEO';
-import { Store, MapPin, Phone, Clock, Mail } from 'lucide-react';
+import { Storefront, MapPin, Phone, Clock, Envelope } from '@phosphor-icons/react';
 import { Box, Typography } from '@mui/material';
 import { useDataStore } from '@/src/core/store/useDataStore';
 
@@ -48,7 +48,7 @@ export function AboutUsView() {
       {/* Nossa História */}
       <Box sx={{ px: { xs: 1, sm: 0 } }}>
         <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Store className="w-6 h-6 text-[var(--color-primary)]" />
+          <Storefront className="w-6 h-6 text-[var(--color-primary)]" />
           Nossa História
         </Typography>
         <Typography variant="body1" sx={{ color: 'text.secondary', whiteSpace: 'pre-line', lineHeight: 1.8 }}>
@@ -80,7 +80,7 @@ export function AboutUsView() {
               {storePhone}
             </Typography>
             <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 2, color: 'text.secondary' }}>
-              <Mail className="w-4 h-4 text-[var(--color-outline)]" />
+              <Envelope className="w-4 h-4 text-[var(--color-outline)]" />
               contato@cloudninedoceria.com.br
             </Typography>
           </Box>
