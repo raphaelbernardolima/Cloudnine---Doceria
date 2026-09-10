@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile } from '@/src/core/types/index';
-import { Search, Edit, User, Shield, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { MagnifyingGlass, Pencil, User, Shield, CheckCircle, WarningCircle, X } from '@phosphor-icons/react';
 
 interface AdminStaffModuleProps {
   staffList: UserProfile[];
@@ -42,12 +42,12 @@ export const AdminStaffModule: React.FC<AdminStaffModuleProps> = ({ staffList, o
     'LIMPEZA': { label: 'Limpeza', color: 'bg-sky-500 text-white' },
     'ATENDIMENTO': { label: 'Atendimento', color: 'bg-indigo-500 text-white' },
     'atendente': { label: 'Atendimento', color: 'bg-indigo-500 text-white' },
-    'USUARIO_PADRAO': { label: 'Usuário Padrão', color: 'bg-gray-500 text-white' },
-    'cliente': { label: 'Cliente', color: 'bg-gray-500 text-white' }
+    'USUARIO_PADRAO': { label: 'Usuário Padrão', color: 'bg-[var(--color-surface-container-low)]0 text-white' },
+    'cliente': { label: 'Cliente', color: 'bg-[var(--color-surface-container-low)]0 text-white' }
   };
 
   const renderRoleBadge = (role: string) => {
-    const config = roleLabels[role] || { label: role, color: 'bg-gray-500 text-white' };
+    const config = roleLabels[role] || { label: role, color: 'bg-[var(--color-surface-container-low)]0 text-white' };
     return (
       <span className={`px-2 py-1 rounded-full text-sm font-bold uppercase tracking-wider ${config.color}`}>
         {config.label}
@@ -70,7 +70,7 @@ export const AdminStaffModule: React.FC<AdminStaffModuleProps> = ({ staffList, o
           </div>
           
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-outline)]" />
+            <MagnifyingGlass className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-outline)]" />
             <input 
               type="text" 
               placeholder="Buscar por nome ou e-mail..." 
@@ -81,9 +81,9 @@ export const AdminStaffModule: React.FC<AdminStaffModuleProps> = ({ staffList, o
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-[var(--color-outline-variant)]/20">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[var(--color-surface-container-low)]">
+        <div className="rounded-2xl sm:border border-[var(--color-outline-variant)]/20">
+          <table className="w-full text-left text-xs block sm:table">
+            <thead className="hidden sm:table-header-group bg-[var(--color-surface-container-low)]">
               <tr className="text-[var(--color-outline)] uppercase font-bold text-sm">
                 <th className="py-3 px-4 rounded-tl-2xl">Funcionário</th>
                 <th className="py-3 px-4">Função (Role)</th>
@@ -91,43 +91,43 @@ export const AdminStaffModule: React.FC<AdminStaffModuleProps> = ({ staffList, o
                 <th className="py-3 px-4 text-right rounded-tr-2xl">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--color-outline-variant)]/10">
+            <tbody className="block sm:table-row-group space-y-4 sm:space-y-0 sm:divide-y divide-[var(--color-outline-variant)]/10">
               {filteredStaff.map((user) => (
-                <tr key={user.id} className="hover:bg-[var(--color-surface-container-low)] transition-colors">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center space-x-3">
+                <tr key={user.id} className="block sm:table-row bg-[var(--color-surface-container-lowest)] sm:bg-transparent rounded-2xl border sm:border-0 border-[var(--color-outline-variant)]/20 shadow-xs sm:shadow-none p-4 sm:p-0 hover:bg-[var(--color-surface-container-low)] transition-colors">
+                  <td className="flex sm:table-cell justify-between items-center py-2 sm:py-3 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]/10 before:content-['Funcionário'] before:sm:hidden before:font-bold before:text-[var(--color-on-surface-variant)]">
+                    <div className="flex items-center space-x-3 text-right sm:text-left">
                       <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 font-bold shrink-0">
                         {user.nome.charAt(0).toUpperCase()}
                       </div>
-                      <div>
+                      <div className="text-right sm:text-left">
                         <p className="font-bold text-[var(--color-on-surface)]">{user.nome} {user.sobrenome}</p>
-                        <p className="text-sm text-[var(--color-outline)]">{user.email}</p>
+                        <p className="text-xs sm:text-sm text-[var(--color-outline)]">{user.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="flex sm:table-cell justify-between items-center py-2 sm:py-3 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]/10 before:content-['Função'] before:sm:hidden before:font-bold before:text-[var(--color-on-surface-variant)]">
                     {renderRoleBadge(user.role)}
                   </td>
-                  <td className="py-3 px-4">
-                    <span className={`flex items-center gap-1.5 text-sm font-bold ${user.Status === 'ativo' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      {user.Status === 'ativo' ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                  <td className="flex sm:table-cell justify-between items-center py-2 sm:py-3 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]/10 before:content-['Status'] before:sm:hidden before:font-bold before:text-[var(--color-on-surface-variant)]">
+                    <span className={`flex items-center gap-1.5 text-xs sm:text-sm font-bold ${user.Status === 'ativo' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {user.Status === 'ativo' ? <CheckCircle className="w-3 h-3" /> : <WarningCircle className="w-3 h-3" />}
                       {user.Status.toUpperCase()}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-right">
+                  <td className="flex sm:table-cell justify-between items-center py-3 sm:py-3 px-0 sm:px-4 text-right sm:border-b border-[var(--color-outline-variant)]/10 before:content-['Ações'] before:sm:hidden before:font-bold before:text-[var(--color-on-surface-variant)] border-t border-[var(--color-outline-variant)]/10 sm:border-t-0 mt-2 sm:mt-0 pt-3 sm:pt-3">
                     <button 
                       onClick={() => handleEditClick(user)}
-                      className="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 font-bold flex items-center space-x-1.5 ml-auto transition-colors"
+                      className="px-4 py-2 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 font-bold flex items-center space-x-1.5 sm:ml-auto transition-colors"
                     >
-                      <Edit className="w-3.5 h-3.5" />
+                      <Pencil className="w-3.5 h-3.5" />
                       <span>Editar</span>
                     </button>
                   </td>
                 </tr>
               ))}
               {filteredStaff.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-8 text-center text-xs text-[var(--color-outline)]">
+                <tr className="block sm:table-row">
+                  <td colSpan={4} className="block sm:table-cell py-8 px-4 text-center text-xs text-[var(--color-outline)]">
                     Nenhum funcionário encontrado.
                   </td>
                 </tr>
@@ -139,7 +139,7 @@ export const AdminStaffModule: React.FC<AdminStaffModuleProps> = ({ staffList, o
 
       {/* Edit Role Modal */}
       {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="w-full max-w-sm bg-[var(--color-surface)] p-6 rounded-3xl space-y-6 shadow-2xl border border-[var(--color-outline-variant)]/40 animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-start">
               <div>
@@ -205,7 +205,7 @@ export const AdminStaffModule: React.FC<AdminStaffModuleProps> = ({ staffList, o
 
       {/* Notification Toast */}
       {toastMessage && (
-        <div className="fixed bottom-4 right-4 z-[100] bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
+        <div className="fixed bottom-4 right-4 z-[9999] bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
           <CheckCircle className="w-5 h-5" />
           <p className="text-xs font-bold">{toastMessage}</p>
         </div>

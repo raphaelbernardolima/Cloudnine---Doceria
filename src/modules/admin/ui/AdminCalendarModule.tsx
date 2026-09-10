@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, Package, ChevronLeft, ChevronRight, X, Phone, User } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Package, CaretLeft, CaretRight, X, Phone, User } from '@phosphor-icons/react';
 import { Order } from '@/src/core/types/index';
 
 interface AdminCalendarModuleProps {
@@ -31,11 +31,11 @@ export const AdminCalendarModule: React.FC<AdminCalendarModuleProps> = ({ orders
           Calendário de Encomendas
         </h3>
         <div className="flex items-center gap-3">
-          <button onClick={prevMonth} className="p-2 bg-[var(--color-surface-container)] rounded-xl hover:bg-[var(--color-surface-container-high)] transition-colors"><ChevronLeft className="w-5 h-5" /></button>
+          <button onClick={prevMonth} className="p-2 bg-[var(--color-surface-container)] rounded-xl hover:bg-[var(--color-surface-container-high)] transition-colors"><CaretLeft className="w-5 h-5" /></button>
           <span className="font-black text-sm sm:text-base text-[var(--color-on-surface)] w-36 text-center">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </span>
-          <button onClick={nextMonth} className="p-2 bg-[var(--color-surface-container)] rounded-xl hover:bg-[var(--color-surface-container-high)] transition-colors"><ChevronRight className="w-5 h-5" /></button>
+          <button onClick={nextMonth} className="p-2 bg-[var(--color-surface-container)] rounded-xl hover:bg-[var(--color-surface-container-high)] transition-colors"><CaretRight className="w-5 h-5" /></button>
         </div>
       </div>
 
@@ -106,7 +106,7 @@ export const AdminCalendarModule: React.FC<AdminCalendarModuleProps> = ({ orders
 
       {/* Day Orders Modal */}
       {selectedDayOrders && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="w-full max-w-lg bg-[var(--color-surface)] p-6 rounded-3xl space-y-5 shadow-2xl border border-[var(--color-outline-variant)]/40 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center pb-3 border-b border-[var(--color-outline-variant)]/20">
               <div>
@@ -157,7 +157,7 @@ export const AdminCalendarModule: React.FC<AdminCalendarModuleProps> = ({ orders
 
                   <div className="flex justify-between items-center pt-2 border-t border-[var(--color-outline-variant)]/20 text-xs font-bold">
                     <span className="text-[var(--color-outline)]">Total:</span>
-                    <span className="text-[var(--color-primary)] text-sm">R$ {order.total.toFixed(2)}</span>
+                    <span className="text-[var(--color-primary)] text-sm">{formatCurrency(order.total)}</span>
                   </div>
                 </div>
               ))}
