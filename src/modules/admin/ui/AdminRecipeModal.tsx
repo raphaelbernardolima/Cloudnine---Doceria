@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Modal, IconButton, TextField, Button, Grid, Divider, Chip, MenuItem, Select } from '@mui/material';
 import { X, FloppyDisk, WarningCircle, CookingPot, CheckCircle } from '@phosphor-icons/react';

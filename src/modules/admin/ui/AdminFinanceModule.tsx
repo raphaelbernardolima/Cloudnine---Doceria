@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { TrendUp, TrendDown, CurrencyDollar, DownloadSimple, ChartPieSlice, ChartLineUp, WarningCircle, Package, ArrowUpRight, ChartBar, Calculator, Calendar } from '@phosphor-icons/react';
 import { Product, Order, Ingredient } from '@/src/core/types/index';
+import { useDataStore } from '@/src/core/store/useDataStore';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   ScatterChart, Scatter, ZAxis, Cell, ReferenceLine
@@ -47,7 +48,8 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
   }, [orders, dateFilter]);
 
   // 2. FINANCIAL CALCULATIONS & KPIs
-  const FIXED_COSTS = 8500; // Mock fixed costs for break-even
+  const { storeInfo } = useDataStore();
+  const FIXED_COSTS = storeInfo.custo_fixo_mensal || 8500; // Usa custo fixo configurado na loja ou default 8500
 
   const financeData = useMemo(() => {
     let rawRevenue = 0;
@@ -59,6 +61,9 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
     
     // To build Cash Flow (Area Chart)
     const dailyFlow: Record<string, number> = {};
+
+    // To calculate Demand Forecasting (Ingredientes)
+    const ingredientUsage: Record<string, { id: string; name: string; usedAmount: number; unit: string }> = {};
 
     filteredOrders.forEach(order => {
       rawRevenue += order.total;
@@ -88,6 +93,13 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
             const ing = ingredients.find(i => i.id === rec.insumoId);
             if (ing) {
               itemCMV += rec.quantidade * ing.custoPorUnidade;
+              
+              // Track Ingredient Usage
+              const totalUsed = rec.quantidade * item.quantidade;
+              if (!ingredientUsage[ing.id]) {
+                ingredientUsage[ing.id] = { id: ing.id, name: ing.nome, usedAmount: 0, unit: ing.unidadeMedida };
+              }
+              ingredientUsage[ing.id].usedAmount += totalUsed;
             }
           });
         } else {
@@ -132,9 +144,23 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
     // Calculate Break Even percentage (max 100%)
     const breakEvenProgress = Math.min(Math.max((grossMargin / FIXED_COSTS) * 100, 0), 100);
 
+    // Calculate Demand Forecast for the next 7 days based on current filtered period
+    let daysInPeriod = 30; // default for month
+    if (dateFilter === 'today') daysInPeriod = 1;
+    if (dateFilter === '7days') daysInPeriod = 7;
+    
+    const forecast = Object.values(ingredientUsage).map(ing => {
+      const dailyUsage = ing.usedAmount / daysInPeriod;
+      const forecast7Days = dailyUsage * 7;
+      return {
+        ...ing,
+        forecast7Days
+      };
+    }).sort((a, b) => b.forecast7Days - a.forecast7Days).slice(0, 5); // Top 5 ingredients to restock
+
     return {
       rawRevenue, netRevenue, totalCMV, grossMargin, grossMarginPercent, ebitda,
-      chartDataFlow, scatterData, breakEvenProgress
+      chartDataFlow, scatterData, breakEvenProgress, forecast
     };
   }, [filteredOrders, products, ingredients]);
 
@@ -386,6 +412,31 @@ export const AdminFinanceModule: React.FC<AdminFinanceModuleProps> = ({ orders, 
              </tbody>
            </table>
          </div>
+      </div>
+      {/* Previsão de Demanda */}
+      <div className="bg-[var(--color-surface-container-lowest)] p-6 rounded-3xl border border-[var(--color-outline-variant)]/30 shadow-sm overflow-hidden">
+        <h3 className="font-bold text-base text-[var(--color-on-surface)] flex items-center gap-2 mb-4">
+          <Calendar className="w-5 h-5 text-amber-500" />
+          Previsão de Demanda (Próximos 7 Dias)
+        </h3>
+        <p className="text-sm text-[var(--color-outline)] mb-4">
+          Com base na média diária do período filtrado, esta é a estimativa de insumos necessários para os próximos 7 dias.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {financeData.forecast.length > 0 ? financeData.forecast.map(item => (
+            <div key={item.id} className="bg-[var(--color-surface-container-low)] p-4 rounded-2xl border border-[var(--color-outline-variant)]/40 flex flex-col items-center text-center">
+              <Package className="w-6 h-6 text-amber-500 mb-2" />
+              <span className="text-xs font-bold text-[var(--color-on-surface)] line-clamp-1">{item.name}</span>
+              <span className="text-lg font-black text-amber-600 mt-1">
+                {item.forecast7Days.toFixed(1)} <span className="text-xs text-[var(--color-outline)]">{item.unit}</span>
+              </span>
+            </div>
+          )) : (
+            <div className="col-span-full text-sm text-[var(--color-outline)] text-center py-4">
+              Sem dados suficientes para prever demanda neste período.
+            </div>
+          )}
+        </div>
       </div>
 
     </div>

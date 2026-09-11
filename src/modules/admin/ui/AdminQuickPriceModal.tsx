@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Modal, IconButton, TextField, Button, InputAdornment, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { X, FloppyDisk, CurrencyDollar, TrendUp } from '@phosphor-icons/react';

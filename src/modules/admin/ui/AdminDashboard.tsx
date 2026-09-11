@@ -63,6 +63,12 @@ export const AdminDashboard: React.FC = () => {
       const newOrder = orders[orders.length - 1] || orders[0];
       setToastMessage(`🎉 Novo pedido #${newOrder?.id || ''} recebido de ${newOrder?.cliente_nome || 'Cliente'}!`);
       setTimeout(() => setToastMessage(null), 5000);
+      
+      // Tocar som de notificação
+      try {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play().catch(e => console.log('Áudio bloqueado pelo navegador:', e));
+      } catch(e) {}
     }
     previousOrderCount.current = orders.length;
   }, [orders]);
@@ -77,13 +83,45 @@ export const AdminDashboard: React.FC = () => {
   // New product form states
   const [showAddProductModal, setShowAddProductModal] = useState(false);
 
+  // Early return para motoboy
+  if (['entregador', 'MOTOBOY'].includes(currentUser.role)) {
+    return (
+      <div className="flex flex-col w-full min-w-0 max-w-4xl mx-auto py-4 px-4 items-start">
+        <SEO title="Painel do Entregador" />
+        <div className="w-full">
+          <AdminDeliveryModule
+            orders={orders}
+            drivers={drivers}
+            onAssignDriver={handleAssignDriver}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
+            isMotoboyView={true}
+          />
+        </div>
+        {toastMessage && (
+          <div className="fixed bottom-4 right-4 z-9999 bg-(--color-primary) text-(--color-on-primary) px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <Tote className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">Atenção!</p>
+              <p className="text-xs opacity-90">{toastMessage}</p>
+            </div>
+            <button onClick={() => setToastMessage(null)} className="ml-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+              X
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full min-w-0 max-w-[1400px] mx-auto py-4 px-4 items-start">
       <SEO 
         title="Painel Administrativo" 
         description="Área restrita de gestão da Cloudnine Doceria." 
       />
-      
+
       {/* Sidebar Navigation (Desktop Only) */}
       <div className="hidden md:flex w-[260px] shrink-0 bg-[var(--color-surface-container-lowest)] rounded-3xl p-4 border border-[var(--color-outline-variant)]/20 shadow-sm flex-col gap-2 overflow-visible sticky top-24">
         <h3 className="text-sm font-bold text-[var(--color-on-surface)] px-2 mb-2">Menu Administrativo</h3>

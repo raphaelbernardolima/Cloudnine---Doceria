@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React from 'react';
 import { Order, Ingredient } from '@/src/core/types/index';
 import { CurrencyDollar, Tote, Warning, TrendUp, Package } from '@phosphor-icons/react';

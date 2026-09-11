@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState } from 'react';
 import { Calendar as CalendarIcon, Clock, Package, CaretLeft, CaretRight, X, Phone, User } from '@phosphor-icons/react';
 import { Order } from '@/src/core/types/index';

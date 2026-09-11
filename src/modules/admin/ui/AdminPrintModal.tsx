@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React from 'react';
 import { Printer } from '@phosphor-icons/react';
 import { Order } from '@/src/core/types/index';

@@ -4,6 +4,7 @@ import { Package, Plus, Trash, Pencil, WarningCircle, CookingPot, Receipt, Tag }
 import { formatCurrency } from '@/src/core/utils/formatters';
 import type { Product, Ingredient, RecipeItem } from '@/src/core/types/index';
 import { useDataStore } from '@/src/core/store/useDataStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 import { AdminRecipeModal } from './AdminRecipeModal';
 import { AdminQuickPriceModal } from './AdminQuickPriceModal';
 
@@ -33,6 +34,29 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
   const [activeSubTab, setActiveSubTab] = useState<'products' | 'ingredients' | 'categories'>('products');
   const [selectedProductForRecipe, setSelectedProductForRecipe] = useState<Product | null>(null);
   const [showQuickPriceModal, setShowQuickPriceModal] = useState(false);
+  const { expenses, setExpenses } = useDataStore();
+  const { showToast } = useUIStore();
+
+  const handleRegistrarDesperdicio = () => {
+    const descricao = window.prompt("O que foi perdido/vencido?");
+    if (!descricao) return;
+    const valorStr = window.prompt("Qual o custo estimado dessa perda? (Apenas números, ex: 15.50)");
+    if (!valorStr) return;
+    const valor = parseFloat(valorStr);
+    if (isNaN(valor)) {
+      alert("Valor inválido.");
+      return;
+    }
+    const newExpense = {
+      id: Date.now().toString(),
+      descricao: `Desperdício: ${descricao}`,
+      valor: valor,
+      data: new Date().toISOString().split('T')[0],
+      categoria: 'Custo Fixo/Operacional'
+    };
+    setExpenses([...expenses, newExpense as any]);
+    showToast(`Desperdício de R$ ${valor.toFixed(2)} registrado com sucesso.`);
+  };
 
   // Dummy form states for quick ingredient add
   const [ingNome, setIngNome] = useState('');
@@ -213,6 +237,14 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
               sx={{ borderRadius: 2, fontWeight: 'bold', boxShadow: 'none' }}
             >
               Atualização Rápida de Preços
+            </MuiButton>
+            <MuiButton
+              variant="contained"
+              color="error"
+              onClick={handleRegistrarDesperdicio}
+              sx={{ borderRadius: 2, fontWeight: 'bold', boxShadow: 'none', ml: 2 }}
+            >
+              Registrar Desperdício/Perda
             </MuiButton>
           </div>
 

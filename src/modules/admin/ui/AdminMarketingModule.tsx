@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState, useRef } from 'react';
 import { Gift, Ticket, FloppyDisk, WarningCircle, Image as ImageIcon, Link as LinkIcon, Trash, Upload, CaretRight } from '@phosphor-icons/react';
 import { updateStoreConfig } from '@/src/core/services/supabase';

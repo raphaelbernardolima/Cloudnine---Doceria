@@ -5,20 +5,37 @@ import { toast } from 'sonner';
 import { formatCurrency } from '@/src/core/utils/formatters';
 
 export const AdminCRMModule: React.FC = () => {
-  // Em um app real, buscaríamos `users` do DataStore. Aqui vamos criar alguns fake para demonstração.
+  const { users, orders } = useDataStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'inactive' | 'vip'>('all');
 
-  const mockUsers = [
-    { id: '1', nome: 'Mariana Silva', telefone: '11999998888', lastOrder: '2023-10-15', totalGasto: 450, wallet: 15 },
-    { id: '2', nome: 'Carlos Eduardo', telefone: '11988887777', lastOrder: '2023-09-01', totalGasto: 120, wallet: 0 },
-    { id: '3', nome: 'Fernanda Costa', telefone: '11977776666', lastOrder: '2023-11-20', totalGasto: 890, wallet: 45 },
-    { id: '4', nome: 'João Pedro', telefone: '11966665555', lastOrder: '2023-08-10', totalGasto: 55, wallet: 0 },
-  ];
+  const crmUsers = React.useMemo(() => {
+    return users.map(u => {
+      const userOrders = orders.filter(o => o.cliente_id === u.id && o.status !== 'cancelado');
+      const totalGasto = userOrders.reduce((sum, o) => sum + o.total, 0);
+      
+      // Assume orders are sorted descending by created_at (as fetched in useSupabaseSync)
+      const lastOrder = userOrders.length > 0 ? userOrders[0].created_at : '';
+      
+      return {
+        id: u.id,
+        nome: `${u.nome || ''} ${u.sobrenome || ''}`.trim() || 'Sem Nome',
+        telefone: u.telefone || '',
+        lastOrder: lastOrder,
+        totalGasto: totalGasto,
+        wallet: u.walletBalance || 0
+      };
+    }).sort((a, b) => b.totalGasto - a.totalGasto); // Sort by totalGasto descending by default
+  }, [users, orders]);
 
-  const filteredUsers = mockUsers.filter(u => {
-    const matchesSearch = u.nome.toLowerCase().includes(searchQuery.toLowerCase());
-    const daysSinceLastOrder = (new Date().getTime() - new Date(u.lastOrder).getTime()) / (1000 * 3600 * 24);
+  const filteredUsers = crmUsers.filter(u => {
+    const matchesSearch = u.nome.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          u.telefone.includes(searchQuery);
+    
+    let daysSinceLastOrder = 999;
+    if (u.lastOrder) {
+      daysSinceLastOrder = (new Date().getTime() - new Date(u.lastOrder).getTime()) / (1000 * 3600 * 24);
+    }
     
     if (filter === 'inactive') return matchesSearch && daysSinceLastOrder > 30;
     if (filter === 'vip') return matchesSearch && u.totalGasto > 500;
