@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState, useEffect } from 'react';
 import { SEO } from '@/src/core/ui/shared/SEO';
 import { User, MapPin, Heart, Tote, Medal, Camera, FloppyDisk, CheckCircle, Clock, CaretRight, Phone, Envelope, Shield, WarningCircle, Copy, ArrowsClockwise, Bell, Sparkle, Star, Gift, Truck, FileText, Sliders } from '@phosphor-icons/react';
