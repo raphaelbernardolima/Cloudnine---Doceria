@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { CartItem } from '@/src/core/types';
 import { globalEventBus, AppEvents } from '@/src/core/events/EventBus';
 
@@ -11,12 +12,16 @@ interface CartStoreState {
   updateQuantity: (id: string, qty: number) => void;
   clearCart: () => void;
   appliedDiscount: number;
-  setAppliedDiscount: (discount: number) => void;
+  appliedCouponCode: string | null;
+  setAppliedDiscount: (discount: number, code?: string | null) => void;
   activeTable: string | null;
   setActiveTable: (table: string | null) => void;
+  lastUpdated?: string;
 }
 
-export const useCartStore = create<CartStoreState>((set) => ({
+export const useCartStore = create<CartStoreState>()(
+  persist(
+    (set) => ({
   cartItems: [],
   isCartOpen: false,
   setIsCartOpen: (open) => set({ isCartOpen: open }),
@@ -35,23 +40,33 @@ export const useCartStore = create<CartStoreState>((set) => ({
       const updated = [...state.cartItems];
       updated[existingIndex].quantity += item.quantity;
       globalEventBus.emit(AppEvents.CART_UPDATED, { items: updated.length, added: item });
-      return { cartItems: updated, isCartOpen: true };
+      return { cartItems: updated, isCartOpen: true, lastUpdated: new Date().toISOString() };
     }
     const newItems = [...state.cartItems, { ...item, id }];
     globalEventBus.emit(AppEvents.CART_UPDATED, { items: newItems.length, added: item });
-    return { cartItems: newItems, isCartOpen: true };
+    return { cartItems: newItems, isCartOpen: true, lastUpdated: new Date().toISOString() };
   }),
 
   removeFromCart: (id) => set((state) => ({
-    cartItems: state.cartItems.filter(item => item.id !== id)
+    cartItems: state.cartItems.filter(item => item.id !== id),
+    lastUpdated: new Date().toISOString()
   })),
 
   updateQuantity: (id, qty) => set((state) => ({
-    cartItems: state.cartItems.map(item => item.id === id ? { ...item, quantity: Math.max(1, qty) } : item)
+    cartItems: state.cartItems.map(item => item.id === id ? { ...item, quantity: Math.max(1, qty) } : item),
+    lastUpdated: new Date().toISOString()
   })),
 
-  clearCart: () => set({ cartItems: [], appliedDiscount: 0 }),
+  clearCart: () => set({ cartItems: [], appliedDiscount: 0, lastUpdated: new Date().toISOString() }),
 
   appliedDiscount: 0,
-  setAppliedDiscount: (discount) => set({ appliedDiscount: discount }),
-}));
+  appliedCouponCode: null,
+  setAppliedDiscount: (discount, code = null) => set({ appliedDiscount: discount, appliedCouponCode: code, lastUpdated: new Date().toISOString() }),
+  lastUpdated: new Date().toISOString(),
+    }),
+    {
+      name: 'cloudnine-cart-storage',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

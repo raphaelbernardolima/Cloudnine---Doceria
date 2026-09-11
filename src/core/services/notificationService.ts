@@ -46,3 +46,21 @@ export function sendOrderStatusNotification(orderId: string | number, status: st
     console.error('Erro ao enviar notificação Push:', err);
   }
 }
+
+export function sendAdminNewOrderNotification(orderId: string | number, total: number) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+
+  const title = '🔔 Novo Pedido Recebido!';
+  const body = `Você recebeu um novo pedido (#${orderId}) no valor de R$ ${total.toFixed(2)}. Acesse o painel para preparar!`;
+
+  try {
+    new Notification(title, {
+      body,
+      icon: '/favicon.ico',
+      badge: '/favicon.ico'
+    });
+  } catch (err) {
+    console.error('Erro ao enviar notificação Push para Admin:', err);
+  }
+}
