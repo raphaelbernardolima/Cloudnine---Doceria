@@ -6,7 +6,6 @@ import { AppThemeProvider } from './core/theme/ThemeContext';
 import { App } from './App.tsx';
 import { ErrorBoundary } from './core/ui/shared/ErrorBoundary';
 import { registerSW } from 'virtual:pwa-register';
-import './core/i18n/i18n';
 import './index.css';
 
 // Registra o Service Worker do PWA
