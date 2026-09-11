@@ -12,6 +12,7 @@ import { CartDrawer } from '@/src/modules/shop/ui/CartDrawer';
 import { CheckoutView } from '@/src/modules/shop/ui/CheckoutView';
 import { OrderTrackingView } from '@/src/modules/shop/ui/OrderTrackingView';
 import { NotFoundView } from '@/src/modules/shop/ui/NotFoundView';
+import { PublicMenuView } from '@/src/modules/shop/ui/PublicMenuView';
 import { LoyaltyView } from '@/src/modules/profile/ui/LoyaltyView';
 import { AuthModal } from '@/src/modules/auth/ui/AuthModal';
 import { Product } from '@/src/core/types';
@@ -123,6 +124,7 @@ export function App() {
           } />
 
           <Route path="/checkout" element={<CheckoutView />} />
+          <Route path="/cardapio" element={<PublicMenuView />} />
           <Route path="/sobre" element={<AboutUsView />} />
           <Route path="/loyalty" element={<LoyaltyView onOpenAuthModal={(msg) => handleOpenAuthModal(msg)} />} />
 

@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState, useEffect } from 'react';
 import { X, Sparkle, Cake, Check, CaretRight, Gift, ChatCircle, Image as ImageIcon, ArrowLeft } from '@phosphor-icons/react';
 import { CustomCakeBuilder, CustomCakeConfig, CustomCakeOption } from '@/src/core/types/index';

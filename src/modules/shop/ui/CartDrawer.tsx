@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useEffect } from 'react';
 import { X, Trash, Tote, CaretRight, Cake, Tag } from '@phosphor-icons/react';
 import { CartItem, Order } from '@/src/core/types/index';

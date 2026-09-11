@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { formatCurrency } from '@/src/core/utils/formatters';
 import { Product } from '@/src/core/types/index';
-import { Box, Typography, Button, IconButton, TextField, Dialog, DialogContent, DialogTitle, DialogActions, Stack, Chip, Divider, alpha } from '@mui/material';
-import { X, Plus, Minus, Tote, Fire } from '@phosphor-icons/react';
+import { Box, Typography, Button, IconButton, TextField, Dialog, DialogContent, DialogTitle, DialogActions, Stack, Chip, Divider, alpha, Rating, Avatar } from '@mui/material';
+import { X, Plus, Minus, Tote, Fire, Star, User } from '@phosphor-icons/react';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 
 interface ProductModalProps {
   product: Product;
@@ -13,6 +16,47 @@ interface ProductModalProps {
 export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, onAddToCart }) => {
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState('');
+
+  const { currentUser, products, setProducts } = useDataStore();
+  const { setIsAuthModalOpen, showToast } = useUIStore();
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [newReviewComment, setNewReviewComment] = useState('');
+  
+  const handleSubmitReview = () => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true, "Faça login para avaliar este produto.");
+      return;
+    }
+    if (!newReviewComment.trim()) {
+      showToast("Escreva um comentário.");
+      return;
+    }
+    
+    const newReview = {
+      id: Date.now().toString(),
+      userId: currentUser.id,
+      userName: `${currentUser.nome} ${currentUser.sobrenome}`,
+      rating: newReviewRating,
+      comment: newReviewComment,
+      date: new Date().toISOString()
+    };
+    
+    const updatedProducts = products.map(p => {
+      if (p.id === product.id) {
+        const avaliacoes = p.avaliacoes || [];
+        return {
+          ...p,
+          avaliacoes: [newReview, ...avaliacoes]
+        };
+      }
+      return p;
+    });
+    setProducts(updatedProducts);
+    setNewReviewComment('');
+    showToast("Avaliação enviada com sucesso!");
+  };
+  
+  const currentProduct = products.find(p => p.id === product.id) || product;
 
   if (!isOpen) return null;
 
@@ -111,8 +155,66 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             variant="outlined"
             slotProps={{ htmlInput: { maxLength: 200 } }}
             helperText={`${note.length}/200 caracteres`}
-            sx={{ mb: 3 }}
+            sx={{ mb: 4 }}
           />
+
+          <Divider sx={{ mb: 4 }} />
+
+          {/* Reviews Section */}
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>Avaliações</Typography>
+          
+          <Box sx={{ mb: 4, p: 3, bgcolor: 'surfaceContainerHighest', borderRadius: 4 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Deixe sua avaliação</Typography>
+            <Rating 
+              value={newReviewRating} 
+              onChange={(_, newValue) => setNewReviewRating(newValue || 5)} 
+              size="large"
+              sx={{ mb: 2, color: 'amber.500' }}
+            />
+            <TextField
+              multiline
+              rows={2}
+              fullWidth
+              placeholder="O que achou deste doce?"
+              value={newReviewComment}
+              onChange={(e) => setNewReviewComment(e.target.value)}
+              variant="outlined"
+              sx={{ mb: 2, bgcolor: 'background.paper', borderRadius: 2 }}
+            />
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              onClick={handleSubmitReview}
+              disableElevation
+              sx={{ borderRadius: 2, fontWeight: 700 }}
+            >
+              Enviar Avaliação
+            </Button>
+          </Box>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {currentProduct.avaliacoes && currentProduct.avaliacoes.length > 0 ? (
+              currentProduct.avaliacoes.map(review => (
+                <Box key={review.id} sx={{ display: 'flex', gap: 2 }}>
+                  <Avatar sx={{ width: 40, height: 40, bgcolor: 'primary.light', color: 'primary.dark' }}>
+                    <User className="w-5 h-5" />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{review.userName}</Typography>
+                    <Rating value={review.rating} readOnly size="small" sx={{ color: 'amber.500', my: 0.5 }} />
+                    <Typography variant="body2" color="text.secondary">{review.comment}</Typography>
+                    <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: 'block' }}>
+                      {new Date(review.date).toLocaleDateString('pt-BR')}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                Nenhuma avaliação ainda. Seja o primeiro a avaliar!
+              </Typography>
+            )}
+          </Box>
 
         </DialogContent>
 

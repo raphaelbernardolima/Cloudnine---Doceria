@@ -54,6 +54,8 @@ export const CheckoutView: React.FC = () => {
     }
   }, [hasCustomCake]);
 
+  const [taxaEntregaDinamica, setTaxaEntregaDinamica] = useState<number>(12.00);
+
   // If cart is empty and not in confirmation, redirect to shop
   useEffect(() => {
     if (cartItems.length === 0 && step !== 'confirmation') {
@@ -63,7 +65,7 @@ export const CheckoutView: React.FC = () => {
 
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-  const taxaEntrega = cartItems.length > 0 && tipoEntrega === 'entrega' ? 12.00 : 0;
+  const taxaEntrega = cartItems.length > 0 && tipoEntrega === 'entrega' ? taxaEntregaDinamica : 0;
 
   const walletDiscount = useWallet && currentUser?.walletBalance ? Math.min(subtotal + taxaEntrega - appliedDiscount, currentUser.walletBalance) : 0;
 
@@ -82,6 +84,27 @@ export const CheckoutView: React.FC = () => {
     if (!nomeCliente.trim() || !telefoneCliente.trim()) {
       setFormError('Por favor, preencha seu nome e telefone.');
       return;
+    }
+
+    if (storeInfo?.loja_aberta === false && !isAgendado) {
+      setFormError('A loja está fechada para novos pedidos no momento. Você ainda pode agendar sua entrega selecionando uma data e horário.');
+      return;
+    }
+
+    if (!isAgendado && storeInfo?.horario_abertura && storeInfo?.horario_fechamento) {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      
+      const [aberturaHour, aberturaMin] = storeInfo.horario_abertura.split(':').map(Number);
+      const [fechamentoHour, fechamentoMin] = storeInfo.horario_fechamento.split(':').map(Number);
+      
+      const aberturaTotal = aberturaHour * 60 + aberturaMin;
+      const fechamentoTotal = fechamentoHour * 60 + fechamentoMin;
+      
+      if (currentMinutes < aberturaTotal || currentMinutes > fechamentoTotal) {
+        setFormError(`A loja está fechada no momento. Horário de funcionamento: ${storeInfo.horario_abertura} às ${storeInfo.horario_fechamento}. Você ainda pode agendar sua entrega!`);
+        return;
+      }
     }
 
     const unmaskedPhone = telefoneCliente.replace(/\D/g, '');
@@ -237,7 +260,7 @@ export const CheckoutView: React.FC = () => {
                         }`}
                     >
                       <Truck className="w-6 h-6" />
-                      <span>Entrega (R$ 12,00)</span>
+                      <span>Entrega ({formatCurrency(taxaEntregaDinamica)})</span>
                     </button>
                     <button
                       type="button"
@@ -269,6 +292,26 @@ export const CheckoutView: React.FC = () => {
                         onAddressChange={(addr: AddressResult) => {
                           const formatted = addr.formattedAddress || `${addr.logradouro}, ${addr.numero || ''} - ${addr.bairro}, ${addr.cidade} - ${addr.uf} (CEP: ${addr.cep})`;
                           setEndereco(formatted);
+                          
+                          if (storeInfo?.taxas_entrega && storeInfo.taxas_entrega.length > 0) {
+                            const found = storeInfo.taxas_entrega.find(t => 
+                              t.bairro.toLowerCase().trim() === (addr.bairro || '').toLowerCase().trim()
+                            );
+                            if (found) {
+                              setTaxaEntregaDinamica(found.taxa);
+                            } else {
+                              // Se não achou, pega a taxa do primeiro ou zera
+                              setTaxaEntregaDinamica(storeInfo.taxas_entrega[0].taxa);
+                            }
+                          } else {
+                            if (addr.cep) {
+                              const suffix = addr.cep.split('-')[1];
+                              if (suffix) {
+                                const base = parseInt(suffix.substring(0,2), 10);
+                                setTaxaEntregaDinamica(8 + (base % 15));
+                              }
+                            }
+                          }
                         }}
                       />
                     </div>

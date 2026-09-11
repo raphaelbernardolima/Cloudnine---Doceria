@@ -8,6 +8,8 @@ import { Box, Typography, Button, TextField, InputAdornment, Grid, Chip, Stack, 
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { useCartStore } from '@/src/core/store/useCartStore';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { isStoreOpen } from '@/src/core/utils/timeUtils';
+import { useUIStore } from '@/src/core/store/useUIStore';
 
 interface ShopViewProps {
   isLoadingProducts: boolean;
@@ -23,12 +25,16 @@ export function ShopView({
   onOpenQuickView
 }: ShopViewProps) {
   const { banners, products, categories } = useDataStore();
-  const { addToCart, activeTable, setActiveTable } = useCartStore();
+  const { cartItems, addToCart, activeTable, setActiveTable, lastUpdated } = useCartStore();
+  const { showToast } = useUIStore();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const { storeInfo } = useDataStore();
+  const storeOpen = isStoreOpen(storeInfo?.horario_abertura, storeInfo?.horario_fechamento, storeInfo?.loja_aberta);
 
   useEffect(() => {
     const mesa = searchParams.get('mesa');
@@ -49,6 +55,16 @@ export function ShopView({
   const onAddToCart = (product: Product, quantity = 1) => {
     addToCart({ product, quantity, customNote: undefined, unitPrice: product.preco });
   };
+
+  useEffect(() => {
+    if (cartItems.length > 0 && lastUpdated) {
+      const timeDiff = new Date().getTime() - new Date(lastUpdated).getTime();
+      // Se passou mais de 10 minutos (600000ms) desde a última vez que o carrinho foi atualizado
+      if (timeDiff > 600000) {
+        showToast('Seus doces estão te esperando! Termine o pedido agora e receba logo! 🧁');
+      }
+    }
+  }, []); // Run once on mount
 
   useEffect(() => {
     const action = searchParams.get('action');
@@ -90,6 +106,23 @@ export function ShopView({
         title="Cardápio Oficial | Cloudnine Doceria" 
         description="Navegue pelo nosso cardápio e encomende os melhores bolos personalizados e doces de luxo." 
       />
+
+      {!storeOpen && (
+        <Box sx={{ px: 2 }}>
+          <div className="bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 p-4 rounded-2xl shadow-sm flex items-start gap-3">
+            <span className="text-2xl">😴</span>
+            <div>
+              <h3 className="font-black text-sm uppercase tracking-wide">Estamos descansando!</h3>
+              <p className="text-sm mt-0.5 opacity-90">Nossa loja está fechada no momento. Você ainda pode adicionar itens ao carrinho e fazer <strong>pedidos agendados</strong> para quando estivermos abertos.</p>
+              {storeInfo?.horario_abertura && storeInfo?.horario_fechamento && (
+                <p className="text-xs font-bold mt-2 bg-red-500/10 px-2 py-1 rounded inline-block">
+                  Horário: {storeInfo.horario_abertura} às {storeInfo.horario_fechamento}
+                </p>
+              )}
+            </div>
+          </div>
+        </Box>
+      )}
 
       {/* Banners Carousel */}
       <HeroCarousel banners={banners} />

@@ -1,18 +1,21 @@
 import React from 'react';
+import { formatCurrency } from '@/src/core/utils/formatters';
 import { Product } from '@/src/core/types/index';
 import { Card, CardMedia, CardContent, Typography, Box, Button, Skeleton, Chip, alpha } from '@mui/material';
 import { Star, Fire, Eye } from '@phosphor-icons/react';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
+  onAddToCart?: (product: Product) => void;
   onOpenQuickView: (product: Product) => void;
+  readOnly?: boolean;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onAddToCart,
-  onOpenQuickView
+  onOpenQuickView,
+  readOnly = false
 }) => {
   return (
     <Card 
@@ -121,22 +124,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {product.descricao}
         </Typography>
 
-        <Button 
-          variant="contained" 
-          fullWidth
-          onClick={() => onAddToCart(product)}
-          sx={{ 
-            bgcolor: 'primary.light', 
-            color: 'primary.dark',
-            boxShadow: 'none',
-            '&:hover': {
-              bgcolor: (theme) => alpha(theme.palette.primary.light, 0.8),
+        {!readOnly && onAddToCart && (
+          <Button 
+            variant="contained" 
+            fullWidth
+            onClick={() => onAddToCart(product)}
+            sx={{ 
+              bgcolor: 'primary.light', 
+              color: 'primary.dark',
               boxShadow: 'none',
-            }
-          }}
-        >
-          Adicionar
-        </Button>
+              '&:hover': {
+                bgcolor: (theme) => alpha(theme.palette.primary.light, 0.8),
+                boxShadow: 'none',
+              }
+            }}
+          >
+            Adicionar
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

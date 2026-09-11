@@ -2,14 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { SEO } from '@/src/core/ui/shared/SEO';
-import { ArrowLeft, CheckCircle, CookingPot, Clock, MapPin, Package, QrCode, Storefront, Truck, ChatCircle, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, CheckCircle, CookingPot, Clock, MapPin, Package, QrCode, Storefront, Truck, ChatCircle, WarningCircle, Star } from '@phosphor-icons/react';
 import type { Order } from '@/src/core/types/index';
+import { useOrderMutations } from '@/src/core/hooks/useOrderMutations';
 
 export const OrderTrackingView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { orders, storePhone } = useDataStore();
+  const { handleSubmitReview } = useOrderMutations();
   const [order, setOrder] = useState<Order | undefined>(undefined);
+
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   useEffect(() => {
     const found = orders.find(o => String(o.id) === id);
@@ -84,6 +91,13 @@ export const OrderTrackingView: React.FC = () => {
     const unmaskedPhone = storePhone.replace(/\D/g, '');
     const msg = encodeURIComponent(`Olá! Queria falar sobre o meu pedido #${order.id}.`);
     window.open(`https://wa.me/55${unmaskedPhone}?text=${msg}`, '_blank');
+  };
+
+  const onReviewSubmit = async () => {
+    if (rating === 0) return;
+    setIsSubmittingReview(true);
+    await handleSubmitReview(order.id, rating, reviewComment);
+    setIsSubmittingReview(false);
   };
 
   return (
@@ -253,6 +267,63 @@ export const OrderTrackingView: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {/* Avaliação do Pedido */}
+        {order.status === 'entregue' && !order.avaliacao && (
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 rounded-3xl border border-amber-200/50 dark:border-amber-700/30 shadow-sm">
+            <div className="text-center mb-4">
+              <h3 className="font-black text-lg text-amber-900 dark:text-amber-400 mb-1">Como foi sua experiência?</h3>
+              <p className="text-sm text-amber-700/80 dark:text-amber-500/80">
+                Sua opinião nos ajuda a criar doces cada vez mais perfeitos.
+              </p>
+            </div>
+            
+            <div className="flex justify-center gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className="transition-transform hover:scale-110 focus:outline-none"
+                >
+                  <Star 
+                    weight={(hoverRating || rating) >= star ? "fill" : "regular"}
+                    className={`w-10 h-10 ${(hoverRating || rating) >= star ? "text-amber-500" : "text-amber-300 dark:text-amber-800"}`} 
+                  />
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="O que achou dos nossos doces? (Opcional)"
+              className="w-full p-3 rounded-2xl bg-white/60 dark:bg-black/20 border border-amber-200 dark:border-amber-900/50 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none h-24 mb-4"
+            />
+
+            <button
+              onClick={onReviewSubmit}
+              disabled={rating === 0 || isSubmittingReview}
+              className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSubmittingReview ? 'Enviando...' : 'Enviar Avaliação'}
+            </button>
+          </div>
+        )}
+        
+        {order.status === 'entregue' && order.avaliacao && (
+          <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-3xl border border-emerald-200/50 dark:border-emerald-700/30 text-center">
+            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-800 rounded-full flex items-center justify-center mx-auto mb-3">
+              <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" weight="fill" />
+            </div>
+            <h3 className="font-bold text-emerald-900 dark:text-emerald-400 mb-1">Obrigado pela sua avaliação!</h3>
+            <p className="text-sm text-emerald-700 dark:text-emerald-500">
+              Você deu {order.avaliacao.rating} estrelas para este pedido.
+            </p>
+          </div>
+        )}
 
       </div>
     </div>
