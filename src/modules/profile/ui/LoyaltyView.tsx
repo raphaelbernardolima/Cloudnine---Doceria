@@ -1,5 +1,6 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React from 'react';
-import { Award, Gift, Star, Sparkles, Check, AlertCircle } from 'lucide-react';
+import { Medal, Gift, Star, Sparkle, Check, WarningCircle, Users, Copy } from '@phosphor-icons/react';
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { useUIStore } from '@/src/core/store/useUIStore';
 import { useCartStore } from '@/src/core/store/useCartStore';
@@ -89,12 +90,18 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onOpenAuthModal }) => 
     }
   ];
 
+  const handleCopyReferral = () => {
+    const code = currentUser?.codigo_indicacao || (currentUser ? `${currentUser.nome.toUpperCase()}10` : 'CLOUD10');
+    navigator.clipboard.writeText(code);
+    if (showToast) showToast(`Código ${code} copiado! Compartilhe com seus amigos.`);
+  };
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto py-4 animate-in fade-in duration-300">
       {!currentUser && (
         <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+            <WarningCircle className="w-5 h-5 text-amber-600 shrink-0" />
             <p className="text-xs font-bold text-center sm:text-left">Faça login para acumular pontos reais a cada pedido e resgatar recompensas exclusivas no Cloudnine Club!</p>
           </div>
           <button
@@ -110,7 +117,7 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onOpenAuthModal }) => 
       <div className="relative rounded-3xl p-8 bg-linear-gradient-primary-to-secondary text-on-primary shadow-md overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="space-y-2 text-center sm:text-left z-10">
           <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-extrabold backdrop-blur-xs">
-            <Sparkles className="w-3.5 h-3.5 fill-current" />
+            <Sparkle className="w-3.5 h-3.5 fill-current" />
             <span>Programa Cloudnine Club</span>
           </span>
           <h2 className="text-2xl sm:text-3xl font-black">
@@ -138,7 +145,7 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onOpenAuthModal }) => 
         </div>
         <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 text-center">
           <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">Total Gasto em Pedidos</span>
-          <span className="text-2xl font-black text-on-surface mt-1 block">R$ {totalSpent.toFixed(2).replace('.', ',')}</span>
+          <span className="text-2xl font-black text-on-surface mt-1 block">{formatCurrency(totalSpent)}</span>
         </div>
         <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 text-center">
           <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">Recompensas Resgatadas</span>
@@ -195,6 +202,39 @@ export const LoyaltyView: React.FC<LoyaltyViewProps> = ({ onOpenAuthModal }) => 
           })}
         </div>
       </div>
+
+      {/* Indique e Ganhe (Member get Member) */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 text-center sm:text-left flex flex-col sm:flex-row items-center gap-6 shadow-sm">
+        <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/30">
+          <Users className="w-8 h-8 text-white" />
+        </div>
+        <div className="flex-1 space-y-2">
+          <h3 className="text-lg font-black text-emerald-900 dark:text-emerald-300">
+            Indique e Ganhe Cashback! 💸
+          </h3>
+          <p className="text-sm text-emerald-800/80 dark:text-emerald-400/80">
+            Compartilhe seu código com um amigo. Ele ganha <strong className="text-emerald-600 dark:text-emerald-300">10% de desconto</strong> na primeira compra, e você ganha <strong className="text-emerald-600 dark:text-emerald-300">R$ 5,00 em cashback</strong> direto na sua carteira para gastar como quiser!
+          </p>
+        </div>
+        <div className="flex flex-col items-center gap-2 shrink-0 w-full sm:w-auto">
+          <div className="px-6 py-3 bg-white dark:bg-black/40 border-2 border-emerald-500/30 rounded-2xl flex items-center gap-3">
+            <span className="font-black text-emerald-700 dark:text-emerald-400 tracking-wider">
+              {currentUser?.codigo_indicacao || (currentUser ? `${currentUser.nome.toUpperCase().split(' ')[0]}10` : 'FAZLOGIN')}
+            </span>
+            <button 
+              onClick={handleCopyReferral}
+              disabled={!currentUser}
+              className="p-2 bg-emerald-100 dark:bg-emerald-900/50 hover:bg-emerald-200 dark:hover:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-xl transition-colors disabled:opacity-50"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+          </div>
+          <span className="text-[10px] uppercase font-bold text-emerald-600/70 tracking-widest">
+            Seu código exclusivo
+          </span>
+        </div>
+      </div>
+
     </div>
   );
 };

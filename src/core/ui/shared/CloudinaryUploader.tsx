@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UploadCloud, CheckCircle, AlertCircle, Image as ImageIcon, Loader2, Link, Copy } from 'lucide-react';
+import { CloudArrowUp, CheckCircle, WarningCircle, Image as ImageIcon, Spinner, Link, Copy } from '@phosphor-icons/react';
 import { uploadToCloudinary, getCloudinaryConfig } from '@/src/core/services/cloudinary';
 
 interface CloudinaryUploaderProps {
@@ -72,7 +72,7 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
           )}
           {uploading && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white">
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Spinner className="w-5 h-5 animate-spin" />
             </div>
           )}
         </div>
@@ -80,8 +80,8 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
         {/* Upload Controls */}
         <div className="flex-1 space-y-2 w-full">
           <label className="cursor-pointer inline-flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs hover:opacity-95 transition-all shadow-xs min-h-[38px]">
-            <UploadCloud className="w-4 h-4" />
-            <span>{uploading ? 'Enviando...' : 'Selecionar Imagem do Computador'}</span>
+            <CloudArrowUp className="w-4 h-4" />
+            <span>{uploading ? 'Enviando...' : 'Selecionar Imagem do Dispositivo'}</span>
             <input
               type="file"
               accept="image/*"
@@ -102,7 +102,7 @@ export const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
 
           {errorMessage && (
             <p className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3 shrink-0" />
+              <WarningCircle className="w-3 h-3 shrink-0" />
               <span>{errorMessage}</span>
             </p>
           )}

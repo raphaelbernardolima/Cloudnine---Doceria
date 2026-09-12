@@ -1,18 +1,21 @@
 import React from 'react';
+import { formatCurrency } from '@/src/core/utils/formatters';
 import { Product } from '@/src/core/types/index';
 import { Card, CardMedia, CardContent, Typography, Box, Button, Skeleton, Chip, alpha } from '@mui/material';
-import { Star, Flame, Eye } from 'lucide-react';
+import { Star, Fire, Eye } from '@phosphor-icons/react';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
+  onAddToCart?: (product: Product) => void;
   onOpenQuickView: (product: Product) => void;
+  readOnly?: boolean;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onAddToCart,
-  onOpenQuickView
+  onOpenQuickView,
+  readOnly = false
 }) => {
   return (
     <Card 
@@ -27,8 +30,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <Box sx={{ position: 'relative', paddingTop: '75%', overflow: 'hidden' }}>
         <CardMedia
           component="img"
-          image={product.image_url}
+          image={product.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600'}
           alt={product.nome}
+          onError={(e: any) => {
+            e.target.onerror = null;
+            e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600';
+          }}
           sx={{
             position: 'absolute',
             top: 0,
@@ -44,7 +51,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 1, flexWrap: 'wrap', zIndex: 1 }}>
           {product.is_best_seller && (
             <Chip 
-              icon={<Flame className="w-3.5 h-3.5" />} 
+              icon={<Fire className="w-3.5 h-3.5" />} 
               label="Bestseller" 
               size="small"
               sx={{ 
@@ -109,7 +116,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </Typography>
           </Box>
           <Typography variant="subtitle1" sx={{ color: 'primary.main', fontWeight: 700, whiteSpace: 'nowrap' }}>
-            R$ {product.preco.toFixed(0)}
+            {formatCurrency(product.preco)}
           </Typography>
         </Box>
 
@@ -117,22 +124,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {product.descricao}
         </Typography>
 
-        <Button 
-          variant="contained" 
-          fullWidth
-          onClick={() => onAddToCart(product)}
-          sx={{ 
-            bgcolor: 'primary.light', 
-            color: 'primary.dark',
-            boxShadow: 'none',
-            '&:hover': {
-              bgcolor: (theme) => alpha(theme.palette.primary.light, 0.8),
+        {!readOnly && onAddToCart && (
+          <Button 
+            variant="contained" 
+            fullWidth
+            onClick={() => onAddToCart(product)}
+            sx={{ 
+              bgcolor: 'primary.light', 
+              color: 'primary.dark',
               boxShadow: 'none',
-            }
-          }}
-        >
-          Adicionar
-        </Button>
+              '&:hover': {
+                bgcolor: (theme) => alpha(theme.palette.primary.light, 0.8),
+                boxShadow: 'none',
+              }
+            }}
+          >
+            Adicionar
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

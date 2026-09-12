@@ -1,6 +1,7 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Modal, IconButton, TextField, Button, Grid, Divider, Chip, MenuItem, Select } from '@mui/material';
-import { X, Save, AlertCircle, ChefHat, CheckCircle2 } from 'lucide-react';
+import { X, FloppyDisk, WarningCircle, CookingPot, CheckCircle } from '@phosphor-icons/react';
 import { Product, Ingredient, RecipeItem } from '@/src/core/types/index';
 import { useRecipeCalculator } from '@/src/core/hooks/useRecipeCalculator';
 
@@ -108,7 +109,7 @@ export const AdminRecipeModal: React.FC<AdminRecipeModalProps> = ({
         <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'outlineVariant', display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'surfaceContainerLow' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, bgcolor: 'primary.main', borderRadius: 2, color: 'primary.contrastText' }}>
-              <ChefHat className="w-5 h-5" />
+              <CookingPot className="w-5 h-5" />
             </Box>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Ficha Técnica & Precificação</Typography>
@@ -189,7 +190,7 @@ export const AdminRecipeModal: React.FC<AdminRecipeModalProps> = ({
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                           <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                            R$ {itemCost.toFixed(2)}
+                            {formatCurrency(itemCost)}
                           </Typography>
                           <IconButton size="small" color="error" onClick={() => handleRemoveIngredient(ing.id)}>
                             <X className="w-4 h-4" />
@@ -204,7 +205,7 @@ export const AdminRecipeModal: React.FC<AdminRecipeModalProps> = ({
                   <Box sx={{ p: 2, bgcolor: 'surfaceContainerHigh', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Custo Base (CMV):</Typography>
                     <Typography variant="body1" sx={{ fontWeight: 'black', color: 'primary.main' }}>
-                      R$ {cmvBase.toFixed(2)}
+                      {formatCurrency(cmvBase)}
                     </Typography>
                   </Box>
                 )}
@@ -249,11 +250,11 @@ export const AdminRecipeModal: React.FC<AdminRecipeModalProps> = ({
                 <Box sx={{ p: 2, bgcolor: 'surfaceContainerLow', borderRadius: 3, border: '1px solid', borderColor: 'outlineVariant' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary">Custo Total (c/ perdas):</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>R$ {totalCost.toFixed(2)}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{formatCurrency(totalCost)}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary">Preço Venda Atual:</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>R$ {product.preco.toFixed(2)}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{formatCurrency(product.preco)}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                     <Typography variant="body2" color="text.secondary">Margem Real:</Typography>
@@ -261,7 +262,7 @@ export const AdminRecipeModal: React.FC<AdminRecipeModalProps> = ({
                       label={`${realMargin.toFixed(1)}%`} 
                       size="small"
                       color={marginStatus === 'healthy' ? 'success' : marginStatus === 'warning' ? 'warning' : 'error'}
-                      icon={marginStatus === 'healthy' ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                      icon={marginStatus === 'healthy' ? <CheckCircle className="w-3 h-3" /> : <WarningCircle className="w-3 h-3" />}
                       sx={{ fontWeight: 'bold', height: 20 }}
                     />
                   </Box>
@@ -269,7 +270,7 @@ export const AdminRecipeModal: React.FC<AdminRecipeModalProps> = ({
                   <Box sx={{ p: 2, bgcolor: 'primary.light', borderRadius: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.dark' }}>PREÇO SUGERIDO (REVERSO)</Typography>
                     <Typography variant="h5" sx={{ fontWeight: 'black', color: 'primary.dark' }}>
-                      R$ {suggestedPrice.toFixed(2)}
+                      {formatCurrency(suggestedPrice)}
                     </Typography>
                     {product.preco !== suggestedPrice && (
                       <Button 
@@ -295,7 +296,7 @@ export const AdminRecipeModal: React.FC<AdminRecipeModalProps> = ({
           <Button variant="outlined" onClick={onClose} sx={{ borderRadius: 2, fontWeight: 'bold', px: 4 }}>
             Cancelar
           </Button>
-          <Button variant="contained" onClick={handleSave} startIcon={<Save className="w-4 h-4" />} sx={{ borderRadius: 2, fontWeight: 'bold', px: 4, boxShadow: 'none' }}>
+          <Button variant="contained" onClick={handleSave} startIcon={<FloppyDisk className="w-4 h-4" />} sx={{ borderRadius: 2, fontWeight: 'bold', px: 4, boxShadow: 'none' }}>
             Salvar Ficha Técnica
           </Button>
         </Box>

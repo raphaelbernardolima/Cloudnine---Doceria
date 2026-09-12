@@ -1,5 +1,14 @@
 import { ReactNode } from "react";
 
+export interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
 export interface Product {
   id: number | string;
   created_at?: string;
@@ -26,6 +35,8 @@ export interface Product {
   target_margin?: number;
   current_cost?: number;
   suggested_price?: number;
+  ativo?: boolean;
+  avaliacoes?: Review[];
 }
 
 export interface CustomCakeOption {
@@ -78,6 +89,7 @@ export interface UserProfile {
   email: string;
   vipLevel?: VipLevel;
   pontosFidelidade?: number;
+  walletBalance?: number;
   avatar_url?: string;
   endereco_rua?: string;
   endereco_numero?: string;
@@ -91,6 +103,7 @@ export interface UserProfile {
   restricao_sem_gluten?: boolean;
   restricao_zero_acucar?: boolean;
   restricao_alergia_nozes?: boolean;
+  codigo_indicacao?: string;
 }
 
 export interface OrderItem {
@@ -120,6 +133,7 @@ export interface Order {
   endereco_entreg: string;
   itens: OrderItem[];
   impressoCozinha?: boolean;
+  avaliacao?: { rating: number; comment: string; date: string };
 }
 
 export interface LoyaltyAccount {
@@ -195,6 +209,7 @@ export interface Banner {
   link?: string;
   cta_text?: string;
   ativo: boolean;
+  layout_type?: 'classic' | 'clean' | 'glassmorphism' | string;
 }
 
 export interface StoreInfo {
@@ -204,4 +219,27 @@ export interface StoreInfo {
   pix_tipo?: string;
   pix_beneficiario?: string;
   pix_cidade?: string;
+  horario_abertura?: string;
+  horario_fechamento?: string;
+  custo_fixo_mensal?: number;
+  loja_aberta?: boolean;
+  taxas_entrega?: { bairro: string; taxa: number }[];
+}
+
+export interface Expense {
+  id: string;
+  descricao: string;
+  valor: number;
+  categoria: string;
+  data: string;
+  created_at?: string;
+  data_vencimento?: string;
+  pago?: boolean;
+}
+
+export interface Table {
+  id: string;
+  numero: string | number;
+  status: 'livre' | 'ocupada' | 'reservada' | 'aguardando_pagamento';
+  seats?: number;
 }

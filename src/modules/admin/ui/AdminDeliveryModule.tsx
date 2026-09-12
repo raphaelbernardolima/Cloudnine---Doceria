@@ -1,5 +1,6 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState } from 'react';
-import { Truck, MapPin, DollarSign, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Truck, MapPin, CurrencyDollar, CheckCircle, CaretDown } from '@phosphor-icons/react';
 import { Order, Driver } from '@/src/core/types/index';
 
 interface AdminDeliveryModuleProps {
@@ -7,9 +8,10 @@ interface AdminDeliveryModuleProps {
   drivers: Driver[];
   onAssignDriver: (orderId: string | number, driverId: string) => void;
   onUpdateOrderStatus: (orderId: string | number, status: Order['status']) => void;
+  isMotoboyView?: boolean;
 }
 
-export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders, drivers, onAssignDriver, onUpdateOrderStatus }) => {
+export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders, drivers, onAssignDriver, onUpdateOrderStatus, isMotoboyView }) => {
   const deliveryOrders = orders.filter(o => o.tipo_entrega === 'entrega' && (o.status === 'pronto_retirada' || o.status === 'saiu_entrega'));
 
   return (
@@ -27,8 +29,10 @@ export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Orders Queue */}
-        <div className="lg:col-span-2 space-y-4">
-          <h4 className="font-bold text-sm text-(--color-on-surface)">Fila de Despacho</h4>
+        <div className={isMotoboyView ? "col-span-1 lg:col-span-3 space-y-4" : "col-span-1 lg:col-span-2 space-y-4"}>
+          <h4 className="font-bold text-sm text-(--color-on-surface)">
+            {isMotoboyView ? 'Minhas Entregas e Pedidos Prontos' : 'Fila de Despacho'}
+          </h4>
           {deliveryOrders.map(o => {
             const driver = drivers.find(d => d.id === o.entregador_id);
             return (
@@ -44,31 +48,33 @@ export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders
                 </div>
 
                 <div className="flex items-center gap-3 pt-3 border-t border-(--color-outline-variant)/20">
-                  <select
-                    value={o.entregador_id || ''}
-                    onChange={e => onAssignDriver(o.id, e.target.value)}
-                    className="p-2 bg-(--color-surface-container) rounded-xl text-xs font-bold border border-transparent hover:border-(--color-primary)/50 transition-colors flex-1"
-                  >
-                    <option value="">Atribuir Motoboy...</option>
-                    {drivers.filter(d => d.status !== 'indisponivel').map(d => (
-                      <option key={d.id} value={d.id}>{d.nome} (R$ {d.taxaPorEntrega.toFixed(2)})</option>
-                    ))}
-                  </select>
+                  {!isMotoboyView && (
+                    <select
+                      value={o.entregador_id || ''}
+                      onChange={e => onAssignDriver(o.id, e.target.value)}
+                      className="p-2 bg-(--color-surface-container) rounded-xl text-xs font-bold border border-transparent hover:border-(--color-primary)/50 transition-colors flex-1"
+                    >
+                      <option value="">Atribuir Motoboy...</option>
+                      {drivers.filter(d => d.status !== 'indisponivel').map(d => (
+                        <option key={d.id} value={d.id}>{d.nome} ({formatCurrency(d.taxaPorEntrega)})</option>
+                      ))}
+                    </select>
+                  )}
 
-                  {o.entregador_id && o.status !== 'saiu_entrega' && (
+                  {o.status !== 'saiu_entrega' && (
                     <button
                       onClick={() => onUpdateOrderStatus(o.id, 'saiu_entrega')}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-xs hover:bg-blue-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-xs hover:bg-blue-700 transition-colors flex-1 sm:flex-none"
                     >
-                      Despachar
+                      Pegar & Despachar
                     </button>
                   )}
-                  {o.entregador_id && o.status === 'saiu_entrega' && (
+                  {o.status === 'saiu_entrega' && (
                     <button
                       onClick={() => onUpdateOrderStatus(o.id, 'entregue')}
                       className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold text-xs hover:bg-emerald-700 transition-colors flex items-center gap-1"
                     >
-                      <CheckCircle2 className="w-4 h-4" /> Concluir
+                      <CheckCircle className="w-4 h-4" /> Concluir
                     </button>
                   )}
                 </div>
@@ -83,6 +89,7 @@ export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders
         </div>
 
         {/* Drivers Status */}
+        {!isMotoboyView && (
         <div className="space-y-4">
           <h4 className="font-bold text-sm text-(--color-on-surface)">Acerto de Entregadores</h4>
           <div className="space-y-3">
@@ -94,12 +101,13 @@ export const AdminDeliveryModule: React.FC<AdminDeliveryModuleProps> = ({ orders
                 </div>
                 <div className="flex justify-between text-xs text-(--color-outline)">
                   <span>{d.pedidosEntregues} entregas hj</span>
-                  <span className="font-black text-emerald-600 flex items-center gap-0.5"><DollarSign className="w-3 h-3" /> {d.totalGanhos.toFixed(2)}</span>
+                  <span className="font-black text-emerald-600 flex items-center gap-0.5"><CurrencyDollar className="w-3 h-3" /> {d.totalGanhos.toFixed(2)}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
+        )}
 
       </div>
     </div>

@@ -1,24 +1,5 @@
 import React, { useState } from 'react';
-import {
-  ShoppingBag,
-  Menu,
-  X,
-  User,
-  LogOut,
-  DollarSign,
-  Send,
-  Heart,
-  Inbox,
-  Gauge,
-  Megaphone,
-  Settings,
-  ChefHat,
-  Layers,
-  Moon,
-  Sun,
-  Bell,
-  Cake
-} from 'lucide-react';
+import { Tote, List as ListIcon, X, User, SignOut, CurrencyDollar, PaperPlaneRight, Heart, Tray, Gauge, Megaphone, Gear, CookingPot, Stack, Moon, Sun, Bell, Cake } from '@phosphor-icons/react';
 import { UserProfile, Order } from '@/src/core/types/index';
 import { isStaff } from '@/src/core/constants/roles';
 import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button, Switch } from '@mui/material';
@@ -81,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => setIsMobileMenuOpen(true)}
                 sx={{ display: { md: 'none' } }}
               >
-                <Menu />
+                <ListIcon />
               </IconButton>
             )}
 
@@ -136,19 +117,19 @@ export const Header: React.FC<HeaderProps> = ({
             </Box>
 
             {/* Desktop Theme Toggle */}
-            <IconButton color="inherit" onClick={toggleTheme} sx={{ display: { xs: 'none', md: 'inline-flex' } }}>
+            <IconButton aria-label="Alternar Tema" color="inherit" onClick={toggleTheme} sx={{ display: { xs: 'none', md: 'inline-flex' } }}>
               {mode === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </IconButton>
 
-            <IconButton color="inherit" onClick={() => setIsNotifDrawerOpen(true)}>
+            <IconButton aria-label="Notificações" color="inherit" onClick={() => setIsNotifDrawerOpen(true)}>
               <Badge badgeContent={unreadCount} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}>
                 <Bell className="w-6 h-6" />
               </Badge>
             </IconButton>
 
-            <IconButton color="inherit" onClick={onOpenCart}>
+            <IconButton aria-label="Carrinho" color="inherit" onClick={onOpenCart}>
               <Badge badgeContent={cartCount} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}>
-                <ShoppingBag className="w-6 h-6" />
+                <Tote className="w-6 h-6" />
               </Badge>
             </IconButton>
           </Box>
@@ -168,8 +149,8 @@ export const Header: React.FC<HeaderProps> = ({
             sx: {
               width: { xs: '84vw', sm: 340 },
               maxWidth: 360,
-              bgcolor: '#FDF2F0',
-              color: '#3D3331',
+              bgcolor: 'var(--color-surface)',
+              color: 'var(--color-on-surface)',
               p: { xs: 2.5, sm: 3 },
               display: 'flex',
               flexDirection: 'column',
@@ -187,7 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Typography
               variant="body1"
               sx={{
-                color: '#4A3E3D',
+                color: 'var(--color-on-surface)',
                 fontWeight: 500,
                 fontSize: '16px',
                 letterSpacing: '-0.01em',
@@ -203,24 +184,24 @@ export const Header: React.FC<HeaderProps> = ({
             <List sx={{ display: 'flex', flexDirection: 'column', gap: 1, p: 0, flexGrow: 1 }}>
               {/* Financeiro */}
               {(() => {
-                const active = isTabActive('dashboard');
+                const active = isTabActive('finance');
                 return (
                   <ListItem disablePadding>
                     <ListItemButton
-                      onClick={() => handleNavClick('/admin?tab=dashboard')}
+                      onClick={() => handleNavClick('/admin?tab=finance')}
                       sx={{
                         borderRadius: '9999px',
-                        bgcolor: active ? '#FCDDD4' : 'transparent',
-                        color: active ? '#3C2218' : '#3D3534',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
                         py: 1.4,
                         px: 2.5,
                         '&:hover': {
-                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
                         }
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <DollarSign className="w-5 h-5 stroke-[2.2]" />
+                        <CurrencyDollar className="w-5 h-5 stroke-[2.2]" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Financeiro
@@ -239,17 +220,17 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleNavClick('/admin?tab=orders')}
                       sx={{
                         borderRadius: '9999px',
-                        bgcolor: active ? '#FCDDD4' : 'transparent',
-                        color: active ? '#3C2218' : '#3D3534',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
                         py: 1.4,
                         px: 2.5,
                         '&:hover': {
-                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
                         }
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Send className="w-5 h-5 stroke-2" />
+                        <PaperPlaneRight className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Pedidos
@@ -271,12 +252,12 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleNavClick('/admin?tab=calendar')}
                       sx={{
                         borderRadius: '9999px',
-                        bgcolor: active ? '#FCDDD4' : 'transparent',
-                        color: active ? '#3C2218' : '#3D3534',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
                         py: 1.4,
                         px: 2.5,
                         '&:hover': {
-                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
                         }
                       }}
                     >
@@ -300,17 +281,17 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleNavClick('/admin?tab=products')}
                       sx={{
                         borderRadius: '9999px',
-                        bgcolor: active ? '#FCDDD4' : 'transparent',
-                        color: active ? '#3C2218' : '#3D3534',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
                         py: 1.4,
                         px: 2.5,
                         '&:hover': {
-                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
                         }
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Inbox className="w-5 h-5 stroke-2" />
+                        <Tray className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Estoque
@@ -332,12 +313,12 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleNavClick('/admin?tab=delivery')}
                       sx={{
                         borderRadius: '9999px',
-                        bgcolor: active ? '#FCDDD4' : 'transparent',
-                        color: active ? '#3C2218' : '#3D3534',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
                         py: 1.4,
                         px: 2.5,
                         '&:hover': {
-                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
                         }
                       }}
                     >
@@ -364,12 +345,12 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleNavClick('/admin?tab=marketing')}
                       sx={{
                         borderRadius: '9999px',
-                        bgcolor: active ? '#FCDDD4' : 'transparent',
-                        color: active ? '#3C2218' : '#3D3534',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
                         py: 1.4,
                         px: 2.5,
                         '&:hover': {
-                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
                         }
                       }}
                     >
@@ -393,12 +374,12 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleNavClick('/admin?tab=custom-cake')}
                       sx={{
                         borderRadius: '9999px',
-                        bgcolor: active ? '#FCDDD4' : 'transparent',
-                        color: active ? '#3C2218' : '#3D3534',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
                         py: 1.4,
                         px: 2.5,
                         '&:hover': {
-                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
                         }
                       }}
                     >
@@ -422,17 +403,17 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleNavClick('/admin?tab=store-config')}
                       sx={{
                         borderRadius: '9999px',
-                        bgcolor: active ? '#FCDDD4' : 'transparent',
-                        color: active ? '#3C2218' : '#3D3534',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
                         py: 1.4,
                         px: 2.5,
                         '&:hover': {
-                          bgcolor: active ? '#FCDDD4' : 'rgba(252, 221, 212, 0.45)',
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
                         }
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                        <Settings className="w-5 h-5 stroke-2" />
+                        <Gear className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
                         Configurações
@@ -485,7 +466,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Button
               fullWidth
               variant="outlined"
-              startIcon={<LogOut className="w-5 h-5" />}
+              startIcon={<SignOut className="w-5 h-5" />}
               onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}
               sx={{
                 borderRadius: '9999px',

@@ -1,19 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SEO } from '@/src/core/ui/shared/SEO';
-import {
-  ShoppingBag,
-  CheckCircle,
-  CreditCard,
-  Truck,
-  Store,
-  Loader2,
-  ArrowLeft,
-  QrCode,
-  Copy,
-  Check,
-  Send,
-  AlertCircle
-} from 'lucide-react';
+import { Tote, CheckCircle, CreditCard, Truck, Storefront, Spinner, ArrowLeft, QrCode, Copy, Check, PaperPlaneRight, WarningCircle, Clock, Wallet, Sparkle, PlusCircle, Calendar } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/src/core/store/useCartStore';
 import { useDataStore } from '@/src/core/store/useDataStore';
@@ -21,6 +8,7 @@ import { useOrderMutations } from '@/src/core/hooks/useOrderMutations';
 import { AddressLookupForm } from '@/src/modules/profile/ui/AddressLookupForm';
 import { AddressResult } from '@/src/core/services/addressService';
 import { Order } from '@/src/core/types/index';
+import { formatCurrency } from '@/src/core/utils/formatters';
 
 export const CheckoutView: React.FC = () => {
   const navigate = useNavigate();
@@ -29,13 +17,15 @@ export const CheckoutView: React.FC = () => {
   const { handlePlaceOrder: onPlaceOrder } = useOrderMutations();
 
   const [step, setStep] = useState<'checkout' | 'confirmation'>('checkout');
+  const [newOrderId, setNewOrderId] = useState<string | null>(null);
   const [copiedPix, setCopiedPix] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Form Fields
-  const [nomeCliente, setNomeCliente] = useState(currentUser?.nome ? `${currentUser.nome} ${currentUser.sobrenome}` : '');
+  const [nomeCliente, setNomeCliente] = useState(currentUser?.nome ? `${currentUser.nome}` : '');
   const [telefoneCliente, setTelefoneCliente] = useState(currentUser?.telefone || '');
-  const [tipoEntrega, setTipoEntrega] = useState<'entrega' | 'retirada'>('entrega');
+  const { activeTable } = useCartStore();
+  const [tipoEntrega, setTipoEntrega] = useState<'entrega' | 'retirada' | 'mesa'>(activeTable ? 'mesa' : 'entrega');
   const [endereco, setEndereco] = useState(
     currentUser?.endereco_rua
       ? `${currentUser.endereco_rua}, ${currentUser.endereco_numero} - ${currentUser.endereco_bairro}, ${currentUser.endereco_cidade}`
@@ -45,6 +35,26 @@ export const CheckoutView: React.FC = () => {
   const [horarioAgendado, setHorarioAgendado] = useState('16:00 - 17:00');
   const [metodoPagamento, setMetodoPagamento] = useState<'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro_retirada'>('pix');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [useWallet, setUseWallet] = useState(false);
+
+  // Upsell state
+  const { products } = useDataStore();
+  const upsellProducts = products
+    .filter(p => !cartItems.some(c => c.product?.id === p.id) && p.preco < 20)
+    .slice(0, 3);
+  const { addToCart } = useCartStore();
+
+  const hasCustomCake = cartItems.some(item => item.customCake != null);
+  const [isAgendado, setIsAgendado] = useState(hasCustomCake);
+
+  // If a custom cake is added/removed, ensure we update the schedule requirement
+  useEffect(() => {
+    if (hasCustomCake) {
+      setIsAgendado(true);
+    }
+  }, [hasCustomCake]);
+
+  const [taxaEntregaDinamica, setTaxaEntregaDinamica] = useState<number>(12.00);
 
   // If cart is empty and not in confirmation, redirect to shop
   useEffect(() => {
@@ -55,8 +65,11 @@ export const CheckoutView: React.FC = () => {
 
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-  const taxaEntrega = cartItems.length > 0 && tipoEntrega === 'entrega' ? 12.00 : 0;
-  const totalFinal = Math.max(0, subtotal + taxaEntrega - appliedDiscount);
+  const taxaEntrega = cartItems.length > 0 && tipoEntrega === 'entrega' ? taxaEntregaDinamica : 0;
+
+  const walletDiscount = useWallet && currentUser?.walletBalance ? Math.min(subtotal + taxaEntrega - appliedDiscount, currentUser.walletBalance) : 0;
+
+  const totalFinal = Math.max(0, subtotal + taxaEntrega - appliedDiscount - walletDiscount);
 
   const pixKey = storeInfo?.pix_chave || "00020126580014BR.GOV.BCB.PIX0136cloudnine.doceria.pix@cloudnine.com520400005303986540510.005802BR5920Cloudnine Confeitaria6009Sao Paulo62070503***6304E21A";
 
@@ -72,6 +85,34 @@ export const CheckoutView: React.FC = () => {
       setFormError('Por favor, preencha seu nome e telefone.');
       return;
     }
+
+    if (storeInfo?.loja_aberta === false && !isAgendado) {
+      setFormError('A loja está fechada para novos pedidos no momento. Você ainda pode agendar sua entrega selecionando uma data e horário.');
+      return;
+    }
+
+    if (!isAgendado && storeInfo?.horario_abertura && storeInfo?.horario_fechamento) {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      
+      const [aberturaHour, aberturaMin] = storeInfo.horario_abertura.split(':').map(Number);
+      const [fechamentoHour, fechamentoMin] = storeInfo.horario_fechamento.split(':').map(Number);
+      
+      const aberturaTotal = aberturaHour * 60 + aberturaMin;
+      const fechamentoTotal = fechamentoHour * 60 + fechamentoMin;
+      
+      if (currentMinutes < aberturaTotal || currentMinutes > fechamentoTotal) {
+        setFormError(`A loja está fechada no momento. Horário de funcionamento: ${storeInfo.horario_abertura} às ${storeInfo.horario_fechamento}. Você ainda pode agendar sua entrega!`);
+        return;
+      }
+    }
+
+    const unmaskedPhone = telefoneCliente.replace(/\D/g, '');
+    if (unmaskedPhone.length < 10) {
+      setFormError('Por favor, insira um telefone válido com DDD (mínimo 10 dígitos).');
+      return;
+    }
+
     if (tipoEntrega === 'entrega' && (!endereco.trim() || endereco.length < 10)) {
       setFormError('Por favor, forneça um endereço completo para entrega.');
       return;
@@ -91,33 +132,33 @@ export const CheckoutView: React.FC = () => {
     }
 
     const newOrder = {
-      id: Math.floor(1000 + Math.random() * 9000),
+      id: Math.floor(Math.random() * 1000000).toString(),
       created_at: new Date().toISOString(),
       cliente_id: currentUser?.id || 'guest',
       cliente_nome: nomeCliente,
-      cliente_telefone: telefoneCliente,
+      cliente_telefone: unmaskedPhone,
       total: totalFinal,
       status: metodoPagamento === 'pix' ? 'pendente_pix' as const : 'em_preparo' as const,
       metodo_pagamento: metodoPagamento,
       tipo_entrega: tipoEntrega,
-      data_agendada: dataAgendada,
-      horario_agendado: horarioAgendado,
-      endereco_entreg: tipoEntrega === 'entrega' ? endereco : 'Retirada no Balcão Cloudnine',
-      itens: cartItems.map((i, idx) => {
-        const itemTitle = i.product?.nome || (i.customCake ? `Bolo Personalizado ${i.customCake.tamanho}` : 'Doce Especial');
-        return {
-          id: idx,
-          nomeProduto: itemTitle,
-          quantidade: i.quantity,
-          preco_unitario: i.unitPrice,
-          detalhesCustomizados: i.customNote || (i.customCake ? `${i.customCake.massa} + ${i.customCake.recheio1}` : undefined)
-        };
-      })
-    };
+      endereco_entreg: tipoEntrega === 'entrega' ? endereco : (tipoEntrega === 'mesa' ? `Mesa ${activeTable}` : 'Retirada na Loja'),
+      numero_mesa: activeTable || undefined,
+      data_agendada: isAgendado ? dataAgendada : undefined,
+      horario_agendado: isAgendado ? horarioAgendado : undefined,
+      itens: cartItems.map((item, index) => ({
+        id: index + 1,
+        produto_id: item.product?.id || 'custom',
+        nomeProduto: item.product?.nome || 'Bolo Personalizado',
+        quantidade: item.quantity,
+        preco_unitario: item.unitPrice,
+        detalhesCustomizados: item.customCake ? `Massa: ${item.customCake.massa}, Recheio: ${item.customCake.recheio1}` : item.customNote
+      }))
+    } as Order;
 
     if (onPlaceOrder) {
       onPlaceOrder(newOrder);
     }
+    setNewOrderId(String(newOrder.id));
     setStep('confirmation');
   };
 
@@ -165,9 +206,9 @@ export const CheckoutView: React.FC = () => {
                   Identificação
                 </h2>
                 {formError && (
-                  <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-sm font-bold flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    {formError}
+                  <div className="flex items-center space-x-2 text-rose-600 bg-rose-50 p-3 rounded-xl text-sm font-bold animate-in slide-in-from-top-2">
+                    <WarningCircle className="w-4 h-4 shrink-0" />
+                    <span>{formError}</span>
                   </div>
                 )}
                 <div className="space-y-4">
@@ -203,103 +244,208 @@ export const CheckoutView: React.FC = () => {
               </section>
 
               {/* Seção: Entrega */}
+              {!activeTable ? (
+                <section className="bg-white dark:bg-(--color-surface-container-low) rounded-3xl p-6 shadow-sm border border-(--color-outline-variant)/20">
+                  <h2 className="text-lg font-extrabold mb-4 text-(--color-on-surface) flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-(--color-primary) text-white flex items-center justify-center text-xs">2</span>
+                    Como deseja receber?
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setTipoEntrega('entrega')}
+                      className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${tipoEntrega === 'entrega'
+                        ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
+                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
+                        }`}
+                    >
+                      <Truck className="w-6 h-6" />
+                      <span>Entrega ({formatCurrency(taxaEntregaDinamica)})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTipoEntrega('retirada')}
+                      className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${tipoEntrega === 'retirada'
+                        ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
+                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
+                        }`}
+                    >
+                      <Storefront className="w-6 h-6" />
+                      <span>Retirada Grátis</span>
+                    </button>
+                  </div>
+
+                  {tipoEntrega === 'entrega' && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                      <label className="font-bold text-sm text-(--color-on-surface-variant) block mb-1.5">
+                        Endereço de Entrega
+                      </label>
+                      <AddressLookupForm
+                        initialCep={currentUser?.endereco_cep || ''}
+                        initialLogradouro={currentUser?.endereco_rua || ''}
+                        initialNumero={currentUser?.endereco_numero || ''}
+                        initialBairro={currentUser?.endereco_bairro || ''}
+                        initialCidade={currentUser?.endereco_cidade || ''}
+                        initialUf={currentUser?.endereco_uf || ''}
+                        initialComplemento={currentUser?.endereco_complemento || ''}
+                        compact={true}
+                        onAddressChange={(addr: AddressResult) => {
+                          const formatted = addr.formattedAddress || `${addr.logradouro}, ${addr.numero || ''} - ${addr.bairro}, ${addr.cidade} - ${addr.uf} (CEP: ${addr.cep})`;
+                          setEndereco(formatted);
+                          
+                          if (storeInfo?.taxas_entrega && storeInfo.taxas_entrega.length > 0) {
+                            const found = storeInfo.taxas_entrega.find(t => 
+                              t.bairro.toLowerCase().trim() === (addr.bairro || '').toLowerCase().trim()
+                            );
+                            if (found) {
+                              setTaxaEntregaDinamica(found.taxa);
+                            } else {
+                              // Se não achou, pega a taxa do primeiro ou zera
+                              setTaxaEntregaDinamica(storeInfo.taxas_entrega[0].taxa);
+                            }
+                          } else {
+                            if (addr.cep) {
+                              const suffix = addr.cep.split('-')[1];
+                              if (suffix) {
+                                const base = parseInt(suffix.substring(0,2), 10);
+                                setTaxaEntregaDinamica(8 + (base % 15));
+                              }
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                </section>
+              ) : (
+                <section className="bg-purple-600 rounded-3xl p-6 shadow-sm border border-purple-500 text-white">
+                  <h2 className="text-lg font-extrabold flex items-center gap-2">
+                    🍽️ Consumo no Local
+                  </h2>
+                  <p className="mt-2 text-purple-100 text-sm">
+                    Você está na <strong>Mesa {activeTable}</strong>. O seu pedido será preparado e servido diretamente para você. Nenhuma taxa de entrega será cobrada.
+                  </p>
+                </section>
+              )}
+
               <section className="bg-white dark:bg-(--color-surface-container-low) rounded-3xl p-6 shadow-sm border border-(--color-outline-variant)/20">
-                <h2 className="text-lg font-extrabold mb-4 text-(--color-on-surface) flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-(--color-primary) text-white flex items-center justify-center text-xs">2</span>
-                  Como deseja receber?
-                </h2>
+                <h3 className="font-bold text-[var(--color-on-surface)] mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-[var(--color-primary)]" />
+                  Prazo do Pedido
+                </h3>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                   <button
                     type="button"
-                    onClick={() => setTipoEntrega('entrega')}
-                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${tipoEntrega === 'entrega'
-                        ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
-                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
-                      }`}
+                    disabled={hasCustomCake}
+                    onClick={() => setIsAgendado(false)}
+                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-1 transition-all relative overflow-hidden ${!isAgendado
+                      ? 'bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] border-[var(--color-primary)]'
+                      : 'bg-transparent text-[var(--color-on-surface-variant)] border-[var(--color-outline-variant)]/30 hover:border-[var(--color-primary)]/50'
+                      } ${hasCustomCake ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                   >
-                    <Truck className="w-6 h-6" />
-                    <span>Entrega (R$ 12,00)</span>
+                    <Clock className="w-6 h-6 mb-1" />
+                    <span>Para Agora</span>
+                    <span className="text-xs font-medium opacity-80">(Em aprox. 40 min)</span>
+                    {hasCustomCake && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-surface)]/80 backdrop-blur-[2px]">
+                        <span className="text-[10px] bg-red-100 text-red-700 px-2 py-1 rounded-full text-center leading-tight">
+                          Indisponível (Você tem bolo sob encomenda)
+                        </span>
+                      </div>
+                    )}
                   </button>
+
                   <button
                     type="button"
-                    onClick={() => setTipoEntrega('retirada')}
-                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${tipoEntrega === 'retirada'
-                        ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
-                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
+                    onClick={() => setIsAgendado(true)}
+                    className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-1 transition-all ${isAgendado
+                      ? 'bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] border-[var(--color-primary)]'
+                      : 'bg-transparent text-[var(--color-on-surface-variant)] border-[var(--color-outline-variant)]/30 hover:border-[var(--color-primary)]/50'
                       }`}
                   >
-                    <Store className="w-6 h-6" />
-                    <span>Retirada Grátis</span>
+                    <Calendar className="w-6 h-6 mb-1" />
+                    <span>Agendar para Depois</span>
+                    <span className="text-xs font-medium opacity-80">(Data e Hora marcada)</span>
                   </button>
                 </div>
 
-                {tipoEntrega === 'entrega' && (
-                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                    <label className="font-bold text-sm text-(--color-on-surface-variant) block mb-1.5">
-                      Endereço de Entrega
-                    </label>
-                    <AddressLookupForm
-                      initialCep={currentUser?.endereco_cep || ''}
-                      initialLogradouro={currentUser?.endereco_rua || ''}
-                      initialNumero={currentUser?.endereco_numero || ''}
-                      initialBairro={currentUser?.endereco_bairro || ''}
-                      initialCidade={currentUser?.endereco_cidade || ''}
-                      initialUf={currentUser?.endereco_uf || ''}
-                      initialComplemento={currentUser?.endereco_complemento || ''}
-                      compact={true}
-                      onAddressChange={(addr: AddressResult) => {
-                        const formatted = addr.formattedAddress || `${addr.logradouro}, ${addr.numero || ''} - ${addr.bairro}, ${addr.cidade} - ${addr.uf} (CEP: ${addr.cep})`;
-                        setEndereco(formatted);
-                      }}
-                    />
+                {isAgendado && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 p-5 bg-[var(--color-surface-container-low)] rounded-2xl border border-[var(--color-outline-variant)]/40">
+                    <div>
+                      <label htmlFor="dataAgendada" className="font-bold text-sm text-(--color-on-surface-variant) block mb-1.5">
+                        Data
+                      </label>
+                      <input
+                        id="dataAgendada"
+                        type="date"
+                        value={dataAgendada}
+                        onChange={(e) => setDataAgendada(e.target.value)}
+                        className="w-full p-3.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/50 text-base focus:outline-none focus:ring-2 focus:ring-(--color-primary)"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="horarioAgendado" className="font-bold text-sm text-(--color-on-surface-variant) block mb-1.5">
+                        Horário
+                      </label>
+                      <select
+                        id="horarioAgendado"
+                        value={horarioAgendado}
+                        onChange={(e) => setHorarioAgendado(e.target.value)}
+                        className="w-full p-3.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/50 text-base focus:outline-none focus:ring-2 focus:ring-(--color-primary)"
+                      >
+                        <option value="10:00 - 12:00">10:00 - 12:00</option>
+                        <option value="14:00 - 16:00">14:00 - 16:00</option>
+                        <option value="16:00 - 17:00">16:00 - 17:00</option>
+                        <option value="18:00 - 19:30">18:00 - 19:30</option>
+                      </select>
+                    </div>
                   </div>
                 )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                  <div>
-                    <label htmlFor="dataAgendada" className="font-bold text-sm text-(--color-on-surface-variant) block mb-1.5">
-                      Data
-                    </label>
-                    <input
-                      id="dataAgendada"
-                      type="date"
-                      value={dataAgendada}
-                      onChange={(e) => setDataAgendada(e.target.value)}
-                      className="w-full p-3.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/50 text-base focus:outline-none focus:ring-2 focus:ring-(--color-primary)"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="horarioAgendado" className="font-bold text-sm text-(--color-on-surface-variant) block mb-1.5">
-                      Horário
-                    </label>
-                    <select
-                      id="horarioAgendado"
-                      value={horarioAgendado}
-                      onChange={(e) => setHorarioAgendado(e.target.value)}
-                      className="w-full p-3.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/50 text-base focus:outline-none focus:ring-2 focus:ring-(--color-primary)"
-                    >
-                      <option value="10:00 - 12:00">10:00 - 12:00</option>
-                      <option value="14:00 - 16:00">14:00 - 16:00</option>
-                      <option value="16:00 - 17:00">16:00 - 17:00</option>
-                      <option value="18:00 - 19:30">18:00 - 19:30</option>
-                    </select>
-                  </div>
-                </div>
               </section>
 
+              {/* UPSell Section */}
+              {upsellProducts.length > 0 && (
+                <section className="bg-amber-50 dark:bg-amber-950/20 rounded-3xl p-6 shadow-sm border border-amber-200 dark:border-amber-900/50">
+                  <h2 className="text-base font-extrabold mb-3 text-amber-800 dark:text-amber-400 flex items-center gap-2">
+                    <Sparkle className="w-5 h-5" />
+                    Que tal adicionar ao pedido?
+                  </h2>
+                  <div className="flex gap-4 overflow-x-auto pb-2 snap-x hide-scrollbar w-full max-w-[100vw]">
+                    {upsellProducts.map(up => (
+                      <div key={up.id} className="min-w-[200px] bg-white dark:bg-(--color-surface-container-low) p-3 rounded-2xl border border-(--color-outline-variant)/20 shadow-xs snap-start flex flex-col gap-2">
+                        <img src={up.image_url} alt={up.nome} className="w-full h-24 object-cover rounded-xl" />
+                        <div>
+                          <p className="font-bold text-sm text-(--color-on-surface) truncate">{up.nome}</p>
+                          <p className="font-black text-amber-600 text-sm">{formatCurrency(up.preco)}</p>
+                        </div>
+                        <button
+                          onClick={() => addToCart({ product: up, quantity: 1, unitPrice: up.preco, customNote: undefined })}
+                          className="mt-auto w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-colors"
+                        >
+                          <PlusCircle className="w-4 h-4" /> Adicionar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               {/* Seção: Pagamento */}
-              <section className="bg-white dark:bg-(--color-surface-container-low) rounded-3xl p-6 shadow-sm border border-(--color-outline-variant)/20 mb-8">
+              <section className="bg-white dark:bg-(--color-surface-container-low) rounded-3xl p-6 shadow-sm border border-(--color-outline-variant)/20">
                 <h2 className="text-lg font-extrabold mb-4 text-(--color-on-surface) flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-(--color-primary) text-white flex items-center justify-center text-xs">3</span>
-                  Pagamento
+                  <span className="w-6 h-6 rounded-full bg-(--color-primary) text-white flex items-center justify-center text-xs">
+                    {!activeTable ? '3' : '2'}
+                  </span>
+                  Como deseja pagar?
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                   <button
                     type="button"
                     onClick={() => setMetodoPagamento('pix')}
                     className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${metodoPagamento === 'pix'
-                        ? 'bg-emerald-50 text-emerald-800 border-emerald-500 dark:bg-emerald-950 dark:text-emerald-300'
-                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-emerald-500/50'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-500 dark:bg-emerald-950 dark:text-emerald-300'
+                      : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-emerald-500/50'
                       }`}
                   >
                     <QrCode className="w-6 h-6" />
@@ -309,8 +455,8 @@ export const CheckoutView: React.FC = () => {
                     type="button"
                     onClick={() => setMetodoPagamento('cartao_credito')}
                     className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${metodoPagamento === 'cartao_credito'
-                        ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
-                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
+                      ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
+                      : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
                       }`}
                   >
                     <CreditCard className="w-6 h-6" />
@@ -333,7 +479,7 @@ export const CheckoutView: React.FC = () => {
             <div className="lg:col-span-5">
               <div className="sticky top-24 bg-white dark:bg-(--color-surface-container-low) rounded-3xl p-6 shadow-md border border-(--color-outline-variant)/20">
                 <h3 className="text-xl font-black text-(--color-on-surface) mb-4 flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5 text-(--color-primary)" />
+                  <Tote className="w-5 h-5 text-(--color-primary)" />
                   Resumo do Pedido
                 </h3>
 
@@ -346,7 +492,7 @@ export const CheckoutView: React.FC = () => {
                         </h4>
                       </div>
                       <span className="font-extrabold text-sm text-(--color-primary) shrink-0">
-                        R$ {(item.unitPrice * item.quantity).toFixed(2).replace('.', ',')}
+                        {formatCurrency(item.unitPrice * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -355,7 +501,7 @@ export const CheckoutView: React.FC = () => {
                 <div className="border-t border-(--color-outline-variant)/30 pt-4 space-y-2 text-sm text-(--color-on-surface-variant)">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span className="font-bold">R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                    <span className="font-bold">{formatCurrency(subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Taxa de Entrega</span>
@@ -363,8 +509,36 @@ export const CheckoutView: React.FC = () => {
                   </div>
                   {appliedDiscount > 0 && (
                     <div className="flex justify-between text-emerald-600">
-                      <span>Desconto</span>
-                      <span className="font-bold">- R$ {appliedDiscount.toFixed(2).replace('.', ',')}</span>
+                      <span>Desconto Promocional</span>
+                      <span className="font-bold">- {formatCurrency(appliedDiscount)}</span>
+                    </div>
+                  )}
+
+                  {currentUser?.walletBalance && currentUser.walletBalance > 0 && (
+                    <div className="pt-2 mt-2 border-t border-(--color-outline-variant)/10">
+                      <label className="flex items-start justify-between cursor-pointer p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-900/50">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={useWallet}
+                            onChange={(e) => setUseWallet(e.target.checked)}
+                            className="mt-1 w-4 h-4 text-emerald-600 rounded"
+                          />
+                          <div>
+                            <p className="font-bold text-sm text-emerald-800 dark:text-emerald-400 flex items-center gap-1">
+                              <Wallet className="w-4 h-4" /> Usar Saldo de Cashback
+                            </p>
+                            <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">
+                              Você tem {formatCurrency(currentUser.walletBalance)} disponível
+                            </p>
+                          </div>
+                        </div>
+                        {useWallet && walletDiscount > 0 && (
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                            - {formatCurrency(walletDiscount)}
+                          </span>
+                        )}
+                      </label>
                     </div>
                   )}
                 </div>
@@ -372,7 +546,7 @@ export const CheckoutView: React.FC = () => {
                 <div className="border-t border-(--color-outline-variant)/30 pt-4 mt-4 flex justify-between items-end">
                   <span className="font-bold text-base text-(--color-on-surface)">Total Final</span>
                   <span className="font-black text-2xl text-(--color-primary)">
-                    R$ {totalFinal.toFixed(2).replace('.', ',')}
+                    {formatCurrency(totalFinal)}
                   </span>
                 </div>
 
@@ -385,7 +559,7 @@ export const CheckoutView: React.FC = () => {
                   {isProcessingPayment ? (
                     <>
                       <span>Processando...</span>
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Spinner className="w-5 h-5 animate-spin" />
                     </>
                   ) : (
                     <>
@@ -453,20 +627,27 @@ export const CheckoutView: React.FC = () => {
               </div>
               <div className="flex justify-between items-center text-sm pt-2 border-t border-(--color-outline-variant)/20">
                 <span className="text-(--color-on-surface-variant)">Total:</span>
-                <span className="font-black text-(--color-primary) text-lg">R$ {totalFinal.toFixed(2).replace('.', ',')}</span>
+                <span className="font-black text-(--color-primary) text-lg">{formatCurrency(totalFinal)}</span>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
               <a
-                href={`https://wa.me/5511999990000?text=${encodeURIComponent(`Olá Cloudnine! Fiz o pedido no site no valor de R$ ${totalFinal.toFixed(2).replace('.', ',')}`)}`}
+                href={`https://wa.me/5511999990000?text=${encodeURIComponent(`Olá Cloudnine! Fiz o pedido no site no valor de ${formatCurrency(totalFinal)}`)}`}
                 target="_blank"
                 rel="noreferrer"
                 className="py-4 px-6 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white font-black text-base flex items-center justify-center space-x-2 shadow-md transition-transform hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
               >
-                <Send className="w-5 h-5" />
+                <PaperPlaneRight className="w-5 h-5" />
                 <span>Enviar Comprovante WhatsApp</span>
               </a>
+
+              <button
+                onClick={() => navigate(`/pedido/${newOrderId}`)}
+                className="py-4 px-6 rounded-full bg-(--color-primary) text-(--color-on-primary) font-black text-base shadow-md transition-transform hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+              >
+                Acompanhar Pedido
+              </button>
 
               <button
                 onClick={() => navigate('/')}

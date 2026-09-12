@@ -1,5 +1,6 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React from 'react';
-import { Printer } from 'lucide-react';
+import { Printer } from '@phosphor-icons/react';
 import { Order } from '@/src/core/types/index';
 
 interface AdminPrintModalProps {
@@ -20,7 +21,7 @@ export const AdminPrintModal: React.FC<AdminPrintModalProps> = ({
   onClose
 }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
       <div className="bg-white text-black p-6 rounded-2xl max-w-sm w-full font-mono text-xs space-y-3 shadow-2xl printable-receipt">
 
         {/* Controls Bar inside preview modal (hidden when printing) */}
@@ -90,7 +91,7 @@ export const AdminPrintModal: React.FC<AdminPrintModalProps> = ({
 
           <div className="flex justify-between font-black text-xs pt-0.5">
             <span>TOTAL A PAGAR</span>
-            <span>R$ {Number(printingOrder.total).toFixed(2)}</span>
+            <span>{formatCurrency(Number(printingOrder.total))}</span>
           </div>
 
           <div className="pt-2 text-center border-t border-dashed border-black space-y-1">

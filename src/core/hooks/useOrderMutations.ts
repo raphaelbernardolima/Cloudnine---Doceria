@@ -1,132 +1,216 @@
 import { Order, AuditLog } from '@/src/core/types';
+import { formatCurrency } from '@/src/core/utils/formatters';
 import { getSupabaseClient } from '@/src/core/services/supabase';
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { useCartStore } from '@/src/core/store/useCartStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 import { sendOrderStatusNotification, requestNotificationPermission } from '@/src/core/services/notificationService';
 
 export function useOrderMutations() {
   const handlePlaceOrder = async (newOrderData: Partial<Order>) => {
     requestNotificationPermission().catch(() => { });
     
-    const { currentUser, loyaltySettings, orders, setOrders, auditLogs, setAuditLogs, setCurrentUser } = useDataStore.getState();
-    const { clearCart, setAppliedDiscount } = useCartStore.getState();
+    if (!navigator.onLine) {
+      useUIStore.getState().showToast('Você está offline. Verifique sua conexão antes de finalizar o pedido.');
+      return;
+    }
 
-    const fullOrder: Order = {
-      id: newOrderData.id || Math.floor(1000 + Math.random() * 9000),
-      created_at: new Date().toISOString(),
-      cliente_id: currentUser?.id || 'usr-guest',
-      cliente_nome: newOrderData.cliente_nome || currentUser?.nome || 'Cliente Cloudnine',
-      cliente_telefone: newOrderData.cliente_telefone || currentUser?.telefone || '',
-      total: newOrderData.total || 0,
-      status: newOrderData.status || 'em_preparo',
-      metodo_pagamento: newOrderData.metodo_pagamento || 'pix',
-      tipo_entrega: newOrderData.tipo_entrega || 'entrega',
-      data_agendada: newOrderData.data_agendada,
-      horario_agendado: newOrderData.horario_agendado,
-      endereco_entreg: newOrderData.endereco_entreg || '',
-      itens: newOrderData.itens || []
-    };
+    try {
+      const { currentUser, loyaltySettings, auditLogs, setAuditLogs, setCurrentUser } = useDataStore.getState();
+      const { cartItems: cartItemsState, clearCart, setAppliedDiscount, appliedDiscount, appliedCouponCode } = useCartStore.getState();
 
-    const client = getSupabaseClient();
-    if (client) {
-      const pedidoDB = {
-        cliente_id: fullOrder.cliente_id !== 'usr-guest' ? fullOrder.cliente_id : null,
-        cliente_nome: fullOrder.cliente_nome,
-        cliente_telefone: fullOrder.cliente_telefone,
-        metodo_pagamento: fullOrder.metodo_pagamento,
-        tipo_entrega: fullOrder.tipo_entrega,
-        data_agendada: fullOrder.data_agendada || null,
-        horario_agendado: fullOrder.horario_agendado || null,
-        total: fullOrder.total,
-        status: fullOrder.status,
-        endereco_entreg: fullOrder.endereco_entreg
+      const orderDataToSubmit = {
+        cliente_id: currentUser?.id || 'guest',
+        cliente_nome: newOrderData.cliente_nome || currentUser?.nome || 'Cliente Cloudnine',
+        cliente_telefone: newOrderData.cliente_telefone || currentUser?.telefone || '',
+        metodo_pagamento: newOrderData.metodo_pagamento || 'pix',
+        tipo_entrega: newOrderData.tipo_entrega || 'entrega',
+        data_agendada: newOrderData.data_agendada,
+        horario_agendado: newOrderData.horario_agendado,
+        endereco_entreg: newOrderData.endereco_entreg || '',
+        appliedDiscount: appliedDiscount,
+        cupom_usado: appliedCouponCode
       };
 
-      const { data, error } = await client.from('pedidos').insert([pedidoDB]).select();
-      if (!error && data && data.length > 0) {
-        fullOrder.id = data[0].id;
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cartItems: cartItemsState, orderData: orderDataToSubmit })
+      });
 
-        if (fullOrder.itens.length > 0) {
-          const itensDB = fullOrder.itens.map(item => ({
-            pedido_id: fullOrder.id,
-            produto_id: typeof item.produto_id === 'number' ? item.produto_id : null,
-            quantidade: item.quantidade,
-            preco_unitario: item.preco_unitario,
-            nome_produto: item.nomeProduto || item.nome,
-            detalhes_customizados: item.detalhesCustomizados
-          }));
-          await client.from('itens_pedidos').insert(itensDB);
-        }
+      const result = await response.json();
 
-        if (fullOrder.cliente_id !== 'usr-guest') {
-          const pontosGanhos = Math.floor(fullOrder.total * (loyaltySettings?.pontosPorReal || 1));
-          if (pontosGanhos > 0) {
-            await client.from('historico_fidelidade').insert([{
-              cliente_id: fullOrder.cliente_id,
-              tipo: 'ganho',
-              pontos: pontosGanhos,
-              descricao: 'Compra na loja',
-              pedido_id: fullOrder.id
-            }]);
-            
-            if (currentUser) {
-              const novosPontos = (currentUser.pontosFidelidade || 0) + pontosGanhos;
-              await client.from('Perfis').update({ pontos_fidelidade: novosPontos }).eq('id', currentUser.id);
-              setCurrentUser({ ...currentUser, pontosFidelidade: novosPontos });
-            }
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro ao processar checkout');
+      }
+
+      // Member get Member (Indique e Ganhe): Recompensa o dono do código usado
+      const client = getSupabaseClient();
+      if (client && appliedCouponCode) {
+        // Tenta achar um perfil com este codigo_indicacao
+        const { data: referrerProfile } = await client
+          .from('Perfis')
+          .select('*')
+          .ilike('codigo_indicacao', appliedCouponCode)
+          .maybeSingle();
+
+        if (referrerProfile) {
+          // Dá R$ 5 de cashback para quem indicou
+          const novoSaldo = (referrerProfile.walletBalance || 0) + 5;
+          await client.from('Perfis').update({ walletBalance: novoSaldo }).eq('id', referrerProfile.id);
+          
+          // Se o dono do código for o usuário atual (mesmo não sendo ideal usar o próprio código, testamos localmente)
+          if (currentUser?.id === referrerProfile.id) {
+            setCurrentUser({ ...currentUser, walletBalance: novoSaldo });
           }
         }
-      } else {
-        console.error("Erro ao inserir pedido", error);
       }
+
+      // Supabase realtime will catch the new order and update the state, but we can clear the cart immediately.
+      clearCart();
+      setAppliedDiscount(0, null);
+
+      // We skip manual loyalty insertion here because it ideally should be done on the backend.
+      // But for audit logs, we'll keep the frontend register for demonstration.
+      const novoLog: AuditLog = {
+        id: Date.now(),
+        created_at: new Date().toISOString(),
+        admin_id: currentUser?.id || 'system',
+        admin_nome: currentUser?.nome || 'Cliente',
+        acao: 'NOVO_PEDIDO',
+        detalhes: `Novo pedido #${result.orderId} realizado por ${orderDataToSubmit.cliente_nome} no valor de ${formatCurrency(result.totalCalculado)}`
+      };
+
+      if (client) {
+        await client.from('logs_auditoria').insert([{
+          acao: novoLog.acao,
+          detalhes: novoLog.detalhes,
+          admin_id: currentUser?.id || null
+        }]);
+      }
+
+      setAuditLogs([novoLog, ...auditLogs]);
+      useUIStore.getState().showToast('Pedido realizado com sucesso!');
+      
+    } catch (err: any) {
+      console.error("Erro ao realizar pedido:", err);
+      useUIStore.getState().showToast(`Erro ao processar o pedido: ${err.message || 'Falha na conexão com o banco de dados.'}`);
     }
-
-    setOrders([fullOrder, ...orders]);
-    clearCart();
-    setAppliedDiscount(0);
-
-    const novoLog: AuditLog = {
-      id: Date.now(),
-      created_at: new Date().toISOString(),
-      admin_id: currentUser?.id || 'system',
-      admin_nome: currentUser?.nome || 'Cliente',
-      acao: 'NOVO_PEDIDO',
-      detalhes: `Novo pedido #${fullOrder.id} realizado por ${fullOrder.cliente_nome} no valor de R$ ${fullOrder.total.toFixed(2)}`
-    };
-
-    if (client) {
-      await client.from('logs_auditoria').insert([{
-        acao: novoLog.acao,
-        detalhes: novoLog.detalhes,
-        admin_id: currentUser?.id || null
-      }]);
-    }
-
-    setAuditLogs([novoLog, ...auditLogs]);
   };
 
   const handleUpdateOrderStatus = async (orderId: number | string, newStatus: Order['status']) => {
-    const { orders, setOrders } = useDataStore.getState();
-    const targetOrder = orders.find(o => o.id === orderId);
-    const client = getSupabaseClient();
-    if (client) {
-      await client.from('pedidos').update({ status: newStatus }).eq('id', orderId);
+    if (!navigator.onLine) {
+      useUIStore.getState().showToast('Você está offline. Não é possível atualizar o status agora.');
+      return;
     }
-    setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
 
-    if (newStatus === 'saiu_entrega' || newStatus === 'entregue') {
-      sendOrderStatusNotification(orderId, newStatus, targetOrder?.cliente_nome);
+    try {
+      const { orders, setOrders } = useDataStore.getState();
+      const targetOrder = orders.find(o => o.id === orderId);
+      const client = getSupabaseClient();
+      
+      if (client) {
+        const { error } = await client.from('pedidos').update({ status: newStatus }).eq('id', orderId);
+        if (error) throw new Error(error.message);
+      }
+      
+      setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
+      // SPLIT DE PAGAMENTO PARA ENTREGADORES
+      if (newStatus === 'entregue' && targetOrder && targetOrder.tipo_entrega === 'entrega' && targetOrder.entregador_id) {
+        const { drivers, setDrivers, expenses, setExpenses } = useDataStore.getState();
+        const driver = drivers.find(d => d.id === targetOrder.entregador_id);
+        
+        if (driver) {
+          // Increment Driver Earnings
+          const taxa = driver.taxaPorEntrega || 5.00;
+          setDrivers(drivers.map(d => 
+            d.id === driver.id 
+              ? { ...d, pedidosEntregues: d.pedidosEntregues + 1, totalGanhos: d.totalGanhos + taxa, status: 'disponivel' } 
+              : d
+          ));
+          
+          // Lança a taxa de entrega como Despesa automaticamente no financeiro
+          const newExpense = {
+            id: Date.now().toString(),
+            descricao: `Frete (Repasse) - Pedido #${targetOrder.id} - ${driver.nome}`,
+            valor: taxa,
+            data: new Date().toISOString().split('T')[0],
+            categoria: 'Logística / Fretes'
+          };
+          setExpenses([...expenses, newExpense as any]);
+        }
+      }
+
+      if (newStatus === 'saiu_entrega' || newStatus === 'entregue') {
+        sendOrderStatusNotification(orderId, newStatus, targetOrder?.cliente_nome);
+      }
+    } catch (err: any) {
+      console.error("Erro ao atualizar status:", err);
+      useUIStore.getState().showToast(`Erro ao atualizar status: ${err.message || 'Falha na conexão.'}`);
     }
   };
 
   const handleAssignDriver = async (orderId: number | string, driverId: string) => {
-    const { orders, setOrders } = useDataStore.getState();
-    const client = getSupabaseClient();
-    if (client) {
-      await client.from('pedidos').update({ entregador_id: driverId }).eq('id', orderId);
+    if (!navigator.onLine) {
+      useUIStore.getState().showToast('Você está offline. Não é possível atribuir entregador agora.');
+      return;
     }
-    setOrders(orders.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o));
+
+    try {
+      const { orders, setOrders } = useDataStore.getState();
+      const client = getSupabaseClient();
+      
+      if (client) {
+        const { error } = await client.from('pedidos').update({ entregador_id: driverId }).eq('id', orderId);
+        if (error) throw new Error(error.message);
+      }
+      
+      setOrders(orders.map(o => o.id === orderId ? { ...o, entregador_id: driverId } : o));
+      useUIStore.getState().showToast('Entregador atribuído com sucesso!');
+    } catch (err: any) {
+      console.error("Erro ao atribuir entregador:", err);
+      useUIStore.getState().showToast(`Erro ao atribuir entregador: ${err.message || 'Falha na conexão.'}`);
+    }
   };
 
-  return { handlePlaceOrder, handleUpdateOrderStatus, handleAssignDriver };
+  const handleSubmitReview = async (orderId: number | string, rating: number, comment: string) => {
+    try {
+      const { orders, setOrders, products, setProducts } = useDataStore.getState();
+      const targetOrder = orders.find(o => o.id === orderId);
+      if (!targetOrder) return;
+
+      const newReview = { rating, comment, date: new Date().toISOString() };
+      
+      // Update Order
+      setOrders(orders.map(o => o.id === orderId ? { ...o, avaliacao: newReview } : o));
+
+      // Update Products inside the order to contain the review for social proof
+      const updatedProducts = products.map(p => {
+        const isProductInOrder = targetOrder.itens.some(item => item.produto_id === p.id);
+        if (isProductInOrder) {
+          const productReview = {
+            id: Date.now().toString() + p.id,
+            userId: targetOrder.cliente_id,
+            userName: targetOrder.cliente_nome,
+            rating,
+            comment,
+            date: newReview.date
+          };
+          const existingReviews = p.avaliacoes || [];
+          return { ...p, avaliacoes: [productReview, ...existingReviews] };
+        }
+        return p;
+      });
+      
+      setProducts(updatedProducts);
+
+      useUIStore.getState().showToast('Avaliação enviada com sucesso! Muito obrigado!');
+    } catch (err: any) {
+      console.error("Erro ao enviar avaliação:", err);
+      useUIStore.getState().showToast(`Erro ao enviar avaliação: ${err.message}`);
+    }
+  };
+
+  return { handlePlaceOrder, handleUpdateOrderStatus, handleAssignDriver, handleSubmitReview };
 }

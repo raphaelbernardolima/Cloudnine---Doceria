@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Card, CardMedia, CardContent, CardActions, Typography, Box, Button as MuiButton, IconButton } from '@mui/material';
-import { Package, Plus, Trash2, Edit, AlertCircle, ChefHat, Receipt } from 'lucide-react';
+import { Package, Plus, Trash, Pencil, WarningCircle, CookingPot, Receipt, Tag } from '@phosphor-icons/react';
+import { formatCurrency } from '@/src/core/utils/formatters';
 import type { Product, Ingredient, RecipeItem } from '@/src/core/types/index';
+import { useDataStore } from '@/src/core/store/useDataStore';
+import { useUIStore } from '@/src/core/store/useUIStore';
 import { AdminRecipeModal } from './AdminRecipeModal';
 import { AdminQuickPriceModal } from './AdminQuickPriceModal';
 
@@ -27,9 +30,33 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
   onUpdateIngredientStock,
   onDeleteIngredient
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'products' | 'ingredients'>('products');
+  const { categories, setCategories } = useDataStore();
+  const [activeSubTab, setActiveSubTab] = useState<'products' | 'ingredients' | 'categories'>('products');
   const [selectedProductForRecipe, setSelectedProductForRecipe] = useState<Product | null>(null);
   const [showQuickPriceModal, setShowQuickPriceModal] = useState(false);
+  const { expenses, setExpenses } = useDataStore();
+  const { showToast } = useUIStore();
+
+  const handleRegistrarDesperdicio = () => {
+    const descricao = window.prompt("O que foi perdido/vencido?");
+    if (!descricao) return;
+    const valorStr = window.prompt("Qual o custo estimado dessa perda? (Apenas números, ex: 15.50)");
+    if (!valorStr) return;
+    const valor = parseFloat(valorStr);
+    if (isNaN(valor)) {
+      alert("Valor inválido.");
+      return;
+    }
+    const newExpense = {
+      id: Date.now().toString(),
+      descricao: `Desperdício: ${descricao}`,
+      valor: valor,
+      data: new Date().toISOString().split('T')[0],
+      categoria: 'Custo Fixo/Operacional'
+    };
+    setExpenses([...expenses, newExpense as any]);
+    showToast(`Desperdício de R$ ${valor.toFixed(2)} registrado com sucesso.`);
+  };
 
   // Dummy form states for quick ingredient add
   const [ingNome, setIngNome] = useState('');
@@ -47,6 +74,18 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
       estoqueMinimo: 1000 // default 1kg/1L
     });
     setIngNome(''); setIngCusto(''); setIngEstoque('');
+  };
+
+  const [newCat, setNewCat] = useState('');
+  const handleAddCat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newCat.trim() && !categories.includes(newCat.trim())) {
+      setCategories([...categories, newCat.trim()]);
+      setNewCat('');
+    }
+  };
+  const handleRemoveCat = (cat: string) => {
+    setCategories(categories.filter(c => c !== cat));
   };
 
   return (
@@ -68,11 +107,59 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
             onClick={() => setActiveSubTab('ingredients')}
             className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${activeSubTab === 'ingredients' ? 'bg-amber-500 text-white shadow-xs' : 'text-(--color-on-surface-variant)'}`}
           >
-            <ChefHat className="w-4 h-4" />
+            <CookingPot className="w-4 h-4" />
             Insumos & Ficha Técnica
+          </button>
+          <button
+            onClick={() => setActiveSubTab('categories')}
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${activeSubTab === 'categories' ? 'bg-purple-500 text-white shadow-xs' : 'text-(--color-on-surface-variant)'}`}
+          >
+            <Tag className="w-4 h-4" />
+            Categorias
           </button>
         </div>
       </div>
+
+      {activeSubTab === 'categories' && (
+        <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
+          <div className="bg-(--color-surface-container-lowest) p-6 rounded-3xl border border-(--color-outline-variant)/30 shadow-xs">
+            <h4 className="font-bold text-base text-(--color-on-surface) mb-4">Adicionar Nova Categoria</h4>
+            <form onSubmit={handleAddCat} className="flex gap-2">
+              <input
+                type="text"
+                required
+                value={newCat}
+                onChange={(e) => setNewCat(e.target.value)}
+                placeholder="Ex: Brownies"
+                className="flex-1 p-3 rounded-xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <button type="submit" className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm transition-colors flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Adicionar
+              </button>
+            </form>
+          </div>
+          
+          <div className="bg-(--color-surface-container-lowest) p-6 rounded-3xl border border-(--color-outline-variant)/30 shadow-xs">
+            <h4 className="font-bold text-base text-(--color-on-surface) mb-4">Categorias Atuais</h4>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((c) => (
+                <div key={c} className="flex items-center gap-2 bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 px-3 py-1.5 rounded-full text-sm font-medium text-(--color-on-surface)">
+                  {c}
+                  {c !== 'Todos' && (
+                    <button onClick={() => handleRemoveCat(c)} className="text-rose-500 hover:bg-rose-100 p-1 rounded-full transition-colors">
+                      <Trash className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-(--color-on-surface-variant) mt-4">
+              A categoria "Todos" não pode ser removida pois é a visualização padrão da vitrine.
+            </p>
+          </div>
+        </div>
+      )}
 
       {activeSubTab === 'products' && (
         <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
@@ -93,11 +180,18 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
                   sx={{ objectFit: 'cover', height: 160 }}
                 />
                 <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-                  <Typography gutterBottom variant="subtitle1" component="div" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-                    {p.nome}
-                  </Typography>
+                  <div className="flex items-start justify-between">
+                    <Typography gutterBottom variant="subtitle1" component="div" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                      {p.nome}
+                    </Typography>
+                    {p.estoque <= 5 && (
+                      <span className="px-1.5 py-0.5 bg-rose-100 text-rose-600 rounded-md text-[10px] font-black flex items-center shrink-0 ml-2">
+                        <WarningCircle className="w-3 h-3 mr-1" /> Baixo
+                      </span>
+                    )}
+                  </div>
                   <Typography variant="body2" color="primary.main" sx={{ fontWeight: 'bold', mb: 2 }}>
-                    R$ {p.preco.toFixed(2).replace('.', ',')}
+                    {formatCurrency(p.preco)}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: 'surfaceContainerHigh', p: 1, borderRadius: 2 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
@@ -116,14 +210,14 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
                 <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2, pt: 0 }}>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton size="small" color="primary" sx={{ bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main', color: 'white' } }}>
-                      <Edit className="w-4 h-4" />
+                      <Pencil className="w-4 h-4" />
                     </IconButton>
                     <IconButton size="small" color="secondary" onClick={() => setSelectedProductForRecipe(p)} sx={{ bgcolor: 'secondary.light', '&:hover': { bgcolor: 'secondary.main', color: 'white' } }} title="Ficha Técnica">
                       <Receipt className="w-4 h-4" />
                     </IconButton>
                   </Box>
-                  <IconButton size="small" color="error" onClick={() => onDeleteProduct(p.id)} sx={{ bgcolor: 'error.light', '&:hover': { bgcolor: 'error.main', color: 'white' } }}>
-                    <Trash2 className="w-4 h-4" />
+                  <IconButton aria-label="Excluir produto" size="small" color="error" onClick={() => { if(window.confirm('Tem certeza que deseja excluir este produto?')) onDeleteProduct(p.id) }} sx={{ bgcolor: 'error.light', '&:hover': { bgcolor: 'error.main', color: 'white' } }}>
+                    <Trash className="w-4 h-4" />
                   </IconButton>
                 </CardActions>
               </Card>
@@ -143,6 +237,14 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
               sx={{ borderRadius: 2, fontWeight: 'bold', boxShadow: 'none' }}
             >
               Atualização Rápida de Preços
+            </MuiButton>
+            <MuiButton
+              variant="contained"
+              color="error"
+              onClick={handleRegistrarDesperdicio}
+              sx={{ borderRadius: 2, fontWeight: 'bold', boxShadow: 'none', ml: 2 }}
+            >
+              Registrar Desperdício/Perda
             </MuiButton>
           </div>
 
@@ -171,8 +273,8 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
 
           {/* Ingredient List */}
           <div className="bg-(--color-surface-container-lowest) rounded-3xl border border-(--color-outline-variant)/30 overflow-hidden shadow-xs">
-            <table className="w-full text-left text-xs">
-              <thead>
+            <table className="w-full text-left text-xs block sm:table">
+              <thead className="hidden sm:table-header-group">
                 <tr className="bg-(--color-surface-container-low) border-b border-(--color-outline-variant)/20 text-sm uppercase font-bold text-(--color-outline)">
                   <th className="py-3 px-4">Insumo</th>
                   <th className="py-3 px-4">Custo Un.</th>
@@ -180,36 +282,40 @@ export const AdminInventoryModule: React.FC<AdminInventoryModuleProps> = ({
                   <th className="py-3 px-4 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="block sm:table-row-group space-y-4 sm:space-y-0 sm:divide-y divide-[var(--color-outline-variant)]/10 p-4 sm:p-0">
                 {ingredients.map(ing => {
                   const isLow = ing.estoqueAtual <= ing.estoqueMinimo;
                   return (
-                    <tr key={ing.id} className="border-b border-(--color-outline-variant)/10 hover:bg-(--color-surface-container-lowest)/50 transition-colors">
-                      <td className="py-3 px-4 font-bold flex items-center gap-2">
-                        {isLow && <AlertCircle className="w-4 h-4 text-rose-500" />}
-                        {ing.nome}
+                    <tr key={ing.id} className="block sm:table-row bg-[var(--color-surface-container-lowest)] sm:bg-transparent rounded-2xl border sm:border-0 border-[var(--color-outline-variant)]/20 shadow-xs sm:shadow-none p-4 sm:p-0 hover:bg-(--color-surface-container-lowest)/50 transition-colors">
+                      <td className="flex sm:table-cell justify-between items-center py-2 sm:py-3 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]/10 before:content-['Insumo'] before:sm:hidden before:font-bold before:text-[var(--color-on-surface-variant)]">
+                        <span className="font-bold flex items-center gap-2">
+                          {isLow && <WarningCircle className="w-4 h-4 text-rose-500" />}
+                          {ing.nome}
+                        </span>
                       </td>
-                      <td className="py-3 px-4">R$ {ing.custoPorUnidade.toFixed(2)} / {ing.unidadeMedida}</td>
-                      <td className="py-3 px-4">
+                      <td className="flex sm:table-cell justify-between items-center py-2 sm:py-3 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]/10 before:content-['Custo_Un.'] before:sm:hidden before:font-bold before:text-[var(--color-on-surface-variant)]">
+                        {formatCurrency(ing.custoPorUnidade)} / {ing.unidadeMedida}
+                      </td>
+                      <td className="flex sm:table-cell justify-between items-center py-2 sm:py-3 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]/10 before:content-['Estoque'] before:sm:hidden before:font-bold before:text-[var(--color-on-surface-variant)]">
                         <div className="flex items-center gap-2">
-                          <button onClick={() => onUpdateIngredientStock(ing.id, Math.max(0, ing.estoqueAtual - 100))} className="p-1 bg-(--color-surface-container-high) rounded-md font-bold">-</button>
+                          <button onClick={() => onUpdateIngredientStock(ing.id, Math.max(0, ing.estoqueAtual - 100))} className="p-1 bg-(--color-surface-container-high) rounded-md font-bold" aria-label="Reduzir estoque">-</button>
                           <span className={`w-16 text-center font-black ${isLow ? 'text-rose-500' : 'text-(--color-on-surface)'}`}>
                             {ing.estoqueAtual} {ing.unidadeMedida}
                           </span>
-                          <button onClick={() => onUpdateIngredientStock(ing.id, ing.estoqueAtual + 100)} className="p-1 bg-(--color-surface-container-high) rounded-md font-bold">+</button>
+                          <button onClick={() => onUpdateIngredientStock(ing.id, ing.estoqueAtual + 100)} className="p-1 bg-(--color-surface-container-high) rounded-md font-bold" aria-label="Aumentar estoque">+</button>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <button onClick={() => onDeleteIngredient(ing.id)} className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors">
-                          <Trash2 className="w-4 h-4" />
+                      <td className="flex sm:table-cell justify-between items-center py-3 sm:py-3 px-0 sm:px-4 text-right sm:border-b border-[var(--color-outline-variant)]/10 before:content-['Ações'] before:sm:hidden before:font-bold before:text-[var(--color-on-surface-variant)] border-t border-[var(--color-outline-variant)]/10 sm:border-t-0 mt-2 sm:mt-0 pt-3 sm:pt-3">
+                        <button onClick={() => { if(window.confirm('Tem certeza que deseja excluir este insumo?')) onDeleteIngredient(ing.id) }} className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors" aria-label="Excluir insumo">
+                          <Trash className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
                   );
                 })}
                 {ingredients.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="py-8 text-center text-xs text-(--color-outline) font-bold italic">Nenhum insumo cadastrado.</td>
+                  <tr className="block sm:table-row">
+                    <td colSpan={4} className="block sm:table-cell py-8 px-4 text-center text-xs text-(--color-outline) font-bold italic">Nenhum insumo cadastrado.</td>
                   </tr>
                 )}
               </tbody>

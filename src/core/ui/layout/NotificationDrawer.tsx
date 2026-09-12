@@ -1,6 +1,6 @@
 import React from 'react';
 import { Drawer, Box, Typography, IconButton, List, ListItem, ListItemText, ListItemIcon, Divider } from '@mui/material';
-import { X, Bell, CheckCircle2, Circle } from 'lucide-react';
+import { X, Bell, CheckCircle, Circle } from '@phosphor-icons/react';
 import { useUIStore } from '@/src/core/store/useUIStore';
 
 interface NotificationDrawerProps {
@@ -27,7 +27,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
     >
       <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'outlineVariant' }}>
         <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Bell className="w-5 h-5 text-[var(--color-primary)]" />
+          <Bell className="w-5 h-5 text-(--color-primary)" />
           Notificações
         </Typography>
         <IconButton onClick={onClose} edge="end">
@@ -46,8 +46,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
             <React.Fragment key={notif.id}>
               <ListItem
                 alignItems="flex-start"
-                sx={{ 
-                  py: 2, 
+                sx={{
+                  py: 2,
                   px: 3,
                   bgcolor: notif.lida ? 'transparent' : 'primaryContainer',
                   transition: 'background-color 0.3s ease',
@@ -56,16 +56,16 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
                 secondaryAction={
                   !notif.lida && (
                     <IconButton edge="end" size="small" onClick={() => markNotificationAsRead(notif.id)} title="Marcar como lida">
-                      <Circle className="w-4 h-4 text-[var(--color-primary)] fill-current" />
+                      <Circle className="w-4 h-4 text-(--color-primary) fill-current" />
                     </IconButton>
                   )
                 }
               >
                 <ListItemIcon sx={{ minWidth: 40 }}>
                   {notif.lida ? (
-                    <CheckCircle2 className="w-5 h-5 text-[var(--color-outline)]" />
+                    <CheckCircle className="w-5 h-5 text-(--color-outline)" />
                   ) : (
-                    <Bell className="w-5 h-5 text-[var(--color-primary)]" />
+                    <Bell className="w-5 h-5 text-(--color-primary)" />
                   )}
                 </ListItemIcon>
                 <ListItemText

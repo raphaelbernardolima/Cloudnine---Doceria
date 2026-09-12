@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SEO } from '@/src/core/ui/shared/SEO';
 import { ProductCard, ProductSkeleton } from './ProductCard';
-import { Sparkles, Cake, Gift, Search, SlidersHorizontal } from 'lucide-react';
+import { HeroCarousel } from './HeroCarousel';
+import { Sparkle, Cake, Gift, MagnifyingGlass, SlidersHorizontal, MagnifyingGlassMinus } from '@phosphor-icons/react';
 import { Product } from '@/src/core/types/index';
 import { Box, Typography, Button, TextField, InputAdornment, Grid, Chip, Stack, IconButton, alpha } from '@mui/material';
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { useCartStore } from '@/src/core/store/useCartStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { isStoreOpen } from '@/src/core/utils/timeUtils';
+import { useUIStore } from '@/src/core/store/useUIStore';
 
 interface ShopViewProps {
   isLoadingProducts: boolean;
@@ -21,14 +24,25 @@ export function ShopView({
   onNavigateLoyalty,
   onOpenQuickView
 }: ShopViewProps) {
-  const { banners, products } = useDataStore();
-  const { addToCart } = useCartStore();
+  const { banners, products, categories } = useDataStore();
+  const { cartItems, addToCart, activeTable, setActiveTable, lastUpdated } = useCartStore();
+  const { showToast } = useUIStore();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const categories = ['Todos', 'Brigadeiros', 'Bolos de Pote', 'Macarons', 'Tortas & Mousse', 'Kits & Presentes'];
+  const { storeInfo } = useDataStore();
+  const storeOpen = isStoreOpen(storeInfo?.horario_abertura, storeInfo?.horario_fechamento, storeInfo?.loja_aberta);
+
+  useEffect(() => {
+    const mesa = searchParams.get('mesa');
+    if (mesa) {
+      setActiveTable(mesa);
+    }
+  }, [searchParams, setActiveTable]);
+
   const activeBanners = banners.filter(b => b.ativo);
 
   const filteredProducts = products.filter(p => {
@@ -42,6 +56,50 @@ export function ShopView({
     addToCart({ product, quantity, customNote: undefined, unitPrice: product.preco });
   };
 
+  useEffect(() => {
+    if (cartItems.length > 0 && lastUpdated) {
+      const timeDiff = new Date().getTime() - new Date(lastUpdated).getTime();
+      // Se passou mais de 10 minutos (600000ms) desde a última vez que o carrinho foi atualizado
+      if (timeDiff > 600000) {
+        showToast('Seus doces estão te esperando! Termine o pedido agora e receba logo! 🧁');
+      }
+    }
+  }, []); // Run once on mount
+
+  useEffect(() => {
+    const action = searchParams.get('action');
+    const category = searchParams.get('category');
+    const productId = searchParams.get('product');
+    const mesa = searchParams.get('mesa');
+
+    if (mesa) {
+      setActiveTable(mesa);
+    }
+
+    if (action === 'custom-cake') {
+      onOpenCustomCake();
+      setSearchParams({});
+    } else if (action === 'loyalty') {
+      onNavigateLoyalty();
+      setSearchParams({});
+    }
+
+    if (category && categories.includes(category)) {
+      setSelectedCategory(category);
+      // Optional: clear param after setting so it doesn't get stuck
+      // setSearchParams({}); 
+      // But keeping it might be nice for shareable links!
+    }
+
+    if (productId) {
+      const p = products.find(prod => prod.id === productId);
+      if (p) {
+        onOpenQuickView(p);
+        setSearchParams({}); // Clear so modal can be closed without getting stuck
+      }
+    }
+  }, [searchParams, onOpenCustomCake, onNavigateLoyalty, categories, products, onOpenQuickView, setSearchParams]);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6, pb: 8, animation: 'fadeIn 0.5s ease-out' }}>
       <SEO 
@@ -49,106 +107,40 @@ export function ShopView({
         description="Navegue pelo nosso cardápio e encomende os melhores bolos personalizados e doces de luxo." 
       />
 
-      {/* Banners Carousel */}
-      {activeBanners.length > 0 && (
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            gap: 2, 
-            overflowX: 'auto', 
-            pb: 1,
-            mx: -2,
-            px: 2,
-            scrollSnapType: 'x mandatory',
-            '&::-webkit-scrollbar': { display: 'none' }
-          }}
-        >
-          {activeBanners.map(banner => (
-            <Box 
-              key={banner.id}
-              onClick={() => banner.link ? navigate(banner.link) : null}
-              sx={{ 
-                minWidth: { xs: '85vw', sm: '400px' },
-                height: { xs: '160px', sm: '220px' },
-                borderRadius: 4,
-                overflow: 'hidden',
-                scrollSnapAlign: 'center',
-                flexShrink: 0,
-                cursor: banner.link ? 'pointer' : 'default',
-                boxShadow: 2,
-                position: 'relative',
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 6,
-                  '& .banner-overlay': {
-                    opacity: 0.7
-                  },
-                  '& .cta-btn': {
-                    transform: 'scale(1.05)'
-                  }
-                }
-              }}
-            >
-              <img src={banner.image_url} alt="Promoção" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              
-              {banner.cta_text && (
-                <>
-                  {/* Dark gradient overlay */}
-                  <Box 
-                    className="banner-overlay"
-                    sx={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 100%)',
-                      opacity: 0.5,
-                      transition: 'opacity 0.3s ease'
-                    }} 
-                  />
-                  {/* CTA Button placed at bottom left */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 16,
-                      left: 16,
-                      right: 16,
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      justifyContent: 'flex-start'
-                    }}
-                  >
-                    <Button
-                      className="cta-btn"
-                      variant="contained"
-                      size="small"
-                      sx={{
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        fontWeight: 'bold',
-                        borderRadius: 3,
-                        px: 3,
-                        py: 1,
-                        textTransform: 'none',
-                        transition: 'all 0.2s ease',
-                        boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
-                        '&:hover': {
-                          bgcolor: 'primary.dark'
-                        }
-                      }}
-                      onClick={(e) => {
-                        if (banner.link) {
-                          e.stopPropagation();
-                          navigate(banner.link);
-                        }
-                      }}
-                    >
-                      {banner.cta_text}
-                    </Button>
-                  </Box>
-                </>
+      {!storeOpen && (
+        <Box sx={{ px: 2 }}>
+          <div className="bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 p-4 rounded-2xl shadow-sm flex items-start gap-3">
+            <span className="text-2xl">😴</span>
+            <div>
+              <h3 className="font-black text-sm uppercase tracking-wide">Estamos descansando!</h3>
+              <p className="text-sm mt-0.5 opacity-90">Nossa loja está fechada no momento. Você ainda pode adicionar itens ao carrinho e fazer <strong>pedidos agendados</strong> para quando estivermos abertos.</p>
+              {storeInfo?.horario_abertura && storeInfo?.horario_fechamento && (
+                <p className="text-xs font-bold mt-2 bg-red-500/10 px-2 py-1 rounded inline-block">
+                  Horário: {storeInfo.horario_abertura} às {storeInfo.horario_fechamento}
+                </p>
               )}
-            </Box>
-          ))}
+            </div>
+          </div>
+        </Box>
+      )}
+
+      {/* Banners Carousel */}
+      <HeroCarousel banners={banners} />
+
+      {activeTable && (
+        <Box sx={{ px: 2 }}>
+          <div className="bg-purple-600 text-white p-4 rounded-3xl shadow-md flex items-center justify-between">
+            <div>
+              <h3 className="font-black text-lg">🍽️ Mesa {activeTable}</h3>
+              <p className="text-purple-100 text-sm">Os pedidos feitos aqui serão entregues diretamente na sua mesa.</p>
+            </div>
+            <button 
+              onClick={() => setActiveTable(null)}
+              className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-colors"
+            >
+              Trocar Mesa
+            </button>
+          </div>
         </Box>
       )}
 
@@ -226,13 +218,14 @@ export function ShopView({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search className="w-5 h-5 text-(--color-outline)" />
+                    <MagnifyingGlass className="w-5 h-5 text-(--color-outline)" />
                   </InputAdornment>
                 ),
               }
             }}
           />
           <IconButton
+            aria-label="Abrir filtros"
             sx={{
               border: '1px solid',
               borderColor: 'outlineVariant',
@@ -276,13 +269,43 @@ export function ShopView({
       </Grid>
 
       {!isLoadingProducts && filteredProducts.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="subtitle1" color="text.primary" gutterBottom>
-            Nenhum doce encontrado nesta categoria
+        <Box sx={{ 
+          textAlign: 'center', 
+          py: 10, 
+          px: 2, 
+          backgroundColor: 'surfaceContainerLowest', 
+          borderRadius: 4, 
+          border: '1px dashed',
+          borderColor: 'outlineVariant' 
+        }}>
+          <Box sx={{ 
+            width: 80, 
+            height: 80, 
+            borderRadius: '50%', 
+            bgcolor: 'error.light', 
+            color: 'error.main', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            mx: 'auto', 
+            mb: 3,
+            opacity: 0.8
+          }}>
+            <MagnifyingGlassMinus className="w-10 h-10" />
+          </Box>
+          <Typography variant="h5" color="text.primary" sx={{ fontWeight: 800, mb: 1 }}>
+            Nenhum doce encontrado
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Tente buscar por outro termo ou escolha outra categoria do cardápio.
+          <Typography variant="body2" color="text.secondary" sx={{ maxW: 400, mx: 'auto' }}>
+            Não encontramos nenhum produto para "{searchQuery}" nesta categoria. Tente buscar por outro termo ou limpe os filtros.
           </Typography>
+          <Button 
+            variant="outlined" 
+            sx={{ mt: 3, borderRadius: 2 }}
+            onClick={() => { setSearchQuery(''); setSelectedCategory('Todos'); }}
+          >
+            Limpar Busca
+          </Button>
         </Box>
       )}
 

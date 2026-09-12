@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Shield, Key, CheckCircle, AlertCircle, LogIn, UserPlus } from 'lucide-react';
+import { X, Envelope, Shield, Key, CheckCircle, WarningCircle, SignIn, UserPlus } from '@phosphor-icons/react';
 import { signInWithSupabase, signUpWithSupabase, getSupabaseConfig } from '@/src/core/services/supabase';
 import { UserProfile } from '@/src/core/types/index';
 
@@ -152,7 +152,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Required Role Warning Notice if redirected */}
         {requiredRoleMessage && (
           <div className="mx-6 mt-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+            <WarningCircle className="w-4 h-4 shrink-0 text-amber-600" />
             <span>{requiredRoleMessage}</span>
           </div>
         )}
@@ -192,7 +192,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {errorMessage && (
             <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-center space-x-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+              <WarningCircle className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -209,7 +209,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div>
                 <label className="font-bold text-[var(--color-on-surface)] block mb-1">E-mail</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-outline)]" />
+                  <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-outline)]" />
                   <input
                     type="email"
                     required
@@ -241,13 +241,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 disabled={loading}
                 className="w-full py-3 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-xs flex items-center justify-center space-x-2 shadow-md hover:opacity-95 transition-all mt-2 min-h-[44px]"
               >
-                <LogIn className="w-4 h-4" />
+                <SignIn className="w-4 h-4" />
                 <span>{loading ? 'Acessando...' : 'Entrar na Conta'}</span>
               </button>
             </form>
           ) : (
             <form onSubmit={handleRegister} className="space-y-3.5">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col sm:grid sm:grid-cols-2 gap-2">
                 <div>
                   <label className="font-bold text-[var(--color-on-surface)] block mb-1">Nome</label>
                   <input

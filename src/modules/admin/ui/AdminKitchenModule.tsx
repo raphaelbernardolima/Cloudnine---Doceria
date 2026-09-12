@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Card, CardContent, Typography, Divider, ToggleButtonGroup, ToggleButton, FormControl, Select, MenuItem, Button, Chip } from '@mui/material';
-import { Printer, ShoppingBag } from 'lucide-react';
+import { Printer, Tote } from '@phosphor-icons/react';
 import { Order } from '@/src/core/types/index';
 
 interface AdminKitchenModuleProps {
@@ -237,7 +237,7 @@ export const AdminKitchenModule: React.FC<AdminKitchenModuleProps> = ({
                         setReceiptType('cliente');
                         onPrintOrder(o);
                       }}
-                      startIcon={<ShoppingBag className="w-4 h-4" />}
+                      startIcon={<Tote className="w-4 h-4" />}
                       sx={{
                         bgcolor: 'var(--color-secondary)',
                         color: 'var(--color-on-secondary)',

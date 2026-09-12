@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Chip } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from '@phosphor-icons/react';
 import { AuditLog } from '@/src/core/types/index';
 
 interface AdminAuditLogsModuleProps {

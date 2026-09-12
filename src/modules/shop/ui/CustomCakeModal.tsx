@@ -1,38 +1,8 @@
+import { formatCurrency } from '@/src/core/utils/formatters';
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Cake, Check, ChevronRight, Gift, MessageSquare, Image as ImageIcon, ArrowLeft } from 'lucide-react';
+import { X, Sparkle, Cake, Check, CaretRight, Gift, ChatCircle, Image as ImageIcon, ArrowLeft } from '@phosphor-icons/react';
 import { CustomCakeBuilder, CustomCakeConfig, CustomCakeOption } from '@/src/core/types/index';
 import { CloudinaryUploader } from '@/src/core/ui/shared/CloudinaryUploader';
-
-const DEFAULT_CONFIG: CustomCakeConfig = {
-  tamanhos: [
-    { id: 't1', label: 'P (10 fatias)', preco_base: 95.00 },
-    { id: 't2', label: 'M (20 fatias)', preco_base: 165.00 },
-    { id: 't3', label: 'G (30 fatias)', preco_base: 230.00 },
-    { id: 't4', label: '2 Andares (45 fatias)', preco_base: 360.00 },
-  ],
-  massas: [
-    { id: 'm1', label: 'Pão de Ló Baunilha', preco_adicional: 0 },
-    { id: 'm2', label: 'Chocolate Cacau 100%', preco_adicional: 0 },
-    { id: 'm3', label: 'Red Velvet', preco_adicional: 15.00 },
-    { id: 'm4', label: 'Nozes com Especiarias', preco_adicional: 15.00 },
-  ],
-  recheios: [
-    { id: 'r1', label: 'Brigadeiro Belga', preco_adicional: 0 },
-    { id: 'r2', label: 'Ninho Cremoso', preco_adicional: 0 },
-    { id: 'r3', label: 'Doce de Leite com Avelã', preco_adicional: 0 },
-    { id: 'r4', label: 'Cream Cheese com Frutas Vermelhas', preco_adicional: 0 },
-    { id: 'r5', label: 'Pistache Bronte', preco_adicional: 25.00 },
-    { id: 'r6', label: 'Mousse de Maracujá', preco_adicional: 0 },
-    { id: 'r7', label: 'Geleia Caseira de Morango', preco_adicional: 0 },
-    { id: 'r8', label: 'Ganache Meio Amargo', preco_adicional: 0 },
-  ],
-  coberturas: [
-    { id: 'c1', label: 'Chantininho Aveludado', preco_adicional: 0 },
-    { id: 'c2', label: 'Buttercream Suíço', preco_adicional: 0 },
-    { id: 'c3', label: 'Dressed Cake Chocolate', preco_adicional: 0 },
-    { id: 'c4', label: 'Espatulado Rústico', preco_adicional: 0 },
-  ]
-};
 
 interface CustomCakeModalProps {
   isOpen: boolean;
@@ -45,16 +15,16 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
   isOpen,
   onClose,
   onAddCustomCake,
-  config = DEFAULT_CONFIG
+  config = { tamanhos: [], massas: [], recheios: [], coberturas: [] }
 }) => {
   const [step, setStep] = useState(1);
   const totalSteps = 5;
 
-  const [tamanho, setTamanho] = useState<string>(config.tamanhos[0]?.label || '');
-  const [massa, setMassa] = useState<string>(config.massas[0]?.label || '');
-  const [recheio1, setRecheio1] = useState<string>(config.recheios[0]?.label || '');
+  const [tamanho, setTamanho] = useState<string>(config?.tamanhos?.[0]?.label || '');
+  const [massa, setMassa] = useState<string>(config?.massas?.[0]?.label || '');
+  const [recheio1, setRecheio1] = useState<string>(config?.recheios?.[0]?.label || '');
   const [recheio2, setRecheio2] = useState<string>('Sem 2º recheio');
-  const [cobertura, setCobertura] = useState<string>(config.coberturas[0]?.label || '');
+  const [cobertura, setCobertura] = useState<string>(config?.coberturas?.[0]?.label || '');
   const [mensagemBolo, setMensagemBolo] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [fotoReferenciaUrl, setFotoReferenciaUrl] = useState<string>('');
@@ -62,10 +32,43 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setStep(1);
+      if (config?.tamanhos?.length) setTamanho(config.tamanhos[0].label);
+      if (config?.massas?.length) setMassa(config.massas[0].label);
+      if (config?.recheios?.length) setRecheio1(config.recheios[0].label);
+      if (config?.coberturas?.length) setCobertura(config.coberturas[0].label);
+      setRecheio2('Sem 2º recheio');
+      setMensagemBolo('');
+      setObservacoes('');
+      setFotoReferenciaUrl('');
     }
-  }, [isOpen]);
+  }, [isOpen, config]);
 
   if (!isOpen) return null;
+
+  const isConfigEmpty = !config || (!config.tamanhos?.length && !config.massas?.length && !config.recheios?.length && !config.coberturas?.length);
+
+  if (isConfigEmpty) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-(--color-surface) w-full max-w-md rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-(--color-outline-variant)/30 relative p-8 text-center items-center">
+          <div className="w-24 h-24 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mb-6">
+            <Cake className="w-12 h-12 text-rose-500" />
+          </div>
+          <h3 className="text-2xl font-black text-(--color-on-surface) mb-3">Ops! Sem opções disponíveis</h3>
+          <p className="text-sm text-(--color-on-surface-variant) mb-8">
+            No momento, não temos nenhuma opção de bolo personalizado disponível para encomenda. 
+            Por favor, tente novamente mais tarde ou confira nossos doces à pronta entrega!
+          </p>
+          <button
+            onClick={onClose}
+            className="w-full py-4 rounded-2xl bg-(--color-primary) text-white font-black text-lg flex items-center justify-center shadow-lg transition-all hover:bg-(--color-primary)/90"
+          >
+            Voltar ao Início
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const calculateTotalPrice = () => {
     let price = 0;
@@ -118,7 +121,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
           <div className="px-6 py-5 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-xl bg-(--color-primary) text-(--color-on-primary) flex items-center justify-center shadow-md">
-                <Sparkles className="w-5 h-5" />
+                <Sparkle className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-xl font-black tracking-tight text-(--color-on-surface)">Montar Bolo</h2>
@@ -164,7 +167,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                       {tamanho === t.label && <Check className="w-5 h-5 text-(--color-primary)" />}
                     </div>
                     <div className="text-xs opacity-80">
-                      R$ {(t.preco_base || t.preco_adicional || 0).toFixed(2)}
+                      {formatCurrency(t.preco_base || t.preco_adicional || 0)}
                     </div>
                   </button>
                 ))}
@@ -193,7 +196,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                       {massa === m.label && <Check className="w-5 h-5 text-(--color-primary)" />}
                     </div>
                     {(m.preco_adicional || 0) > 0 && (
-                      <span className="block text-xs opacity-80">+ R$ {(m.preco_adicional || 0).toFixed(2)}</span>
+                      <span className="block text-xs opacity-80">+ {formatCurrency(m.preco_adicional || 0)}</span>
                     )}
                   </button>
                 ))}
@@ -210,7 +213,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
               
               <div className="space-y-4">
                 <label className="font-extrabold text-sm text-(--color-on-surface) block bg-rose-50 dark:bg-rose-950/30 p-2 rounded-lg px-4 border border-rose-100 dark:border-rose-900/50">1º Recheio</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3">
                   {config.recheios.map((r) => (
                     <button
                       key={r.id}
@@ -221,7 +224,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                         }`}
                     >
                       <span className="block">{r.label}</span>
-                      {(r.preco_adicional || 0) > 0 && <span className="block text-[10px] opacity-80 mt-1">+ R$ {(r.preco_adicional || 0).toFixed(2)}</span>}
+                      {(r.preco_adicional || 0) > 0 && <span className="block text-[10px] opacity-80 mt-1">+ {formatCurrency(r.preco_adicional || 0)}</span>}
                     </button>
                   ))}
                 </div>
@@ -229,7 +232,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
 
               <div className="space-y-4">
                 <label className="font-extrabold text-sm text-(--color-on-surface) block bg-orange-50 dark:bg-orange-950/30 p-2 rounded-lg px-4 border border-orange-100 dark:border-orange-900/50">2º Recheio (Opcional)</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3">
                   <button
                     onClick={() => setRecheio2('Sem 2º recheio')}
                     className={`p-3 rounded-2xl border text-xs font-bold text-center transition-all ${recheio2 === 'Sem 2º recheio'
@@ -249,7 +252,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                         }`}
                     >
                       <span className="block">{r.label}</span>
-                      {(r.preco_adicional || 0) > 0 && <span className="block text-[10px] opacity-80 mt-1">+ R$ {(r.preco_adicional || 0).toFixed(2)}</span>}
+                      {(r.preco_adicional || 0) > 0 && <span className="block text-[10px] opacity-80 mt-1">+ {formatCurrency(r.preco_adicional || 0)}</span>}
                     </button>
                   ))}
                 </div>
@@ -278,7 +281,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                       {cobertura === c.label && <Check className="w-5 h-5 text-(--color-primary)" />}
                     </div>
                     {(c.preco_adicional || 0) > 0 && (
-                      <span className="block text-xs opacity-80">+ R$ {(c.preco_adicional || 0).toFixed(2)}</span>
+                      <span className="block text-xs opacity-80">+ {formatCurrency(c.preco_adicional || 0)}</span>
                     )}
                   </button>
                 ))}
@@ -319,16 +322,18 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
 
               <div className="space-y-3">
                 <label className="font-extrabold text-sm flex items-center space-x-2 text-(--color-on-surface)">
-                  <MessageSquare className="w-4 h-4 text-(--color-primary)" />
+                  <ChatCircle className="w-4 h-4 text-(--color-primary)" />
                   <span>Observações Adicionais</span>
                 </label>
                 <textarea
                   value={observacoes}
-                  onChange={(e) => setObservacoes(e.target.value)}
+                  onChange={(e) => setObservacoes(e.target.value.slice(0, 200))}
                   placeholder="Cores, tema ou detalhes específicos..."
                   rows={3}
+                  maxLength={200}
                   className="w-full p-4 rounded-2xl border border-(--color-outline-variant)/40 bg-(--color-surface-container-lowest) text-sm focus:outline-none focus:border-(--color-primary) focus:ring-1 focus:ring-(--color-primary) transition-all resize-none"
                 />
+                <span className="text-[10px] text-(--color-outline) text-right block">{observacoes.length}/200</span>
               </div>
 
               <div className="space-y-3">
@@ -351,7 +356,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
         <div className="p-4 sm:p-6 border-t border-(--color-outline-variant)/20 bg-(--color-surface-container-lowest) shrink-0 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm font-bold text-(--color-on-surface-variant)">Total:</span>
-            <span className="text-2xl font-black text-(--color-primary)">R$ {currentPrice.toFixed(2)}</span>
+            <span className="text-2xl font-black text-(--color-primary)">{formatCurrency(currentPrice)}</span>
           </div>
 
           <div className="flex gap-3">
@@ -370,7 +375,7 @@ export const CustomCakeModal: React.FC<CustomCakeModalProps> = ({
                 className="flex-1 py-4 rounded-2xl bg-(--color-primary) hover:bg-(--color-primary)/90 text-white font-black text-lg flex items-center justify-center space-x-2 shadow-lg transition-all"
               >
                 <span>Próximo Passo</span>
-                <ChevronRight className="w-5 h-5" />
+                <CaretRight className="w-5 h-5" />
               </button>
             ) : (
               <button
