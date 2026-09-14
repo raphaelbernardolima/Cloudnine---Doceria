@@ -3,12 +3,32 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { createClient } from "@supabase/supabase-js";
+import rateLimit from "express-rate-limit";
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   app.use(express.json());
+
+  // 🛡️ Global Rate Limiter: Protege a aplicação inteira (Max 500 requisições / 15 min por IP)
+  const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 500, 
+    message: { error: "Muitas requisições originadas deste IP. Por favor, aguarde alguns minutos e tente novamente." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use(globalLimiter);
+
+  // 🔒 Checkout Limiter: Proteção extrema na rota de pagamento (Max 20 checkouts / 1 hora por IP)
+  // Isso evita spam de pedidos falsos e exaustão da API do Mercado Pago
+  const checkoutLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hora
+    max: 20, 
+    message: { error: "Limite de tentativas de checkout atingido. Por segurança, tente novamente em uma hora." }
+  });
+  app.use("/api/checkout", checkoutLimiter);
 
   // Helper function to get service role client
   const getAdminSupabase = () => {
