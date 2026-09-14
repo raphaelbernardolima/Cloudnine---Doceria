@@ -5,7 +5,7 @@ import {
   Divider, Accordion, AccordionSummary, AccordionDetails, Switch, 
   FormControlLabel, MenuItem, Select, Chip, OutlinedInput, InputLabel, FormControl
 } from '@mui/material';
-import { Plus, Trash, FloppyDisk, Cake, Sparkle, CaretDown, Star, WarningCircle, Drop } from '@phosphor-icons/react';
+import { Plus, Trash, FloppyDisk, Cake, Sparkle, CaretDown, Star, WarningCircle, Drop, Spinner } from '@phosphor-icons/react';
 
 interface AdminCustomCakeModuleProps {
   config: CustomCakeConfig;
