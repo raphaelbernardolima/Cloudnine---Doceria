@@ -1,3 +1,5 @@
+import { createNotificationInDB } from '@/src/core/services/supabase';
+
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) {
     console.warn('Este navegador não suporta notificações Push.');
@@ -16,7 +18,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return false;
 }
 
-export function sendOrderStatusNotification(orderId: string | number, status: string, clienteNome?: string) {
+export function sendOrderStatusNotification(orderId: string | number, status: string, clienteNome?: string, clienteId?: string | null) {
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
 
@@ -44,6 +46,11 @@ export function sendOrderStatusNotification(orderId: string | number, status: st
     });
   } catch (err) {
     console.error('Erro ao enviar notificação Push:', err);
+  }
+
+  // Também criar no banco de dados para a gaveta de notificações in-app
+  if (clienteId) {
+    createNotificationInDB(title, body, clienteId).catch(console.error);
   }
 }
 

@@ -28,9 +28,7 @@ export const useUIStore = create<UIStoreState>((set) => ({
     setTimeout(() => set({ toastMessage: null }), 3500);
   },
 
-  notifications: [
-    { id: '1', created_at: new Date().toISOString(), titulo: 'Bem-vindo à Cloudnine!', mensagem: 'Aproveite nossas delícias.', lida: false }
-  ],
+  notifications: [],
   setNotifications: (notifs) => set({ notifications: notifs }),
   markNotificationAsRead: (id) => set((state) => ({
     notifications: state.notifications.map(n => n.id === id ? { ...n, lida: true } : n)

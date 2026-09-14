@@ -10,6 +10,15 @@ interface NotificationDrawerProps {
 
 export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose }) => {
   const { notifications, markNotificationAsRead } = useUIStore();
+  
+  const handleMarkAsRead = async (id: string | number) => {
+    // Atualiza local primeiro para feedback instantâneo (Optimistic UI)
+    markNotificationAsRead(id);
+    
+    // Dispara para o backend em background
+    const { markNotificationAsReadInDB } = await import('@/src/core/services/supabase');
+    await markNotificationAsReadInDB(id);
+  };
 
   return (
     <Drawer
@@ -55,7 +64,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
                 }}
                 secondaryAction={
                   !notif.lida && (
-                    <IconButton edge="end" size="small" onClick={() => markNotificationAsRead(notif.id)} title="Marcar como lida">
+                    <IconButton edge="end" size="small" onClick={() => handleMarkAsRead(notif.id)} title="Marcar como lida">
                       <Circle className="w-4 h-4 text-(--color-primary) fill-current" />
                     </IconButton>
                   )

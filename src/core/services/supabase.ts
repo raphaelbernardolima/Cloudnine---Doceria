@@ -352,3 +352,47 @@ export async function testSupabaseConnection(urlInput?: string, keyInput?: strin
     };
   }
 }
+
+/**
+ * Marca uma notificação como lida no banco de dados.
+ */
+export async function markNotificationAsReadInDB(notificationId: string | number): Promise<void> {
+  const client = getSupabaseClient();
+  if (!client) return;
+  try {
+    await client
+      .from('notificacoes')
+      .update({ lida: true })
+      .eq('id', notificationId);
+  } catch (err) {
+    console.error('Erro ao marcar notificação como lida:', err);
+  }
+}
+
+/**
+ * Cria uma nova notificação no banco de dados (ex: status de pedido, alertas).
+ */
+export async function createNotificationInDB(
+  titulo: string, 
+  mensagem: string, 
+  cliente_id?: string | null
+): Promise<{ success: boolean; error?: string }> {
+  const client = getSupabaseClient();
+  if (!client) return { success: false, error: 'Supabase não configurado' };
+
+  try {
+    const payload = {
+      titulo,
+      mensagem,
+      lida: false,
+      ...(cliente_id ? { cliente_id } : {}) // Adiciona cliente_id apenas se não for nulo/undefined (notificação específica)
+    };
+
+    const { error } = await client.from('notificacoes').insert([payload]);
+    
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : 'Erro ao criar notificação' };
+  }
+}

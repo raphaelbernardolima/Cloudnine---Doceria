@@ -146,7 +146,7 @@ export function useOrderMutations() {
       }
 
       if (newStatus === 'saiu_entrega' || newStatus === 'entregue') {
-        sendOrderStatusNotification(orderId, newStatus, targetOrder?.cliente_nome);
+        sendOrderStatusNotification(orderId, newStatus, targetOrder?.cliente_nome, targetOrder?.cliente_id);
       }
     } catch (err: any) {
       console.error("Erro ao atualizar status:", err);

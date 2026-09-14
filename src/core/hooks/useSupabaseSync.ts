@@ -7,6 +7,7 @@ import { INITIAL_PRODUCTS } from '@/src/data/doceriaData';
 
 export function useSupabaseSync() {
   const { 
+    currentUser,
     setCurrentUser,
     setStorePhone, 
     setProducts, 
@@ -183,4 +184,50 @@ export function useSupabaseSync() {
       client.removeChannel(channel);
     };
   }, [setProducts, setIsLoadingProducts, setOrders, setTables]);
+
+  // Sync Notificações do Usuário
+  useEffect(() => {
+    const client = getSupabaseClient();
+    if (!client || !currentUser) return;
+
+    const fetchNotifications = async () => {
+      try {
+        const { data, error } = await client
+          .from('notificacoes')
+          .select('*')
+          .or(`cliente_id.eq.${currentUser.id},cliente_id.is.null`)
+          .order('created_at', { ascending: false })
+          .limit(20);
+        
+        if (!error && data) {
+          useUIStore.getState().setNotifications(data as any);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar notificações:', err);
+      }
+    };
+
+    fetchNotifications();
+
+    const notifChannel = client.channel(`notif-${currentUser.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notificacoes' },
+        (payload) => {
+          const newNotif = payload.new;
+          if (newNotif.cliente_id === currentUser.id || newNotif.cliente_id === null) {
+            if (newNotif.titulo) {
+              useUIStore.getState().showToast(`Nova notificação: ${newNotif.titulo}`);
+            }
+            const currentNotifs = useUIStore.getState().notifications;
+            useUIStore.getState().setNotifications([newNotif as any, ...currentNotifs]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(notifChannel);
+    };
+  }, [currentUser]);
 }
