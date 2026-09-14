@@ -89,7 +89,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, durationMs
               }}
             >
               <img 
-                src={storeInfo?.logo_url || '/cloudnine-logo.png'} 
+                src={storeInfo?.logo_url || '/LogoCloudnine.svg'} 
                 alt="Cloud Nine Logo" 
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />

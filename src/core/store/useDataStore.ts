@@ -70,6 +70,7 @@ export const useDataStore = create<DataStoreState>((set) => ({
   banners: [],
   setBanners: (banners) => set({ banners }),
   storeInfo: {
+    logo_url: '/LogoCloudnine.svg',
     historia_loja: 'Fundada com muito amor, a Cloudnine Doceria traz os melhores doces artesanais...',
     fotos_loja: ['https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=600']
   },
