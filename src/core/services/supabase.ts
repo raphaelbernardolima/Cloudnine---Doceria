@@ -288,10 +288,18 @@ export async function updateUserProfileInDB(userId: string, updates: Partial<Use
       updateDataPerfis.avatar_url = updates.avatar_url;
     }
 
+    // Recuperar email do usuário atual para garantir que o upsert tenha os dados obrigatórios
+    const { data: { user } } = await client.auth.getUser();
+
     const { error } = await client
       .from('Perfis')
-      .update(updateDataPerfis)
-      .eq('id', userId);
+      .upsert({
+        id: userId,
+        email: user?.email || '',
+        role: 'cliente',
+        Status: 'ativo',
+        ...updateDataPerfis
+      });
 
     if (error) {
       console.warn('Erro ao atualizar perfil na tabela Perfis no Supabase:', error);

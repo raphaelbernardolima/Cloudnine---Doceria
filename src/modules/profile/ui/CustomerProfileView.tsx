@@ -6,6 +6,15 @@ import { UserProfile, Order } from '@/src/core/types/index';
 import { CloudinaryUploader } from '@/src/core/ui/shared/CloudinaryUploader';
 import { AddressLookupForm } from './AddressLookupForm';
 
+const formatPhoneNumber = (value: string) => {
+  if (!value) return '';
+  const digits = value.replace(/\D/g, '');
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+};
+
 interface CustomerProfileViewProps {
   currentUser: UserProfile;
   onUpdateUser: (updated: UserProfile) => void;
@@ -184,7 +193,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                     <span className="hidden sm:inline opacity-30">•</span>
                     <div className="flex items-center gap-1.5">
                       <Phone className="w-3.5 h-3.5 text-[var(--color-primary)]" />
-                      <span>{telefone}</span>
+                      <span>{formatPhoneNumber(telefone)}</span>
                     </div>
                   </>
                 )}
@@ -401,7 +410,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                         <input
                           type="tel"
                           value={telefone}
-                          onChange={(e) => setTelefone(e.target.value)}
+                          onChange={(e) => setTelefone(formatPhoneNumber(e.target.value))}
                           placeholder="(11) 99999-9999"
                           className="w-full p-3 rounded-2xl bg-(--color-surface-container-low) border border-(--color-outline-variant)/40 font-medium focus:outline-none focus:ring-2 focus:ring-(--color-primary)"
                         />

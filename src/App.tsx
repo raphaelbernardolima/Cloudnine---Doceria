@@ -26,7 +26,7 @@ import { Sparkle, ShieldWarning, SignIn, User } from '@phosphor-icons/react';
 import { useUIStore } from '@/src/core/store/useUIStore';
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { useCartStore } from '@/src/core/store/useCartStore';
-import { signOutSupabase, getSupabaseClient } from '@/src/core/services/supabase';
+import { signOutSupabase, getSupabaseClient, updateUserProfileInDB } from '@/src/core/services/supabase';
 import { isStaff } from '@/src/core/constants/roles';
 
 // Lazy-loaded heavy modules (code splitting)
@@ -168,7 +168,12 @@ export function App() {
                 <CustomerProfileView
                   currentUser={currentUser}
                   orders={orders}
-                  onUpdateUser={(updated) => setCurrentUser(updated)}
+                  onUpdateUser={async (updated) => {
+                    setCurrentUser(updated);
+                    if (updated.id) {
+                      await updateUserProfileInDB(updated.id, updated);
+                    }
+                  }}
                   onNavigateToShop={() => navigate('/')}
                   onNavigateToAdmin={() => navigate('/admin')}
                 />
