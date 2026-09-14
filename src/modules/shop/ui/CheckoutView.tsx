@@ -20,6 +20,8 @@ export const CheckoutView: React.FC = () => {
   const [newOrderId, setNewOrderId] = useState<string | null>(null);
   const [copiedPix, setCopiedPix] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [pixData, setPixData] = useState<{qr_code: string, qr_code_base64: string, payment_id: number} | null>(null);
+  const [pixStatus, setPixStatus] = useState<'pendente' | 'pago'>('pendente');
 
   // Form Fields
   const [nomeCliente, setNomeCliente] = useState(currentUser?.nome ? `${currentUser.nome}` : '');
@@ -63,6 +65,32 @@ export const CheckoutView: React.FC = () => {
     }
   }, [cartItems, step, navigate]);
 
+  // Listen to Pix Payment changes
+  useEffect(() => {
+    if (step === 'confirmation' && newOrderId && pixData) {
+      const { getSupabaseClient } = require('@/src/core/services/supabase');
+      const client = getSupabaseClient();
+      if (!client) return;
+
+      const channel = client.channel(`pedido_${newOrderId}`)
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'pedidos',
+          filter: `id=eq.${newOrderId}`
+        }, (payload: any) => {
+          if (payload.new && payload.new.status_pagamento === 'pago') {
+            setPixStatus('pago');
+          }
+        })
+        .subscribe();
+
+      return () => {
+        client.removeChannel(channel);
+      };
+    }
+  }, [step, newOrderId, pixData]);
+
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
   const taxaEntrega = cartItems.length > 0 && tipoEntrega === 'entrega' ? taxaEntregaDinamica : 0;
@@ -71,7 +99,7 @@ export const CheckoutView: React.FC = () => {
 
   const totalFinal = Math.max(0, subtotal + taxaEntrega - appliedDiscount - walletDiscount);
 
-  const pixKey = storeInfo?.pix_chave || "00020126580014BR.GOV.BCB.PIX0136cloudnine.doceria.pix@cloudnine.com520400005303986540510.005802BR5920Cloudnine Confeitaria6009Sao Paulo62070503***6304E21A";
+  const pixKey = pixData?.qr_code || storeInfo?.pix_chave || "00020126580014BR.GOV.BCB.PIX0136cloudnine.doceria.pix@cloudnine.com520400005303986540510.005802BR5920Cloudnine Confeitaria6009Sao Paulo62070503***6304E21A";
 
   const handleCopyPix = () => {
     navigator.clipboard.writeText(pixKey);
@@ -155,16 +183,42 @@ export const CheckoutView: React.FC = () => {
       }))
     } as Order;
 
+    let result: any = null;
     if (onPlaceOrder) {
-      onPlaceOrder(newOrder);
+      setIsProcessingPayment(true);
+      try {
+        result = await onPlaceOrder(newOrder);
+      } catch (err) {
+        setIsProcessingPayment(false);
+        return; // handlePlaceOrder já mostrou Toast
+      }
+      setIsProcessingPayment(false);
     }
-    setNewOrderId(String(newOrder.id));
+    
+    if (result && result.pixData) {
+      setPixData(result.pixData);
+    }
+
+    setNewOrderId(result ? String(result.orderId) : String(newOrder.id));
     setStep('confirmation');
   };
 
   if (cartItems.length === 0 && step !== 'confirmation') {
     return null; // Will redirect via useEffect
   }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+    
+    if (value.length > 2) {
+      value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+    }
+    if (value.length > 10) {
+      value = `${value.slice(0, 10)}-${value.slice(10)}`;
+    }
+    setTelefoneCliente(value);
+  };
 
   return (
     <div className="min-h-screen bg-(--color-surface-container-lowest) animate-in fade-in pb-20">
@@ -206,7 +260,7 @@ export const CheckoutView: React.FC = () => {
                   Identificação
                 </h2>
                 {formError && (
-                  <div className="flex items-center space-x-2 text-rose-600 bg-rose-50 p-3 rounded-xl text-sm font-bold animate-in slide-in-from-top-2">
+                  <div className="flex items-center space-x-2 text-rose-700 bg-rose-50 dark:bg-rose-500/10 dark:text-rose-400 dark:border dark:border-rose-500/30 p-3 rounded-xl text-sm font-bold animate-in slide-in-from-top-2">
                     <WarningCircle className="w-4 h-4 shrink-0" />
                     <span>{formError}</span>
                   </div>
@@ -234,7 +288,7 @@ export const CheckoutView: React.FC = () => {
                       id="telefoneCliente"
                       type="tel"
                       value={telefoneCliente}
-                      onChange={(e) => setTelefoneCliente(e.target.value)}
+                      onChange={handlePhoneChange}
                       placeholder="(11) 99999-9999"
                       className="w-full p-3.5 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/50 text-base focus:outline-none focus:ring-2 focus:ring-(--color-primary)"
                       aria-required="true"
@@ -255,8 +309,8 @@ export const CheckoutView: React.FC = () => {
                       type="button"
                       onClick={() => setTipoEntrega('entrega')}
                       className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${tipoEntrega === 'entrega'
-                        ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
-                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
+                        ? 'bg-(--color-surface-container-high) text-(--color-on-surface) border-(--color-on-surface)'
+                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-on-surface)/50'
                         }`}
                     >
                       <Truck className="w-6 h-6" />
@@ -266,8 +320,8 @@ export const CheckoutView: React.FC = () => {
                       type="button"
                       onClick={() => setTipoEntrega('retirada')}
                       className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${tipoEntrega === 'retirada'
-                        ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
-                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
+                        ? 'bg-(--color-surface-container-high) text-(--color-on-surface) border-(--color-on-surface)'
+                        : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-on-surface)/50'
                         }`}
                     >
                       <Storefront className="w-6 h-6" />
@@ -455,8 +509,8 @@ export const CheckoutView: React.FC = () => {
                     type="button"
                     onClick={() => setMetodoPagamento('cartao_credito')}
                     className={`p-4 rounded-2xl border-2 font-bold text-base flex flex-col items-center justify-center gap-2 transition-all ${metodoPagamento === 'cartao_credito'
-                      ? 'bg-(--color-primary-container) text-(--color-on-primary-container) border-(--color-primary)'
-                      : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-primary)/50'
+                      ? 'bg-(--color-surface-container-high) text-(--color-on-surface) border-(--color-on-surface)'
+                      : 'bg-transparent text-(--color-on-surface-variant) border-(--color-outline-variant)/30 hover:border-(--color-on-surface)/50'
                       }`}
                   >
                     <CreditCard className="w-6 h-6" />
@@ -552,8 +606,8 @@ export const CheckoutView: React.FC = () => {
 
                 <button
                   onClick={handleFinishCheckout}
-                  disabled={isProcessingPayment}
-                  className="w-full mt-6 py-4 rounded-full bg-(--color-primary) hover:bg-(--color-primary)/90 text-white font-black text-lg flex items-center justify-center space-x-2 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  disabled={isProcessingPayment || !nomeCliente.trim() || !telefoneCliente.trim() || (tipoEntrega === 'entrega' && !endereco.trim()) || !metodoPagamento}
+                  className="w-full mt-6 py-4 rounded-full bg-(--color-primary) hover:bg-(--color-primary)/90 text-white font-black text-lg flex items-center justify-center space-x-2 shadow-lg disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
                   aria-label="Confirmar Pedido e Pagar"
                 >
                   {isProcessingPayment ? (
@@ -589,16 +643,33 @@ export const CheckoutView: React.FC = () => {
 
             {metodoPagamento === 'pix' && (
               <div className="p-6 rounded-3xl bg-white dark:bg-(--color-surface-container-low) border-2 border-emerald-500/20 shadow-md">
-                <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-300 mb-4">
-                  Escaneie o QR Code ou copie a chave Pix
-                </h3>
-                <div className="p-3 bg-white rounded-xl inline-block shadow-sm border border-neutral-100 mb-4">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pixKey)}`}
-                    alt="QR Code Pix"
-                    className="w-40 h-40"
-                  />
-                </div>
+                {pixStatus === 'pago' ? (
+                  <div className="flex flex-col items-center py-4 space-y-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg animate-bounce">
+                      <CheckCircle className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-xl font-bold text-emerald-600">Pagamento Aprovado!</h3>
+                    <p className="text-sm text-(--color-outline)">Obrigado! Seu pedido já está sendo preparado.</p>
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-300 mb-4">
+                      {pixData ? 'Escaneie o QR Code Dinâmico' : 'Escaneie o QR Code ou copie a chave Pix'}
+                    </h3>
+                    <div className="p-3 bg-white rounded-xl inline-block shadow-sm border border-neutral-100 mb-4">
+                      <img
+                        src={pixData ? `data:image/jpeg;base64,${pixData.qr_code_base64}` : `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pixKey)}`}
+                        alt="QR Code Pix"
+                        className="w-40 h-40"
+                      />
+                    </div>
+                    {pixData && (
+                      <p className="text-xs text-emerald-600 mb-2 font-semibold">
+                        Aguardando confirmação do pagamento... (Atualização Automática)
+                      </p>
+                    )}
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={handleCopyPix}

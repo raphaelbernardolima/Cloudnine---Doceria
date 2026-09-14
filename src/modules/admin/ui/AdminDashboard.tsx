@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Tote, Calendar, Package, Printer, Truck, Gift, ShieldCheck, Sparkle, Storefront, Cake, SquaresFour, CreditCard, Users, Monitor } from '@phosphor-icons/react';
 import { Product, Order, UserProfile, AuditLog, Ingredient, Driver, Coupon, LoyaltySettings, CustomCakeConfig } from '@/src/core/types/index';
 import { updateStoreConfig } from '@/src/core/services/supabase';
+import { Switch } from '@mui/material';
 
 import { AdminHomeDashboard } from './AdminHomeDashboard';
 import { AdminCashFlowModule } from './AdminCashFlowModule';
@@ -34,7 +35,7 @@ export const AdminDashboard: React.FC = () => {
     products, orders, staff, auditLogs, currentUser,
     ingredients, setIngredients, drivers, coupons, setCoupons,
     loyaltySettings, setLoyaltySettings, customCakeConfig, setCustomCakeConfig,
-    storePhone, setStorePhone, expenses, setExpenses
+    storePhone, setStorePhone, expenses, setExpenses, storeInfo, setStoreInfo
   } = useDataStore();
   const { showToast } = useUIStore();
   
@@ -116,15 +117,46 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 w-full min-w-0 max-w-[1400px] mx-auto py-4 px-4 items-start">
+    <div className="flex w-full items-start min-h-[calc(100vh-80px)]">
       <SEO 
         title="Painel Administrativo" 
         description="Área restrita de gestão da Cloudnine Doceria." 
       />
 
       {/* Sidebar Navigation (Desktop Only) */}
-      <div className="hidden md:flex w-[260px] shrink-0 bg-[var(--color-surface-container-lowest)] rounded-3xl p-4 border border-[var(--color-outline-variant)]/20 shadow-sm flex-col gap-2 overflow-visible sticky top-24">
-        <h3 className="text-sm font-bold text-[var(--color-on-surface)] px-2 mb-2">Menu Administrativo</h3>
+      <div className="hidden md:flex flex-col w-[260px] shrink-0 bg-[var(--color-surface-container-lowest)] border-r border-[var(--color-outline-variant)]/30 h-[calc(100vh-80px)] sticky top-[80px] overflow-y-auto pb-12 pt-6 px-4 gap-1.5 z-30 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        
+        {/* Toggle Loja Aberta/Fechada */}
+        {['admin', 'ADMIN'].includes(currentUser.role) && (
+          <div className="mb-4 p-3 rounded-2xl border border-[var(--color-outline-variant)]/30 bg-[var(--color-surface-container)] flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${storeInfo?.loja_aberta ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]'}`} />
+              <span className="text-xs font-black uppercase tracking-wide text-[var(--color-on-surface)]">
+                {storeInfo?.loja_aberta ? 'Loja Aberta' : 'Loja Fechada'}
+              </span>
+            </div>
+            <Switch 
+              size="small"
+              checked={!!storeInfo?.loja_aberta}
+              onChange={async (e) => {
+                const newVal = e.target.checked;
+                if (setStoreInfo && storeInfo) {
+                  setStoreInfo({...storeInfo, loja_aberta: newVal});
+                }
+                const res = await updateStoreConfig({ loja_aberta: newVal });
+                if (res.success) {
+                  showToast(newVal ? 'Loja aberta para receber pedidos!' : 'Loja fechada temporariamente.');
+                }
+              }}
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': { color: '#10B981' },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#10B981' },
+              }}
+            />
+          </div>
+        )}
+
+        <h3 className="text-xs font-black text-[var(--color-outline)] uppercase tracking-wider px-3 mb-3">Menu Administrativo</h3>
         
         {['admin', 'ADMIN'].includes(currentUser.role) && (
           <button
@@ -148,7 +180,7 @@ export const AdminDashboard: React.FC = () => {
               }`}
           >
             <Tote className="w-5 h-5" />
-            <span>Pedidos ({orders.length})</span>
+            <span>Gestão de Pedidos (Gerente)</span>
           </button>
         )}
 
@@ -186,7 +218,7 @@ export const AdminDashboard: React.FC = () => {
               }`}
           >
             <Printer className="w-5 h-5" />
-            <span>Comanda Cozinha</span>
+            <span>Tela da Cozinha (KDS)</span>
           </button>
         )}
 
@@ -304,18 +336,51 @@ export const AdminDashboard: React.FC = () => {
         )}
       </div>
 
+      {/* Wrapper for Mobile Nav + Main Content */}
+      <div className="flex-1 min-w-0 flex flex-col">
+
+        {/* Mobile-only Store Toggle */}
+        {['admin', 'ADMIN'].includes(currentUser.role) && (
+          <div className="md:hidden m-4 mb-0 p-3 rounded-2xl border border-[var(--color-outline-variant)]/30 bg-[var(--color-surface-container)] flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${storeInfo?.loja_aberta ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]'}`} />
+              <span className="text-xs font-black uppercase tracking-wide text-[var(--color-on-surface)]">
+                {storeInfo?.loja_aberta ? 'Loja Aberta' : 'Loja Fechada'}
+              </span>
+            </div>
+            <Switch 
+              size="small"
+              checked={!!storeInfo?.loja_aberta}
+              onChange={async (e) => {
+                const newVal = e.target.checked;
+                if (setStoreInfo && storeInfo) {
+                  setStoreInfo({...storeInfo, loja_aberta: newVal});
+                }
+                const res = await updateStoreConfig({ loja_aberta: newVal });
+                if (res.success) {
+                  showToast(newVal ? 'Loja aberta para receber pedidos!' : 'Loja fechada temporariamente.');
+                }
+              }}
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': { color: '#10B981' },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#10B981' },
+              }}
+            />
+          </div>
+        )}
+
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0 space-y-6 pb-20">
+      <div className="w-full flex flex-col pt-6 px-4 sm:px-8 lg:px-10 pb-24 gap-6">
         
         {/* Top Header */}
-        <div className="p-8 rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--color-primary)] bg-[var(--color-primary-container)]/20 px-3 py-1.5 rounded-full">
+        <div className="p-4 sm:p-8 rounded-2xl sm:rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 shadow-xs">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[var(--color-primary)] bg-[var(--color-primary-container)]/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">
             Painel Administrativo Restrito
           </span>
-          <h1 className="text-3xl mt-3 text-[var(--color-on-surface)]" style={{ fontFamily: '"Libre Caslon Text", serif', fontStyle: 'italic' }}>
+          <h1 className="text-xl sm:text-3xl mt-2 sm:mt-3 text-[var(--color-on-surface)] break-words" style={{ fontFamily: '"Libre Caslon Text", serif', fontStyle: 'italic' }}>
             Gestão Operacional Cloudnine
           </h1>
-          <p className="text-sm text-[var(--color-on-surface-variant)] mt-1 font-medium">
+          <p className="text-xs sm:text-sm text-[var(--color-on-surface-variant)] mt-1 font-medium">
             Controle de pedidos, catálogo de produtos, impressão da cozinha e inteligência de vendas.
           </p>
         </div>
@@ -415,6 +480,7 @@ export const AdminDashboard: React.FC = () => {
             printerStatusMessage={printerStatusMessage}
             setPrinterStatusMessage={setPrinterStatusMessage}
             onPrintOrder={setPrintingOrder}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
           />
         )}
 
@@ -462,5 +528,6 @@ export const AdminDashboard: React.FC = () => {
         )}
       </div>
     </div>
+  </div>
   );
 };

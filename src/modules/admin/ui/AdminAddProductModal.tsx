@@ -19,6 +19,7 @@ export const AdminAddProductModal: React.FC<AdminAddProductModalProps> = ({
   const [categoria, setCategoria] = useState(categories[1] || 'Brigadeiros');
   const [estoque, setEstoque] = useState('25');
   const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&q=80&w=800');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleCreateProduct = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +72,7 @@ export const AdminAddProductModal: React.FC<AdminAddProductModalProps> = ({
           />
         </div>
 
-        <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3">
+        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3">
           <div>
             <label className="font-bold block mb-1 text-sm">Preço (R$)</label>
             <input
@@ -96,17 +97,33 @@ export const AdminAddProductModal: React.FC<AdminAddProductModalProps> = ({
               ))}
             </select>
           </div>
+        </div>
 
-          <div>
-            <label className="font-bold block mb-1 text-sm">Estoque Inicial</label>
-            <input
-              type="number"
-              required
-              value={estoque}
-              onChange={(e) => setEstoque(e.target.value)}
-              className="w-full p-3 rounded-xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/40 text-sm focus:ring-2 focus:ring-(--color-primary) outline-none transition-all"
-            />
-          </div>
+        {/* Configurações Avançadas (Progressive Disclosure) */}
+        <div className="border border-(--color-outline-variant)/30 rounded-xl overflow-hidden bg-(--color-surface-container-low)">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full p-3 flex justify-between items-center text-sm font-bold text-(--color-on-surface-variant) hover:bg-(--color-surface-container-high) transition-colors"
+          >
+            <span>Opções Avançadas</span>
+            <span className="text-[10px] uppercase tracking-widest">{showAdvanced ? 'Ocultar' : 'Mostrar'}</span>
+          </button>
+          
+          {showAdvanced && (
+            <div className="p-4 pt-0 border-t border-(--color-outline-variant)/20 space-y-3 animate-in fade-in slide-in-from-top-2">
+              <div>
+                <label className="font-bold block mb-1 text-xs text-(--color-outline)">Estoque Inicial</label>
+                <input
+                  type="number"
+                  required
+                  value={estoque}
+                  onChange={(e) => setEstoque(e.target.value)}
+                  className="w-full p-2.5 rounded-lg bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/40 text-sm focus:ring-2 focus:ring-(--color-primary) outline-none transition-all"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Image Uploader */}
