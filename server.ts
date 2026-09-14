@@ -4,10 +4,21 @@ import { createServer as createViteServer } from "vite";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { createClient } from "@supabase/supabase-js";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import cors from "cors";
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  // 🛡️ Segurança HTTP Headers (Proteção contra XSS, Clickjacking, etc)
+  app.use(helmet({
+    contentSecurityPolicy: false, // Desabilitado localmente para não quebrar assets do Vite
+    crossOriginEmbedderPolicy: false
+  }));
+
+  // 🛡️ CORS (Cross-Origin Resource Sharing)
+  app.use(cors({ origin: '*' })); // Em prod, trocar para o domínio real
 
   app.use(express.json());
 
