@@ -10,56 +10,24 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Rota de criação de preferência do Mercado Pago
-  app.post("/api/create-preference", async (req, res) => {
-    try {
-      const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
-      if (!accessToken) {
-        return res.status(500).json({ error: "Mercado Pago Access Token não configurado no ambiente (.env)." });
-      }
+  // Helper function to get service role client
+  const getAdminSupabase = () => {
+    const url = process.env.VITE_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    if (!url || !key) return null;
+    return createClient(url, key);
+  };
 
-      const client = new MercadoPagoConfig({ accessToken, options: { timeout: 15000 } });
-      const { items, payer, external_reference } = req.body;
-      
-      const preference = new Preference(client);
-      
-      const origin = process.env.APP_URL || req.headers.origin || `http://localhost:${PORT}`;
-
-      const response = await preference.create({
-        body: {
-          items,
-          payer,
-          external_reference,
-          back_urls: {
-            success: `${origin}?payment=success`,
-            failure: `${origin}?payment=failure`,
-            pending: `${origin}?payment=pending`
-          },
-          auto_return: "approved",
-        }
-      });
-      
-      res.json({ id: response.id, init_point: response.init_point });
-    } catch (error) {
-      console.error("Erro ao criar preferência no Mercado Pago:", error);
-      res.status(500).json({ error: "Erro ao processar pagamento com o Mercado Pago." });
-    }
-  });
-
-  // Rota segura para validação e fechamento de pedido (Server-side Checkout)
+  // Rota segura para validação, pagamento PIX e fechamento de pedido
   app.post("/api/checkout", async (req, res) => {
     try {
-      const url = process.env.VITE_SUPABASE_URL;
-      // Idealmente usar SERVICE_ROLE_KEY no backend, mas a ANON já serve para ler produtos públicos e inserir pedidos (dependendo do RLS)
-      const key = process.env.VITE_SUPABASE_ANON_KEY;
+      const supabaseAdmin = getAdminSupabase();
       
-      if (!url || !key) {
+      if (!supabaseAdmin) {
         return res.status(500).json({ error: "Supabase não configurado no servidor." });
       }
 
-      const supabase = createClient(url, key);
       const { cartItems, orderData } = req.body;
-
       if (!cartItems || !orderData) {
         return res.status(400).json({ error: "Dados do pedido inválidos." });
       }
@@ -70,7 +38,7 @@ async function startServer() {
       // Validar preços reais do banco
       for (const item of cartItems) {
         if (item.product?.id) {
-          const { data: prodData } = await supabase.from("produtos").select("preco").eq("id", item.product.id).single();
+          const { data: prodData } = await supabaseAdmin.from("produtos").select("preco").eq("id", item.product.id).single();
           const realPrice = prodData ? prodData.preco : item.unitPrice; // Fallback temporário
           calculatedTotal += realPrice * item.quantity;
           
@@ -82,7 +50,6 @@ async function startServer() {
             detalhes_customizados: item.customNote || null
           });
         } else if (item.customCake) {
-          // Bolo personalizado - idealmente validar os preços base das massas/recheios, mas usaremos o enviado por ora
           calculatedTotal += item.unitPrice * item.quantity;
           validItems.push({
             produto_id: null,
@@ -96,12 +63,7 @@ async function startServer() {
 
       const taxaEntrega = orderData.tipo_entrega === "entrega" ? 12.00 : 0;
       calculatedTotal += taxaEntrega;
-
-      // Desconto simulado por Fidelidade (se aplicável, ideal checar no banco)
-      if (orderData.appliedDiscount) {
-         calculatedTotal -= orderData.appliedDiscount;
-      }
-
+      if (orderData.appliedDiscount) calculatedTotal -= orderData.appliedDiscount;
       calculatedTotal = Math.max(0, calculatedTotal);
 
       // Inserir Pedido no Supabase
@@ -115,42 +77,77 @@ async function startServer() {
         horario_agendado: orderData.horario_agendado || null,
         endereco_entreg: orderData.endereco_entreg,
         total: calculatedTotal,
-        status: orderData.metodo_pagamento === 'pix' ? 'pendente_pix' : 'em_preparo',
+        status: orderData.metodo_pagamento === 'pix' ? 'aguardando_pagamento' : 'em_preparo',
+        status_pagamento: orderData.metodo_pagamento === 'pix' ? 'pendente' : 'pago',
       };
 
-      const { data: insertedOrder, error: orderError } = await supabase.from('pedidos').insert([pedidoDB]).select().single();
+      const { data: insertedOrder, error: orderError } = await supabaseAdmin.from('pedidos').insert([pedidoDB]).select().single();
       
       if (orderError || !insertedOrder) {
         throw new Error(orderError?.message || "Erro ao inserir pedido.");
       }
 
       // Inserir Itens
-      const itensDB = validItems.map(vi => ({
-        ...vi,
-        pedido_id: insertedOrder.id
-      }));
+      const itensDB = validItems.map(vi => ({ ...vi, pedido_id: insertedOrder.id }));
+      await supabaseAdmin.from('itens_pedidos').insert(itensDB);
 
-      const { error: itemsError } = await supabase.from('itens_pedidos').insert(itensDB);
-      if (itemsError) {
-         console.warn("Erro ao inserir itens, mas pedido foi criado:", itemsError);
-      }
+      let pixData = null;
 
-      // SIMULAÇÃO WHATSAPP API: Avisar cliente que pedido foi recebido
-      if (orderData.cliente_telefone) {
+      // Integração com Mercado Pago PIX
+      if (orderData.metodo_pagamento === 'pix') {
+        const { data: secrets } = await supabaseAdmin.from('config_segredos').select('mercadopago_access_token').limit(1).maybeSingle();
+        const accessToken = secrets?.mercadopago_access_token;
+        
+        if (!accessToken) {
+          throw new Error("Token do Mercado Pago não configurado. Verifique as configurações de pagamento no Admin.");
+        }
+
+        const origin = process.env.APP_URL || req.headers.origin || `http://localhost:${PORT}`;
+
         try {
-          // Fire and forget
-          fetch(`http://localhost:${process.env.PORT || 3000}/api/webhook/whatsapp`, {
+          // Utilizar API pura do MP para pagamentos Pix
+          const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+              'X-Idempotency-Key': `order_${insertedOrder.id}_${Date.now()}`
+            },
             body: JSON.stringify({
-              telefone: orderData.cliente_telefone,
-              mensagem: `Olá ${orderData.cliente_nome}! Seu pedido #${insertedOrder.id} no valor de R$ ${calculatedTotal.toFixed(2)} foi recebido com sucesso pela Cloudnine Doceria.`
+              transaction_amount: Number(calculatedTotal.toFixed(2)),
+              description: `Pedido #${insertedOrder.id} - Cloudnine Doceria`,
+              payment_method_id: "pix",
+              payer: {
+                email: orderData.cliente_id && orderData.cliente_id !== 'guest' ? "cliente@cloudnine.com" : "convidado@cloudnine.com", // MP exige um email
+                first_name: orderData.cliente_nome
+              },
+              external_reference: String(insertedOrder.id),
+              notification_url: `${origin}/api/webhook/mercadopago`
             })
-          }).catch(e => console.error("Erro interno ao chamar webhook WhatsApp:", e.message));
-        } catch (e) {}
+          });
+
+          const paymentRes = await mpResponse.json();
+
+          if (paymentRes.id) {
+            pixData = {
+              qr_code: paymentRes.point_of_interaction.transaction_data.qr_code,
+              qr_code_base64: paymentRes.point_of_interaction.transaction_data.qr_code_base64,
+              payment_id: paymentRes.id
+            };
+            
+            // Atualizar pedido com ID de pagamento externo
+            await supabaseAdmin.from('pedidos').update({ id_pagamento_externo: String(paymentRes.id) }).eq('id', insertedOrder.id);
+          } else {
+             console.error("Erro MP:", paymentRes);
+             throw new Error("Erro ao gerar Pix no Mercado Pago.");
+          }
+        } catch (mpError: any) {
+          console.error("Exceção MP:", mpError);
+          throw new Error("Falha na comunicação com o Mercado Pago.");
+        }
       }
 
-      res.json({ success: true, orderId: insertedOrder.id, totalCalculado: calculatedTotal });
+      res.json({ success: true, orderId: insertedOrder.id, totalCalculado: calculatedTotal, pixData });
 
     } catch (error: any) {
       console.error("Erro no checkout seguro:", error);
@@ -161,32 +158,37 @@ async function startServer() {
   // Webhook do Mercado Pago (IPN)
   app.post("/api/webhook/mercadopago", async (req, res) => {
     try {
-      const url = process.env.VITE_SUPABASE_URL;
-      const key = process.env.VITE_SUPABASE_ANON_KEY;
+      const supabaseAdmin = getAdminSupabase();
+      if (!supabaseAdmin) return res.status(500).json({ error: "Supabase não configurado" });
       
-      if (!url || !key) {
-        return res.status(500).json({ error: "Supabase não configurado no servidor." });
-      }
-
-      const supabase = createClient(url, key);
-      
-      // O Mercado Pago envia 'action' ou 'type' e um objeto 'data' com o ID do pagamento
       const { action, type, data } = req.body;
-      
-      // Simulação para o MVP: se recebemos um aviso de pagamento, aprovamos o pedido.
-      // Em produção real, você usaria o Access Token para consultar o MP com data.id 
-      // e descobriria o external_reference (seu Order ID).
       const paymentId = req.query['data.id'] || data?.id;
-      const topic = req.query.topic || type;
+      const topic = req.query.topic || type || action;
       
-      if (topic === 'payment' && paymentId) {
+      if ((topic === 'payment' || topic === 'payment.created' || topic === 'payment.updated') && paymentId) {
         console.log(`[Webhook MP] Pagamento recebido/atualizado. ID: ${paymentId}`);
-        // Simulando que aprovou (pois não temos a integração completa do backend no plano free)
-        // Se tivéssemos o order_id, faríamos:
-        // await supabase.from('pedidos').update({ status: 'em_preparo' }).eq('id', orderId);
+        
+        // Obter access_token para verificar o status real
+        const { data: secrets } = await supabaseAdmin.from('config_segredos').select('mercadopago_access_token').limit(1).maybeSingle();
+        const accessToken = secrets?.mercadopago_access_token;
+        
+        if (accessToken) {
+           const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+             headers: { 'Authorization': `Bearer ${accessToken}` }
+           });
+           const paymentInfo = await mpResponse.json();
+           
+           if (paymentInfo.status === 'approved' && paymentInfo.external_reference) {
+              const orderId = paymentInfo.external_reference;
+              console.log(`[Webhook MP] Pedido ${orderId} aprovado com sucesso!`);
+              await supabaseAdmin.from('pedidos').update({ 
+                status_pagamento: 'pago',
+                status: 'em_preparo'
+              }).eq('id', orderId);
+           }
+        }
       }
 
-      // O Mercado Pago exige retorno 200 OK imediato
       res.status(200).send("OK");
     } catch (error) {
       console.error("Erro no webhook MP:", error);

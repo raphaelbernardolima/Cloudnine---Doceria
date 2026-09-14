@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDataStore } from '@/src/core/store/useDataStore';
 import { Users, MagnifyingGlass, Faders, ChatCircle, Gift, Clock, TrendUp, Warning } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -9,13 +9,14 @@ export const AdminCRMModule: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'inactive' | 'vip'>('all');
 
-  const crmUsers = React.useMemo(() => {
+  const crmUsers = useMemo(() => {
     return users.map(u => {
       const userOrders = orders.filter(o => o.cliente_id === u.id && o.status !== 'cancelado');
       const totalGasto = userOrders.reduce((sum, o) => sum + o.total, 0);
       
-      // Assume orders are sorted descending by created_at (as fetched in useSupabaseSync)
-      const lastOrder = userOrders.length > 0 ? userOrders[0].created_at : '';
+      // Sort descending by created_at to get the most recent order
+      const sortedOrders = [...userOrders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      const lastOrder = sortedOrders.length > 0 ? sortedOrders[0].created_at : '';
       
       return {
         id: u.id,
@@ -41,6 +42,14 @@ export const AdminCRMModule: React.FC = () => {
     if (filter === 'vip') return matchesSearch && u.totalGasto > 500;
     return matchesSearch;
   });
+
+  const totalClientes = crmUsers.length;
+  const inRiskClientes = crmUsers.filter(u => {
+    if (!u.lastOrder) return true; // Nunca comprou = em risco de não voltar
+    const days = (new Date().getTime() - new Date(u.lastOrder).getTime()) / (1000 * 3600 * 24);
+    return days > 30;
+  }).length;
+  const vipClientes = crmUsers.filter(u => u.totalGasto > 500).length;
 
   const sendWhatsAppCampaign = (telefone: string, nome: string) => {
     const text = `Olá ${nome}! Saudade de você aqui na Cloudnine Doceria 🥰 Temos um presente especial: 10% de desconto na sua próxima compra com o cupom VOLTA10. Peça agora: ${window.location.origin}`;
@@ -68,7 +77,7 @@ export const AdminCRMModule: React.FC = () => {
             <div className="p-2 bg-blue-100 text-blue-600 rounded-xl"><Users className="w-5 h-5" /></div>
             <h3 className="font-bold text-[var(--color-on-surface-variant)]">Total de Clientes</h3>
           </div>
-          <p className="text-3xl font-black text-[var(--color-on-surface)]">1.245</p>
+          <p className="text-3xl font-black text-[var(--color-on-surface)]">{totalClientes}</p>
         </div>
         
         <div className="bg-[var(--color-surface-container-lowest)] p-6 rounded-3xl shadow-sm border border-[var(--color-outline-variant)]/20">
@@ -76,7 +85,7 @@ export const AdminCRMModule: React.FC = () => {
             <div className="p-2 bg-amber-100 text-amber-600 rounded-xl"><Warning className="w-5 h-5" /></div>
             <h3 className="font-bold text-[var(--color-on-surface-variant)]">Em Risco (30+ dias)</h3>
           </div>
-          <p className="text-3xl font-black text-[var(--color-on-surface)]">312</p>
+          <p className="text-3xl font-black text-[var(--color-on-surface)]">{inRiskClientes}</p>
         </div>
 
         <div className="bg-[var(--color-surface-container-lowest)] p-6 rounded-3xl shadow-sm border border-[var(--color-outline-variant)]/20">
@@ -84,7 +93,7 @@ export const AdminCRMModule: React.FC = () => {
             <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl"><TrendUp className="w-5 h-5" /></div>
             <h3 className="font-bold text-[var(--color-on-surface-variant)]">Clientes VIP</h3>
           </div>
-          <p className="text-3xl font-black text-[var(--color-on-surface)]">89</p>
+          <p className="text-3xl font-black text-[var(--color-on-surface)]">{vipClientes}</p>
         </div>
       </div>
 
@@ -135,7 +144,10 @@ export const AdminCRMModule: React.FC = () => {
             </thead>
             <tbody className="block sm:table-row-group space-y-4 sm:space-y-0 sm:divide-y divide-[var(--color-outline-variant)]\/10 p-4 sm:p-0">
               {filteredUsers.map(user => {
-                const daysSince = Math.floor((new Date().getTime() - new Date(user.lastOrder).getTime()) / (1000 * 3600 * 24));
+                let daysSince = 999;
+                if (user.lastOrder) {
+                  daysSince = Math.floor((new Date().getTime() - new Date(user.lastOrder).getTime()) / (1000 * 3600 * 24));
+                }
                 const isInactive = daysSince > 30;
                 
                 return (
@@ -143,15 +155,21 @@ export const AdminCRMModule: React.FC = () => {
                     <td className="flex sm:table-cell justify-between items-center py-2 sm:p-4 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]\/10 before:content-['Cliente'] before:sm:hidden before:font-bold before:text-[var(--color-outline)]">
                       <div className="text-right sm:text-left">
                         <p className="font-bold text-[var(--color-on-surface)]">{user.nome}</p>
-                        <p className="text-xs text-[var(--color-outline)]">{user.telefone}</p>
+                        <p className="text-xs text-[var(--color-outline)]">{user.telefone || 'Sem número'}</p>
                       </div>
                     </td>
                     <td className="flex sm:table-cell justify-between items-center py-2 sm:p-4 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]\/10 before:content-['Último_Pedido'] before:sm:hidden before:font-bold before:text-[var(--color-outline)]">
                       <div className="flex items-center justify-end sm:justify-start gap-2">
-                        <Clock className={`w-4 h-4 ${isInactive ? 'text-amber-500' : 'text-emerald-500'}`} />
-                        <span className={`text-sm font-bold ${isInactive ? 'text-amber-600' : 'text-[var(--color-on-surface-variant)]'}`}>
-                          Há {daysSince} dias
-                        </span>
+                        {user.lastOrder ? (
+                          <>
+                            <Clock className={`w-4 h-4 ${isInactive ? 'text-amber-500' : 'text-emerald-500'}`} />
+                            <span className={`text-sm font-bold ${isInactive ? 'text-amber-600' : 'text-[var(--color-on-surface-variant)]'}`}>
+                              Há {daysSince} dias
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-sm font-bold text-[var(--color-outline)]">Nunca comprou</span>
+                        )}
                       </div>
                     </td>
                     <td className="flex sm:table-cell justify-between items-center py-2 sm:p-4 px-0 sm:px-4 sm:border-b border-[var(--color-outline-variant)]\/10 before:content-['Total_Gasto'] before:sm:hidden before:font-bold before:text-[var(--color-outline)]">
@@ -169,7 +187,9 @@ export const AdminCRMModule: React.FC = () => {
                     <td className="flex sm:table-cell justify-between items-center py-3 sm:p-4 px-0 sm:px-4 text-center border-t border-[var(--color-outline-variant)]\/10 sm:border-t-0 mt-2 sm:mt-0 pt-3 sm:pt-4 sm:border-b before:content-['Ações'] before:sm:hidden before:font-bold before:text-[var(--color-outline)]">
                       <button 
                         onClick={() => sendWhatsAppCampaign(user.telefone, user.nome)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] rounded-xl text-xs font-bold transition-colors"
+                        disabled={!user.telefone}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-bold transition-colors"
+                        title={!user.telefone ? 'Cliente sem telefone cadastrado' : ''}
                       >
                         <ChatCircle className="w-4 h-4" />
                         {isInactive ? 'Recuperar' : 'Enviar Mimo'}

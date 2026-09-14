@@ -46,13 +46,24 @@ export interface CustomCakeOption {
   preco_adicional?: number;
   peso_estimado_kg?: number;
   fatias?: number;
+  
+  // New Steroids Fields
+  max_recheios?: number; // For sizes
+  multiplicador_preco?: number; // For sizes (e.g. 1.5x)
+  limite_caracteres?: number; // For sizes
+  dias_antecedencia?: number; // Lead time
+  tags_alergenicos?: string[]; // e.g. 'contem_gluten', 'zero_lactose'
+  color_hex?: string; // For coverings/frosting
+  is_premium?: boolean; // Badge
 }
 
 export interface CustomCakeConfig {
   tamanhos: CustomCakeOption[];
   massas: CustomCakeOption[];
   recheios: CustomCakeOption[];
-  [key: string]: CustomCakeOption[];
+  coberturas: CustomCakeOption[];
+  extras?: CustomCakeOption[];
+  [key: string]: CustomCakeOption[] | undefined;
 }
 
 export interface CustomCakeBuilder {
@@ -60,7 +71,10 @@ export interface CustomCakeBuilder {
   massa: string;
   recheio1: string;
   recheio2?: string;
+  recheio3?: string;
   cobertura: string;
+  corCobertura?: string;
+  extras?: string[]; // Array of selected extra IDs or Labels
   mensagemBolo: string;
   observacoes: string;
   precoCalculado: number;
@@ -130,10 +144,12 @@ export interface Order {
   entregador_id?: string;
   data_agendada?: string;
   horario_agendado?: string;
-  endereco_entreg: string;
+  endereco_entreg?: string;
   itens: OrderItem[];
   impressoCozinha?: boolean;
   avaliacao?: { rating: number; comment: string; date: string };
+  mesa?: string | number;
+  endereco?: { rua?: string; bairro?: string; numero?: string } | string;
 }
 
 export interface LoyaltyAccount {
@@ -215,6 +231,7 @@ export interface Banner {
 export interface StoreInfo {
   historia_loja: string;
   fotos_loja: string[];
+  logo_url?: string;
   pix_chave?: string;
   pix_tipo?: string;
   pix_beneficiario?: string;

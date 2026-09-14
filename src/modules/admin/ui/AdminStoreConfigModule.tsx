@@ -16,7 +16,7 @@ export const AdminStoreConfigModule: React.FC<AdminStoreConfigModuleProps> = ({ 
   const [nomeLoja, setNomeLoja] = useState('Cloudnine Doceria');
   const [historiaLoja, setHistoriaLoja] = useState(storeInfo.historia_loja);
   const [fotosLoja, setFotosLoja] = useState<string[]>(storeInfo.fotos_loja || []);
-  const [logoUrl, setLogoUrl] = useState('https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=200');
+  const [logoUrl, setLogoUrl] = useState('/cloudnine-logo.png');
   const [telefone, setTelefone] = useState('(13) 98874-7014');
   const [email, setEmail] = useState('contato@cloudninedoceria.com.br');
   const [lojaAberta, setLojaAberta] = useState(true);

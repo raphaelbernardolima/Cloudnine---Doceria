@@ -73,6 +73,39 @@ export async function updateStoreConfig(config: any): Promise<{ success: boolean
   }
 }
 
+export async function getStoreSecrets(): Promise<any | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+  try {
+    const { data, error } = await client.from('config_segredos').select('*').limit(1).maybeSingle();
+    if (error || !data) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateStoreSecrets(secrets: any): Promise<{ success: boolean; error?: string }> {
+  const client = getSupabaseClient();
+  if (!client) return { success: true };
+  try {
+    const { data: existing } = await client.from('config_segredos').select('id').limit(1).maybeSingle();
+    if (existing && existing.id) {
+      const { error } = await client
+        .from('config_segredos')
+        .update({ ...secrets, atualizado_em: new Date().toISOString() })
+        .eq('id', existing.id);
+      if (error) return { success: false, error: error.message };
+    } else {
+      const { error } = await client.from('config_segredos').insert([secrets]);
+      if (error) return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : 'Erro ao salvar segredos' };
+  }
+}
+
 /**
  * Realiza login via Supabase Auth com Email e Senha
  */

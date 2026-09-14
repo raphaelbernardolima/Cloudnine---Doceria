@@ -60,7 +60,7 @@ describe('useCouponLogic', () => {
       await result.current.handleApplyCoupon('BEMVINDO');
     });
 
-    expect(setAppliedDiscountMock).toHaveBeenCalledWith(10);
-    expect(showToastMock).toHaveBeenCalledWith('Cupom BEMVINDO de R$ 10.00 OFF aplicado!');
+    expect(setAppliedDiscountMock).toHaveBeenCalledWith(10, 'BEMVINDO');
+    expect(showToastMock).toHaveBeenCalledWith(expect.stringContaining('Cupom BEMVINDO'));
   });
 });

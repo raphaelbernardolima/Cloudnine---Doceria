@@ -85,7 +85,7 @@ export const AdminCashFlowModule: React.FC<AdminCashFlowModuleProps> = ({
             </div>
             <span className="font-bold text-sm text-[var(--color-on-surface-variant)]">Receitas (Pagas)</span>
           </div>
-          <p className="text-2xl font-black text-[var(--color-on-surface)]">{formatCurrency(receitasRealizadas)}</p>
+          <p className="text-xl sm:text-2xl font-black text-[var(--color-on-surface)] truncate">{formatCurrency(receitasRealizadas)}</p>
           {receitasPendentes > 0 && (
             <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
               + {formatCurrency(receitasPendentes)} pendentes
@@ -101,7 +101,7 @@ export const AdminCashFlowModule: React.FC<AdminCashFlowModuleProps> = ({
             </div>
             <span className="font-bold text-sm text-[var(--color-on-surface-variant)]">Despesas (Pagas)</span>
           </div>
-          <p className="text-2xl font-black text-[var(--color-on-surface)]">{formatCurrency(despesasPagas)}</p>
+          <p className="text-xl sm:text-2xl font-black text-[var(--color-on-surface)] truncate">{formatCurrency(despesasPagas)}</p>
           {despesasPendentes > 0 && (
             <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
               + {formatCurrency(despesasPendentes)} a pagar
@@ -116,7 +116,7 @@ export const AdminCashFlowModule: React.FC<AdminCashFlowModuleProps> = ({
             </div>
             <span className="font-bold text-sm text-[var(--color-on-surface-variant)]">Lucro Líquido (DRE Simplificado)</span>
           </div>
-          <p className={`text-3xl font-black ${lucroLiquidoRealizado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+          <p className={`text-2xl sm:text-3xl font-black truncate ${lucroLiquidoRealizado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {formatCurrency(lucroLiquidoRealizado)}
           </p>
         </div>

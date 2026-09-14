@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, BottomNavigation, BottomNavigationAction } from '@mui/material';
-import { Tote, User, Sparkle, Storefront } from '@phosphor-icons/react';
+import { Tote, User, Cake, Storefront } from '@phosphor-icons/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MobileBottomNavProps {
@@ -57,7 +57,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         }}
       >
         <BottomNavigationAction label="Cardápio" icon={<Tote className="w-5 h-5" />} />
-        <BottomNavigationAction label="Montar Bolo" icon={<Sparkle className="w-5 h-5" />} />
+        <BottomNavigationAction label="Montar Bolo" icon={<Cake className="w-5 h-5" />} />
         <BottomNavigationAction label="Meu Perfil" icon={<User className="w-5 h-5" />} />
         <BottomNavigationAction label="Sobre Nós" icon={<Storefront className="w-5 h-5" />} />
       </BottomNavigation>

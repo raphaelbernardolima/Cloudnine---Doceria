@@ -22,8 +22,7 @@ export function useProductMutations() {
           preco: newProd.preco,
           categoria: newProd.categoria,
           estoque: newProd.estoque,
-          image_url: newProd.image_url,
-          ativo: newProd.ativo
+          image_url: newProd.image_url
         };
         
         const { data, error } = await client.from('produtos').insert([dbPayload]).select();

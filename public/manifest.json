@@ -1,0 +1,45 @@
+{
+  "name": "Cloudnine Doceria",
+  "short_name": "Cloudnine",
+  "description": "Plataforma e-commerce e sistema de gestão da Cloudnine Doceria - Doces, Bolos e Café",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF8F7",
+  "theme_color": "#5E222A",
+  "orientation": "portrait",
+  "categories": ["food", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/LogoCloudnine.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/LogoCloudnine.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/LogoCloudnine.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ver Cardápio",
+      "short_name": "Cardápio",
+      "description": "Veja nossos bolos e doces",
+      "url": "/cardapio",
+      "icons": [{ "src": "/LogoCloudnine.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Meu Perfil",
+      "short_name": "Perfil",
+      "description": "Acesse seus pedidos e pontos",
+      "url": "/profile",
+      "icons": [{ "src": "/LogoCloudnine.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

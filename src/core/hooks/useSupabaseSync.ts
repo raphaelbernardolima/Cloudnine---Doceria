@@ -15,7 +15,8 @@ export function useSupabaseSync() {
     setCustomCakeConfig,
     setBanners,
     setStoreInfo,
-    setLoyaltySettings
+    setLoyaltySettings,
+    setTables
   } = useDataStore();
   const { setNotifications } = useUIStore();
 
@@ -109,6 +110,14 @@ export function useSupabaseSync() {
           setUsers(perfisData);
         }
 
+        // Fetch tables (mesas)
+        const { data: mesasData, error: mesasErr } = await client.from('mesas').select('*').order('numero', { ascending: true });
+        if (!mesasErr && mesasData) {
+          setTables(mesasData as any);
+        } else {
+          setTables([]);
+        }
+
       } catch (err: any) {
         console.error("Error fetching from Supabase", err);
         if (navigator.onLine) {
@@ -157,10 +166,21 @@ export function useSupabaseSync() {
           }
         }
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'mesas' },
+        async (payload) => {
+          console.log('Realtime Mesa Change:', payload);
+          const { data: mesasData } = await client.from('mesas').select('*').order('numero', { ascending: true });
+          if (mesasData) {
+            useDataStore.getState().setTables(mesasData as any);
+          }
+        }
+      )
       .subscribe();
 
     return () => {
       client.removeChannel(channel);
     };
-  }, [setProducts, setIsLoadingProducts, setOrders]);
+  }, [setProducts, setIsLoadingProducts, setOrders, setTables]);
 }

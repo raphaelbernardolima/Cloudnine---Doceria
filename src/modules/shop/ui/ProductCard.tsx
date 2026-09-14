@@ -86,6 +86,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="quick-view-btn"
           onClick={() => onOpenQuickView(product)}
           variant="contained"
+          aria-label={`Ver detalhes de ${product.nome}`}
           sx={{
             position: 'absolute',
             bottom: 12,
@@ -95,7 +96,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             height: 40,
             borderRadius: '50%',
             p: 0,
-            opacity: 0,
+            opacity: { xs: 0.9, sm: 0 },
             transition: 'opacity 0.3s ease',
             bgcolor: 'rgba(255,255,255,0.9)',
             color: 'grey.900',

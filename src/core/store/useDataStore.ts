@@ -78,11 +78,6 @@ export const useDataStore = create<DataStoreState>((set) => ({
   setCategories: (categories) => set({ categories }),
   expenses: [],
   setExpenses: (expenses) => set({ expenses }),
-  tables: Array.from({ length: 15 }, (_, i) => ({
-    id: String(i + 1),
-    numero: String(i + 1).padStart(2, '0'),
-    status: 'livre',
-    seats: 4
-  })),
+  tables: [],
   setTables: (tables) => set({ tables })
 }));

@@ -53,6 +53,10 @@ export function ShopView({
   });
 
   const onAddToCart = (product: Product, quantity = 1) => {
+    if (!storeOpen) {
+      showToast('Nossa loja está fechada no momento. Retorne mais tarde!');
+      return;
+    }
     addToCart({ product, quantity, customNote: undefined, unitPrice: product.preco });
   };
 
@@ -112,8 +116,8 @@ export function ShopView({
           <div className="bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 p-4 rounded-2xl shadow-sm flex items-start gap-3">
             <span className="text-2xl">😴</span>
             <div>
-              <h3 className="font-black text-sm uppercase tracking-wide">Estamos descansando!</h3>
-              <p className="text-sm mt-0.5 opacity-90">Nossa loja está fechada no momento. Você ainda pode adicionar itens ao carrinho e fazer <strong>pedidos agendados</strong> para quando estivermos abertos.</p>
+              <h3 className="font-black text-sm uppercase tracking-wide">Loja Fechada</h3>
+              <p className="text-sm mt-0.5 opacity-90">Nossa loja não está recebendo pedidos no momento. Retornaremos em breve!</p>
               {storeInfo?.horario_abertura && storeInfo?.horario_fechamento && (
                 <p className="text-xs font-bold mt-2 bg-red-500/10 px-2 py-1 rounded inline-block">
                   Horário: {storeInfo.horario_abertura} às {storeInfo.horario_fechamento}

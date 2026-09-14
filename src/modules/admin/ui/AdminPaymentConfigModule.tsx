@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, QrCode, Shield, FloppyDisk, Spinner, CheckCircle, Key, Lock, Lightning } from '@phosphor-icons/react';
-import { getStoreConfig, updateStoreConfig } from '@/src/core/services/supabase';
+import { getStoreConfig, updateStoreConfig, getStoreSecrets, updateStoreSecrets } from '@/src/core/services/supabase';
 
 interface AdminPaymentConfigModuleProps {
   showToast: (msg: string) => void;
@@ -29,8 +29,11 @@ export const AdminPaymentConfigModule: React.FC<AdminPaymentConfigModuleProps> =
         if (data.pix_beneficiario) setPixBeneficiario(data.pix_beneficiario);
         if (data.pix_cidade) setPixCidade(data.pix_cidade);
         if (typeof data.mercadopago_ativo === 'boolean') setMpAtivo(data.mercadopago_ativo);
-        if (data.mercadopago_access_token) setMpAccessToken(data.mercadopago_access_token);
-        if (data.mercadopago_public_key) setMpPublicKey(data.mercadopago_public_key);
+      }
+      const secrets = await getStoreSecrets();
+      if (secrets) {
+        if (secrets.mercadopago_access_token) setMpAccessToken(secrets.mercadopago_access_token);
+        if (secrets.mercadopago_public_key) setMpPublicKey(secrets.mercadopago_public_key);
       }
       setLoading(false);
     }
@@ -41,23 +44,28 @@ export const AdminPaymentConfigModule: React.FC<AdminPaymentConfigModuleProps> =
     e.preventDefault();
     setSaving(true);
 
-    const payload = {
+    const payloadConfig = {
       pix_tipo: pixTipo,
       pix_chave: pixChave,
       pix_beneficiario: pixBeneficiario,
       pix_cidade: pixCidade,
-      mercadopago_ativo: mpAtivo,
+      mercadopago_ativo: mpAtivo
+    };
+
+    const payloadSecrets = {
       mercadopago_access_token: mpAccessToken,
       mercadopago_public_key: mpPublicKey
     };
 
-    const res = await updateStoreConfig(payload);
+    const resConfig = await updateStoreConfig(payloadConfig);
+    const resSecrets = await updateStoreSecrets(payloadSecrets);
+    
     setSaving(false);
 
-    if (res.success) {
+    if (resConfig.success && resSecrets.success) {
       showToast('Configurações de pagamento salvas com sucesso!');
     } else {
-      showToast('Erro ao salvar pagamentos: ' + (res.error || 'Erro desconhecido'));
+      showToast('Erro ao salvar pagamentos: ' + (resConfig.error || resSecrets.error || 'Erro desconhecido'));
     }
   };
 
@@ -189,7 +197,7 @@ export const AdminPaymentConfigModule: React.FC<AdminPaymentConfigModuleProps> =
                   className="w-full pl-10 pr-3.5 py-3.5 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/40 focus:ring-2 focus:ring-[var(--color-primary)] text-sm font-mono"
                 />
               </div>
-              <p className="text-[11px] text-[var(--color-outline)] mt-1">
+              <p className="text-xs text-[var(--color-outline)] mt-1">
                 Utilizado para gerar cobranças Pix via API, processar pagamentos de cartão e Webhooks.
               </p>
             </div>

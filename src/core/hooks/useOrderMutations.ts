@@ -92,9 +92,12 @@ export function useOrderMutations() {
       setAuditLogs([novoLog, ...auditLogs]);
       useUIStore.getState().showToast('Pedido realizado com sucesso!');
       
+      return result;
+      
     } catch (err: any) {
       console.error("Erro ao realizar pedido:", err);
       useUIStore.getState().showToast(`Erro ao processar o pedido: ${err.message || 'Falha na conexão com o banco de dados.'}`);
+      throw err;
     }
   };
 

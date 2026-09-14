@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Typography } from '@mui/material';
 import { Cake } from '@phosphor-icons/react';
+import { useDataStore } from '@/src/core/store/useDataStore';
 
 interface SplashScreenProps {
   onFinish?: () => void;
@@ -10,6 +11,7 @@ interface SplashScreenProps {
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, durationMs = 2500 }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const { storeInfo } = useDataStore();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -87,7 +89,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, durationMs
               }}
             >
               <img 
-                src="/LogoCloudnine.svg" 
+                src={storeInfo?.logo_url || '/cloudnine-logo.png'} 
                 alt="Cloud Nine Logo" 
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
@@ -135,7 +137,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, durationMs
             <Typography sx={{ 
               color: '#A68A83', 
               letterSpacing: '0.1em', 
-              fontSize: '11px', 
+              fontSize: '12px', 
               fontWeight: 600,
               textTransform: 'uppercase'
             }}>

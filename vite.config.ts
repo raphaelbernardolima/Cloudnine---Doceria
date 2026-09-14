@@ -15,22 +15,7 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['LogoCloudnine.svg'],
-        manifest: {
-          name: 'Cloudnine Doceria',
-          short_name: 'Cloudnine',
-          description: 'Plataforma e-commerce e sistema de gestão da Cloudnine Doceria',
-          theme_color: '#5E222A',
-          background_color: '#FFF8F7',
-          display: 'standalone',
-          icons: [
-            {
-              src: 'LogoCloudnine.svg',
-              sizes: 'any',
-              type: 'image/svg+xml',
-              purpose: 'any maskable'
-            }
-          ]
-        },
+        manifest: false,
         workbox: {
           maximumFileSizeToCacheInBytes: 5000000 // 5MB
         }
