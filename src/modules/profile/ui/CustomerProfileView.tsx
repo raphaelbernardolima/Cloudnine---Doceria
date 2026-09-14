@@ -141,7 +141,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:pt-8 space-y-6 animate-in fade-in duration-300">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:pt-8 space-y-6 animate-in fade-in duration-300 min-w-0 w-full overflow-x-hidden">
       <SEO 
         title="Meu Perfil" 
         description="Acompanhe seus pedidos, acumule pontos de fidelidade e gerencie seu perfil na Cloudnine." 
@@ -220,7 +220,7 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
         {/* Left Sidebar Navigation */}
         <div className="lg:col-span-1 space-y-2">
           <div className="p-4 rounded-[32px] bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/30 space-y-1 sticky top-20" style={{ boxShadow: '0 12px 40px rgba(220, 160, 145, 0.08)' }}>
-            <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--color-primary)] mb-2">
+            <p className="px-3 py-2 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-primary)] mb-2">
               Portal do Cliente
             </p>
 
@@ -497,37 +497,51 @@ export const CustomerProfileView: React.FC<CustomerProfileViewProps> = ({
                           </div>
 
                           {/* Order Tracking Timeline */}
-                          <div className="py-2 px-1">
-                            <div className="flex items-center justify-between relative">
-                              <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-[var(--color-outline-variant)] -translate-y-1/2 z-0 opacity-30"></div>
-                              {[
-                                { id: 'recebido', label: 'Recebido' },
-                                { id: 'em_preparo', label: 'Preparo' },
-                                { id: 'saiu_entrega', label: 'Entrega' },
-                                { id: 'entregue', label: 'Entregue' }
-                              ].map((step, stepIdx, arr) => {
-                                const currentIndex = arr.findIndex(s => s.id === o.status);
-                                const isCompleted = currentIndex >= stepIdx;
-                                const isCurrent = currentIndex === stepIdx;
-                                
-                                return (
-                                  <div key={step.id} className="relative z-10 flex flex-col items-center gap-1.5">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] transition-all
-                                      ${isCompleted ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-[var(--color-on-primary)]' : 'bg-[var(--color-surface)] border-[var(--color-outline-variant)] text-[var(--color-outline)]'}
-                                      ${isCurrent ? 'ring-2 ring-[var(--color-primary)]/30 ring-offset-1 ring-offset-[var(--color-surface)]' : ''}
-                                    `}>
-                                      {isCompleted ? <CheckCircle className="w-3.5 h-3.5" /> : (stepIdx + 1)}
-                                    </div>
-                                    <span className={`text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wide
-                                      ${isCurrent ? 'text-[var(--color-primary)]' : isCompleted ? 'text-[var(--color-on-surface)]' : 'text-[var(--color-outline)]'}
-                                    `}>
-                                      {step.label}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
+                           <div className="py-2 px-1">
+                             <div className="flex items-center justify-between relative">
+                               {/* Base timeline */}
+                               <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-[var(--color-outline-variant)] -translate-y-1/2 z-0 opacity-30"></div>
+                               {/* Active progress timeline (Uniform Connectedness) */}
+                               <div 
+                                 className="absolute top-1/2 left-4 h-0.5 bg-[var(--color-primary)] -translate-y-1/2 z-0 transition-all duration-500"
+                                 style={{ 
+                                   width: (() => {
+                                     const statusList = ['recebido', 'em_preparo', 'saiu_entrega', 'entregue'];
+                                     const currentIndex = statusList.findIndex(s => s === o.status);
+                                     if (currentIndex <= 0) return '0%';
+                                     return `calc(${(currentIndex / (statusList.length - 1)) * 100}% - 32px)`;
+                                   })()
+                                 }}
+                               ></div>
+                               
+                               {[
+                                 { id: 'recebido', label: 'Recebido' },
+                                 { id: 'em_preparo', label: 'Preparo' },
+                                 { id: 'saiu_entrega', label: 'Entrega' },
+                                 { id: 'entregue', label: 'Entregue' }
+                               ].map((step, stepIdx, arr) => {
+                                 const currentIndex = arr.findIndex(s => s.id === o.status);
+                                 const isCompleted = currentIndex >= stepIdx;
+                                 const isCurrent = currentIndex === stepIdx;
+                                 
+                                 return (
+                                   <div key={step.id} className="relative z-10 flex flex-col items-center gap-1.5">
+                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] transition-all
+                                       ${isCompleted ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-[var(--color-on-primary)] shadow-sm' : 'bg-[var(--color-surface)] border-[var(--color-outline-variant)] text-[var(--color-outline)]'}
+                                       ${isCurrent ? 'ring-2 ring-[var(--color-primary)]/30 ring-offset-1 ring-offset-[var(--color-surface)] scale-110' : ''}
+                                     `}>
+                                       {isCompleted ? <CheckCircle className="w-3.5 h-3.5" /> : (stepIdx + 1)}
+                                     </div>
+                                     <span className={`text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wide
+                                       ${isCurrent ? 'text-[var(--color-primary)]' : isCompleted ? 'text-[var(--color-on-surface)]' : 'text-[var(--color-outline)]'}
+                                     `}>
+                                       {step.label}
+                                     </span>
+                                   </div>
+                                 );
+                               })}
+                             </div>
+                           </div>
 
                           {/* Item list */}
                           <div className="p-3.5 rounded-2xl bg-(--color-surface-container-lowest) border border-(--color-outline-variant)/20 text-xs space-y-1.5 font-mono">

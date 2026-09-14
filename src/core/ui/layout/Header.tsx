@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tote, List as ListIcon, X, User, SignOut, CurrencyDollar, PaperPlaneRight, Heart, Tray, Gauge, Megaphone, Gear, CookingPot, Stack, Moon, Sun, Bell, Cake } from '@phosphor-icons/react';
+import { Tote, List as ListIcon, X, User, SignOut, CurrencyDollar, PaperPlaneRight, Heart, Tray, Gauge, Megaphone, Gear, CookingPot, Stack, Moon, Sun, Bell, Cake, Printer, Users, Monitor, ShieldCheck } from '@phosphor-icons/react';
 import { UserProfile, Order } from '@/src/core/types/index';
 import { isStaff } from '@/src/core/constants/roles';
 import { AppBar, Toolbar, IconButton, Typography, Badge, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Button, Switch } from '@mui/material';
@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
   const { mode, toggleTheme } = useAppTheme();
-  const { currentUser, orders = [] } = useDataStore();
+  const { currentUser, orders = [], storeInfo } = useDataStore();
   const { cartItems } = useCartStore();
   const { notifications } = useUIStore();
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -66,20 +66,39 @@ export const Header: React.FC<HeaderProps> = ({
               </IconButton>
             )}
 
-            <Typography
-              variant="h4"
-              component="div"
+
+            <Box 
+              onClick={() => onNavigate('/')}
               sx={{
                 cursor: 'pointer',
-                fontFamily: '"Libre Caslon Text", serif',
-                color: 'primary.light',
-                fontStyle: 'italic',
-                fontWeight: 400
+                display: 'flex',
+                alignItems: 'center',
+                height: '40px',
               }}
-              onClick={() => onNavigate('/')}
             >
-              Cloud Nine
-            </Typography>
+              {storeInfo?.logo_url && storeInfo.logo_url.trim() !== '' ? (
+                <img 
+                  src={storeInfo.logo_url} 
+                  alt="Cloud Nine Logo" 
+                  style={{ maxHeight: '100%', objectFit: 'contain' }}
+                />
+              ) : (
+                <Typography 
+                  variant="h5" 
+                  component="div" 
+                  sx={{ 
+                    fontFamily: "'Inter', sans-serif", 
+                    fontWeight: 900, 
+                    letterSpacing: '-1px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ color: 'var(--color-primary)' }}>cloud</span>
+                  <span style={{ color: 'var(--color-on-surface)' }}>nine.</span>
+                </Typography>
+              )}
+            </Box>
           </Box>
 
           {/* Desktop Nav */}
@@ -203,7 +222,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
                         <CurrencyDollar className="w-5 h-5 stroke-[2.2]" />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
                         Financeiro
                       </Typography>
                     </ListItemButton>
@@ -232,7 +251,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
                         <PaperPlaneRight className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
                         Pedidos
                       </Typography>
                       <Typography sx={{ color: '#5A4A47', fontSize: '14px', fontWeight: 500 }}>
@@ -264,7 +283,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
                         <Heart className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
                         Encomendas
                       </Typography>
                     </ListItemButton>
@@ -293,7 +312,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
                         <Tray className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
                         Estoque
                       </Typography>
                     </ListItemButton>
@@ -325,7 +344,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
                         <Gauge className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
                         Entregas
                       </Typography>
                       <Typography sx={{ color: '#5A4A47', fontSize: '14px', fontWeight: 500 }}>
@@ -357,7 +376,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
                         <Megaphone className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
                         Marketing
                       </Typography>
                     </ListItemButton>
@@ -386,8 +405,124 @@ export const Header: React.FC<HeaderProps> = ({
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
                         <Cake className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
                         Bolos Personalizados
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* KDS Cozinha */}
+              {(() => {
+                const active = isTabActive('kitchen');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => handleNavClick('/admin?tab=kitchen')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Printer className="w-5 h-5 stroke-2" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
+                        Tela da Cozinha (KDS)
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* CRM */}
+              {(() => {
+                const active = isTabActive('crm');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => handleNavClick('/admin?tab=crm')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Users className="w-5 h-5 stroke-2" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
+                        Clientes & CRM
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* Mesas */}
+              {(() => {
+                const active = isTabActive('tables');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => handleNavClick('/admin?tab=tables')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <Monitor className="w-5 h-5 stroke-2" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
+                        Gestão de Mesas
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })()}
+
+              {/* Equipe */}
+              {(() => {
+                const active = isTabActive('team');
+                return (
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => handleNavClick('/admin?tab=team')}
+                      sx={{
+                        borderRadius: '9999px',
+                        bgcolor: active ? 'var(--color-primary-container)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
+                        py: 1.4,
+                        px: 2.5,
+                        '&:hover': {
+                          bgcolor: active ? 'var(--color-primary-container)' : 'var(--color-surface-container-highest)',
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                        <ShieldCheck className="w-5 h-5 stroke-2" />
+                      </ListItemIcon>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
+                        Equipe & Permissões
                       </Typography>
                     </ListItemButton>
                   </ListItem>
@@ -415,7 +550,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
                         <Gear className="w-5 h-5 stroke-2" />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '15px', color: 'inherit', flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: active ? 700 : 500, fontSize: '14px', color: 'inherit', flexGrow: 1 }}>
                         Configurações
                       </Typography>
                     </ListItemButton>
@@ -430,7 +565,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => handleNavClick('/')}
                   sx={{ borderRadius: '9999px', py: 1.4, px: 2.5 }}
                 >
-                  <Typography sx={{ fontWeight: 600, fontSize: '15px' }}>
+                  <Typography sx={{ fontWeight: 600, fontSize: '14px' }}>
                     Cardápio
                   </Typography>
                 </ListItemButton>
@@ -440,7 +575,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => { onOpenCustomCakeModal(); setIsMobileMenuOpen(false); }}
                   sx={{ borderRadius: '9999px', py: 1.4, px: 2.5 }}
                 >
-                  <Typography sx={{ fontWeight: 600, fontSize: '15px' }}>
+                  <Typography sx={{ fontWeight: 600, fontSize: '14px' }}>
                     Montar Bolo Personalizado
                   </Typography>
                 </ListItemButton>
@@ -475,7 +610,7 @@ export const Header: React.FC<HeaderProps> = ({
                 py: 1.4,
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: '15px',
+                fontSize: '14px',
                 '&:hover': {
                   borderColor: '#7A1F20',
                   bgcolor: 'rgba(158, 42, 43, 0.05)',
@@ -497,7 +632,7 @@ export const Header: React.FC<HeaderProps> = ({
                 py: 1.4,
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: '15px'
+                fontSize: '14px'
               }}
             >
               Entrar / Cadastrar

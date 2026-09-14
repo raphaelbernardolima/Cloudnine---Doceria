@@ -63,13 +63,13 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory rounded-[32px] shadow-sm hide-scrollbar"
+        className="flex overflow-x-auto snap-x snap-mandatory rounded-l-[32px] md:rounded-[32px] shadow-sm hide-scrollbar gap-4 pr-4 md:pr-0"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {activeBanners.map((banner, index) => (
           <div 
             key={banner.id} 
-            className="flex-none w-full h-full snap-center relative aspect-[16/10] sm:aspect-[21/9] md:aspect-[3/1] bg-[var(--color-surface-container-high)] group overflow-hidden cursor-pointer"
+            className="flex-none w-[85%] md:w-full h-full snap-center relative aspect-[16/10] sm:aspect-[21/9] md:aspect-[3/1] bg-[var(--color-surface-container-high)] group overflow-hidden cursor-pointer rounded-[32px]"
             onClick={() => {
               if (banner.link && banner.layout_type === 'clean') {
                 navigate(banner.link);
@@ -197,10 +197,10 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
             <button
               key={idx}
               onClick={() => scrollToIndex(idx)}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              className={`h-3 rounded-full transition-all duration-300 ${
                 idx === activeIndex 
-                  ? 'bg-[var(--color-primary)] w-6 shadow-sm' 
-                  : 'bg-[var(--color-outline-variant)] w-2 hover:bg-[var(--color-outline)]'
+                  ? 'bg-[var(--color-primary)] w-8 shadow-sm' 
+                  : 'bg-[var(--color-outline-variant)] w-3 hover:bg-[var(--color-outline)]'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />

@@ -134,6 +134,7 @@ body {
   -webkit-font-smoothing:  antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height:             1.6;
+  overflow-x:              hidden;
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────────── */
